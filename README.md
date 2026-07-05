@@ -1,6 +1,6 @@
 # dotfiles
 
-<!-- video: link to the mac-setup video goes here -->
+Watch the walkthrough: https://youtu.be/5N-okeDdIuI
 
 My personal Mac setup, managed with nix-darwin and home-manager.
 One repo, one command, and a fresh Mac ends up configured the same way every time.
@@ -58,6 +58,8 @@ nix flake check --no-build
 nix build .#darwinConfigurations.mac.system --dry-run
 ```
 
+If you renamed the host label in "Make it yours", substitute your label for `mac` in these commands.
+
 ## Daily use
 
 Edit the config files in place, then apply:
@@ -76,8 +78,8 @@ If you clone it, change these before you run `bootstrap.sh`:
 
 - **Username and home path** `kunchen` / `/Users/kunchen`, in four places: `flake.nix:26`, `configuration.nix:10-12`, `configuration.nix:30` (the `nix-homebrew.user` setting), and `home.nix:8-9`.
 - **Git identity**, in `home.nix:43-46` (`kunchenguid` / `kun@kunchenguid.com`).
-- **Host label** `"mac"`, in `flake.nix:18` (the `darwinConfigurations."mac"` name) and `rebuild.sh:5` (the `#mac` at the end of the flake reference).
-  Both have to match.
+- **Host label** `"mac"`, in three places: `flake.nix:18` (the `darwinConfigurations."mac"` name), `rebuild.sh:5` (the `#mac` at the end of the flake reference), and `bootstrap.sh`'s first-switch command (also `#mac`).
+  All three have to match.
 - **CPU architecture**, `hostPlatform` in `configuration.nix` (see Prerequisites above).
 
 **Homebrew cleanup warning:** `configuration.nix` sets `homebrew.onActivation.cleanup = "zap"`.
