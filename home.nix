@@ -1,12 +1,12 @@
-{ config, pkgs, ... }:
+{ config, pkgs, user, ... }:
 
 let
   dotfiles = "${config.home.homeDirectory}/.dotfiles";
 in
 
 {
-  home.username = "kunchen";
-  home.homeDirectory = "/Users/kunchen";
+  home.username = user;
+  home.homeDirectory = "/Users/${user}";
   home.stateVersion = "24.11";
   home.packages = with pkgs; [
     # cli i use constantly
@@ -38,11 +38,6 @@ in
       cc = "claude --dangerously-skip-permissions";
       co = "codex --full-auto";
     };
-  };
-
-  programs.git.settings.user = {
-    name = "kunchenguid";
-    email = "kun@kunchenguid.com";
   };
 
   programs.starship = {

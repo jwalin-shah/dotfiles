@@ -32,19 +32,21 @@ git clone https://github.com/kunchenguid/dotfiles.git
 cd dotfiles
 ```
 
-Before you run it: open the config files and change the values listed in "Make it yours" below (username, home path, git identity, host label, and Intel vs Apple Silicon), and read the Homebrew cleanup warning.
+Before you run it: review "Make it yours" below.
+Change the host label or CPU architecture if needed, and read the Homebrew cleanup warning.
 `bootstrap.sh` applies the config to your machine, so do this first.
 
 ```sh
 ./bootstrap.sh
 ```
 
-`bootstrap.sh` does three things, in order:
+`bootstrap.sh` does four things, in order:
 
 1. Installs Determinate Nix, if it isn't already installed.
 2. Symlinks this repo to `~/.dotfiles`.
    This has to happen before the first build, because `home.nix` points at config files through `~/.dotfiles`.
-3. Runs the first `darwin-rebuild switch`.
+3. Checks the `user` configured in `flake.nix` against your actual macOS username, and offers to fix it for you if they differ.
+4. Runs the first `darwin-rebuild switch`.
    It fetches the `darwin-rebuild` tool from the nix-darwin 26.05 release branch, then applies this repo's locked flake config.
 
 After that, `darwin-rebuild` exists and you're on the normal workflow below.
@@ -74,13 +76,27 @@ No separate build-and-copy step.
 ## Make it yours
 
 This repo is mine.
-If you clone it, change these before you run `bootstrap.sh`:
+If you clone it, review these before you run `bootstrap.sh`:
 
-- **Username and home path** `kunchen` / `/Users/kunchen`, in four places: `flake.nix:26`, `configuration.nix:10-12`, `configuration.nix:30` (the `nix-homebrew.user` setting), and `home.nix:8-9`.
-- **Git identity**, in `home.nix:43-46` (`kunchenguid` / `kun@kunchenguid.com`).
-- **Host label** `"mac"`, in three places: `flake.nix:18` (the `darwinConfigurations."mac"` name), `rebuild.sh:5` (the `#mac` at the end of the flake reference), and `bootstrap.sh`'s first-switch command (also `#mac`).
+- **Username**: run `./bootstrap.sh` (it detects your macOS username and offers to set it) OR change the single `user = "kunchen"` line in `flake.nix`.
+  Everything else (`configuration.nix`, `home.nix`, home directory paths) is threaded from that one variable.
+- **Host label** `"mac"`, in three places: `flake.nix` (the `darwinConfigurations."mac"` name), `rebuild.sh:5` (the `#mac` at the end of the flake reference), and `bootstrap.sh`'s first-switch command (also `#mac`).
   All three have to match.
 - **CPU architecture**, `hostPlatform` in `configuration.nix` (see Prerequisites above).
+
+**Git identity:** this config deliberately does not set your git name or email.
+Git will stop your first commit and tell you to set them (`git config --global user.name "Your Name"` and `git config --global user.email you@example.com`).
+If you'd rather manage that declaratively, add this back to `home.nix` with your own identity:
+
+```nix
+programs.git = {
+  enable = true;
+  settings.user = {
+    name = "Your Name";
+    email = "you@example.com";
+  };
+};
+```
 
 **Homebrew cleanup warning:** `configuration.nix` sets `homebrew.onActivation.cleanup = "zap"`.
 That means every time you switch, Homebrew removes any package or cask on your machine that isn't listed in the `brews` and `casks` arrays in `configuration.nix`.
@@ -103,7 +119,7 @@ If you don't use it, just remove it from `brews` in your copy.
 - `flake.nix` - the entry point.
   Wires up nixpkgs, nix-darwin, home-manager, and nix-homebrew, and declares the `mac` machine.
 - `configuration.nix` - system-level config: macOS defaults, Homebrew.
-- `home.nix` - user-level config: shell, git, packages, and the symlinks described below.
+- `home.nix` - user-level config: shell, packages, prompt, and the symlinks described below.
 - `rebuild.sh` - re-applies the config after the first switch.
   Run this every time you make a change.
 - `home/` - the actual config files that get symlinked into place (Neovim, WezTerm, herdr, Claude settings, the shared `AGENTS.md`).
