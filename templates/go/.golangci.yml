@@ -1,0 +1,42 @@
+run:
+  timeout: 5m
+  build-tags: []
+  skip-dirs-use-default: true
+
+output:
+  format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
+
+linters-settings:
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+  misspell:
+    locale: US
+  unparam:
+    check-exported: true
+  unused:
+    check-exported: false
+  nakedret:
+    max-func-lines: 30
+
+linters:
+  enable:
+    - errcheck
+    - misspell
+    - unconvert
+    - bodyclose
+    - gofmt
+    - ineffassign
+    - staticcheck
+    - gosimple
+    - shadow
+  disable-all: false
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - errcheck
+        - unconvert

@@ -1,0 +1,36 @@
+repos:
+  - repo: https://github.com/golangci/golangci-lint
+    rev: v1.57.2
+    hooks:
+      - id: golangci-lint
+        args: [--timeout=5m]
+
+  - repo: local
+    hooks:
+      - id: gofmt
+        name: gofmt
+        entry: gofmt -w
+        language: system
+        types: [go]
+
+      - id: goimports
+        name: goimports
+        entry: bash -c 'go run golang.org/x/tools/cmd/goimports@latest -w'
+        language: system
+        types: [go]
+
+      - id: go-vet
+        name: go vet
+        entry: go vet ./...
+        language: system
+        types: [go]
+        pass_filenames: false
+        always_run: true
+
+      - id: go-test
+        name: go test
+        entry: go test -v ./...
+        language: system
+        types: [go]
+        pass_filenames: false
+        always_run: true

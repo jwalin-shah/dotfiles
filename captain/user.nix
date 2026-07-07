@@ -18,7 +18,7 @@ in
   ];
 
   home.sessionVariables = {
-    PATH = "${config.home.homeDirectory}/.local/bin:${config.home.homeDirectory}/bin:/opt/homebrew/bin:$PATH";
+    PATH = "${config.home.homeDirectory}/.cargo/bin:${config.home.homeDirectory}/.local/bin:${config.home.homeDirectory}/bin:/opt/homebrew/bin:$PATH";
   };
 
   programs.zsh.shellAliases = {
@@ -33,10 +33,9 @@ in
     # these just invoke the launcher wrapper which handles auth and routing.
     c = "claude";
     cx = "codex";
-    ct = "ot";  # opencode via TokenRouter
-    agy = "agy";
-    kilo = "kilo";
-    cu = "cu";
+    gha = "npx -y gh-axi";
+    cda = "npx -y chrome-devtools-axi";
+    lva = "npx -y lavish-axi";
   };
 
   # Symlinks for captain-specific config files (under captain/config/)
