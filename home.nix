@@ -5,6 +5,8 @@ let
 in
 
 {
+  imports = [ ./captain/user.nix ];
+
   home.username = user;
   home.homeDirectory = "/Users/${user}";
   home.stateVersion = "24.11";

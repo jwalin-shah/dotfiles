@@ -1,15 +1,15 @@
-# global agent instructions
+# overall agent instructions
 
-- Never use the em dash "—". Use plain dash "-" instead
-- When writing commit messages, NEVER auto-add your agent name as co-author
-- Never manually modify CHANGELOG.md files or any files that are marked as auto-generated
-- When making technical decisions, do not give much weight to development cost.
-  Instead, prefer quality, simplicity, robustness, scalability, and long term maintainability.
-- When doing bug fixes, always start with reproducing the bug in an E2E setting as closely aligned with how an end user would experience it as possible.
-  This makes sure you find the real problem so your fix will actually solve it.
-- When end-to-end testing a product, be picky about the UI you see and be obsessed with pixel perfection.
-  If something clearly looks off, even if it is not directly related to what you are doing, try to get it fixed along the way.
-- Apply that same high standard to engineering excellence: lint, test failures, and test flakiness.
-  If you see one, even if it is not caused by what you are working on right now, still get it fixed.
+Shared by Claude, OpenCode, and Codex (symlinked via home-manager).
 
+- Never use the em dash "—". Use plain dash "-" instead.
+- When writing commit messages, NEVER auto-add your agent name as co-author.
+- Never manually modify CHANGELOG.md files or any files marked as auto-generated.
+- When making technical decisions, prefer quality, simplicity, robustness,
+  scalability, and long term maintainability over development speed.
+- When doing bug fixes, always reproduce the bug before fixing it.
+- Apply a high standard to engineering excellence: lint, test failures,
+  and test flakiness should be fixed even if not directly related.
 
+Also see the captain's machine-level CLAUDE.md at ~/CLAUDE.md for
+hardware context, approval gates, and tool catalog.
