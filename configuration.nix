@@ -192,6 +192,8 @@
         };
         StandardOutPath = "/Users/${user}/.cache/mintmux/launchd-stdout.log";
         StandardErrorPath = "/Users/${user}/.cache/mintmux/launchd-stderr.log";
+        ThrottleInterval = 5;
+        ExitTimeOut = 10;
       };
     };
 
@@ -206,6 +208,8 @@
         };
         StandardOutPath = "/Users/${user}/.local/share/jw/sessiond-stdout.log";
         StandardErrorPath = "/Users/${user}/.local/share/jw/sessiond-stderr.log";
+        ThrottleInterval = 5;
+        ExitTimeOut = 10;
       };
     };
 
@@ -220,6 +224,7 @@
         };
         StandardOutPath = "/Users/${user}/.local/share/jw/sentry-stdout.log";
         StandardErrorPath = "/Users/${user}/.local/share/jw/sentry-stderr.log";
+        ExitTimeOut = 10;
       };
     };
 
@@ -288,6 +293,8 @@
         };
         StandardOutPath = "/Users/${user}/.local/share/jw/herdr.log";
         StandardErrorPath = "/Users/${user}/.local/share/jw/herdr.log";
+        ThrottleInterval = 5;
+        ExitTimeOut = 10;
       };
     };
   };
