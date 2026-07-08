@@ -39,6 +39,7 @@ in
     syntaxHighlighting.enable = true;
     initContent = ''
       bindkey '^f' autosuggest-accept
+      eval "$(direnv hook zsh)"
     '';
     shellAliases = {
       ".." = "cd ..";
@@ -195,6 +196,22 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/verify-core-launchers.sh";
   home.file."bin/prune-opencode-local-state.sh".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/prune-opencode-local-state.sh";
+
+  # Global linter/formatter configs
+  home.file.".config/lint/.prettierrc".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/lint/.prettierrc";
+  home.file.".config/lint/.eslintrc.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/lint/.eslintrc.json";
+  home.file.".config/lint/pyproject.toml".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/lint/pyproject.toml";
+  home.file.".config/lint/.golangci.yml".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/lint/.golangci.yml";
+  home.file.".config/lint/rustfmt.toml".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/lint/rustfmt.toml";
+  home.file.".config/lint/.clang-format".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/lint/.clang-format";
+  home.file.".config/lint/.shellcheckrc".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/lint/.shellcheckrc";
 
   # ~/.local/bin
   home.file.".local/bin/oo".source =

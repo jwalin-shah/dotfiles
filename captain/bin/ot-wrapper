@@ -2,4 +2,8 @@
 import os
 import sys
 
-os.execvp("opencode", ["/opt/homebrew/bin/opencode", "--dangerously-skip-permissions"] + sys.argv[1:])
+os.environ["OPENCODE_CONFIG"] = os.path.expanduser("~/.config/opencode/profiles/ot.json")
+os.execvp("secret-cache", [
+    "secret-cache", "exec", "--",
+    "/opt/homebrew/bin/opencode"
+] + sys.argv[1:])

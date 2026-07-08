@@ -2,4 +2,5 @@
 import os
 import sys
 
-os.execvp("opencode", ["/opt/homebrew/bin/opencode", "--dangerously-skip-permissions"] + sys.argv[1:])
+os.environ["OPENCODE_CONFIG"] = os.path.expanduser("~/.config/opencode/profiles/oo.json")
+os.execvp("opencode", ["/opt/homebrew/bin/opencode"] + sys.argv[1:])

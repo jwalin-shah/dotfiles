@@ -57,6 +57,7 @@
       "fzf"
       "gh"
       "go"
+      "gofumpt"
       "golangci-lint"
       "herdr"
       "infisical"
@@ -70,6 +71,7 @@
       "ruff"
       "rustup"
       "shellcheck"
+      "swift-format"
       "spotify_player"
       "tailscale"
       "tmux"
@@ -221,23 +223,6 @@
       };
     };
 
-    "com.jwalinshah.jw-agentd" = {
-      serviceConfig.ProgramArguments = [
-        "/Users/${user}/.local/bin/jw-agentd"
-        "--no-mlx"
-      ];
-      serviceConfig = {
-        KeepAlive = true;
-        RunAtLoad = true;
-        ThrottleInterval = 5;
-        EnvironmentVariables = {
-          PATH = "/Users/${user}/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin";
-        };
-        StandardOutPath = "/Users/${user}/.local/share/jw/agentd-stdout.log";
-        StandardErrorPath = "/Users/${user}/.local/share/jw/agentd-stderr.log";
-      };
-    };
-
     # -- Monitoring & Health --
     "com.jw.heal" = {
       serviceConfig = {
@@ -260,19 +245,6 @@
         };
         StandardOutPath = "/Users/${user}/Library/Logs/m5logd-stdout.log";
         StandardErrorPath = "/Users/${user}/Library/Logs/m5logd-stderr.log";
-      };
-    };
-
-    "com.jwalinshah.quota-keychain-sync" = {
-      serviceConfig = {
-        ProgramArguments = [ "/Users/${user}/.local/bin/jw-quota-keychain-sync" ];
-        RunAtLoad = true;
-        StartInterval = 3600;
-        EnvironmentVariables = {
-          PATH = "/opt/homebrew/bin:/Users/${user}/.local/bin:/usr/local/bin:/usr/bin:/bin";
-        };
-        StandardOutPath = "/Users/${user}/.cache/quota-core/keychain-sync.log";
-        StandardErrorPath = "/Users/${user}/.cache/quota-core/keychain-sync.log";
       };
     };
 
@@ -304,26 +276,27 @@
       };
     };
 
-    "com.jwalinshah.brave-automation" = {
+    # -- Session Provider (firstmate crew dispatch) --
+    "com.jwalinshah.herdr" = {
       serviceConfig = {
-        ProgramArguments = [ "/Users/${user}/bin/brave-automation" ];
+        ProgramArguments = [ "/opt/homebrew/bin/herdr" ];
+        KeepAlive = true;
         RunAtLoad = true;
-        StartInterval = 900;
         EnvironmentVariables = {
+          HOME = "/Users/${user}";
           PATH = "/opt/homebrew/bin:/Users/${user}/.local/bin:/usr/local/bin:/usr/bin:/bin";
-          BRAVE_AUTOMATION_BACKGROUND = "1";
-          BRAVE_AUTOMATION_HEADLESS = "1";
-          BRAVE_AUTOMATION_MODE = "ensure";
         };
-        StandardOutPath = "/Users/${user}/.cache/quota-core/brave-automation.log";
-        StandardErrorPath = "/Users/${user}/.cache/quota-core/brave-automation.log";
+        StandardOutPath = "/Users/${user}/.local/share/jw/herdr.log";
+        StandardErrorPath = "/Users/${user}/.local/share/jw/herdr.log";
       };
     };
   };
 
+  # -- Root Daemons --
   launchd.daemons."com.jwalinshah.m5fand" = {
     serviceConfig = {
       ProgramArguments = [ "/Users/${user}/.local/bin/m5fand" ];
+      UserName = "root";
       KeepAlive = true;
       RunAtLoad = true;
       EnvironmentVariables = {
