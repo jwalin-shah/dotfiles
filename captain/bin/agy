@@ -1,4 +1,9 @@
-#!/usr/bin/env bash
-# Google Antigravity CLI — uses its own auth, not secret-cache.
-set -euo pipefail
-exec /opt/homebrew/bin/agy "$@"
+#!/usr/bin/env python3
+"""Gemini via Google API - WITH AUTOMATIC COMPRESSION HOOKS"""
+import subprocess
+import sys
+import os
+from pathlib import Path
+
+wrapper = Path(__file__).parent / "agy-wrapper"
+os.execvp(str(wrapper), [str(wrapper)] + sys.argv[1:])

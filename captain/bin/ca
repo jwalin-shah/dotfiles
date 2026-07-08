@@ -1,2 +1,10 @@
-#!/bin/bash
-exec ~/bin/claude-launch run a --permission-mode auto "$@"
+#!/usr/bin/env python3
+"""Claude Code via Anthropic OAuth - WITH AUTOMATIC COMPRESSION HOOKS"""
+import subprocess
+import sys
+import os
+from pathlib import Path
+
+# Run the compression wrapper
+wrapper = Path(__file__).parent / "ca-wrapper"
+os.execvp(str(wrapper), [str(wrapper)] + sys.argv[1:])

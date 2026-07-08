@@ -1,11 +1,9 @@
-#!/usr/bin/env bash
-# Claude Code via TokenRouter (direct, no compression proxy overhead).
-# Fast access to 105+ models aggregated through TokenRouter.
-set -euo pipefail
+#!/usr/bin/env python3
+"""Claude Code via TokenRouter - WITH AUTOMATIC COMPRESSION HOOKS"""
+import subprocess
+import sys
+import os
+from pathlib import Path
 
-# Use TokenRouter directly (no Headroom compression overhead)
-# This is fast and reliable. Compression comes from hooks, not proxy.
-PROFILE="token"
-
-exec "$HOME/.local/bin/secret-cache" exec -- \
-  "$HOME/bin/claude-launch" run "$PROFILE" --dangerously-skip-permissions "$@"
+wrapper = Path(__file__).parent / "ct-wrapper"
+os.execvp(str(wrapper), [str(wrapper)] + sys.argv[1:])
