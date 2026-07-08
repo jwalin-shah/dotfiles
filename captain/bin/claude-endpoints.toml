@@ -49,7 +49,7 @@ preflight = false
 config_dir = "~/.claude-token"
 base_url = "http://127.0.0.1:8788"
 gateway_discovery = false
-custom_model_option = "MiniMax-M3"
+custom_model_option = "deepseek/deepseek-v4-flash"
 key.source = "env"
 key.env = "TOKENROUTER_API_KEY"
 
@@ -65,7 +65,7 @@ ANTHROPIC_DEFAULT_FABLE_MODEL = "x-ai/grok-build-0.1"
 config_dir = "~/.claude-token"
 base_url = "http://127.0.0.1:18999"
 gateway_discovery = false
-custom_model_option = "MiniMax-M3"
+custom_model_option = "deepseek/deepseek-v4-flash"
 key.source = "env"
 key.env = "TOKENROUTER_API_KEY"
 

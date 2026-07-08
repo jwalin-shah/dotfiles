@@ -271,6 +271,7 @@
         EnvironmentVariables = {
           PATH = lib.mkForce "/opt/homebrew/bin:/Users/${user}/.local/bin:/usr/local/bin:/usr/bin:/bin";
           BRAVE_AUTOMATION_BACKGROUND = "1";
+          BRAVE_AUTOMATION_HEADLESS = "1";
           BRAVE_AUTOMATION_MODE = "ensure";
         };
         StandardOutPath = "/Users/${user}/.cache/quota-core/brave-automation.log";
