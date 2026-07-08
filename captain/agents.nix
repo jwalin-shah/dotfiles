@@ -1,90 +1,113 @@
-# Centralized agent configuration for all AI tools
-# This module declares:
-# - All tool configurations
-# - Permissions policies
-# - Service dependencies
-# - MCP registrations (empty)
-# - Launcher setup
+# Centralized agent configuration — SINGLE SOURCE OF TRUTH
+# All tool configs (MCPs, hooks, permissions) defined here.
+# Generated files are created from this schema, not stored separately.
 
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 let
   permissions = import ./permissions.nix;
   services = import ./services.nix;
+
+  # MCP server definitions — shared across tools
+  mcpServers = {
+    githits = { command = "githits"; args = ["mcp" "start"]; };
+    tldr = { command = "tldr-mcp"; args = ["--project" "/Users/jwalinshah/projects"]; };
+    cocoindex = { command = "ccc"; args = ["mcp"]; };
+    cognee = { command = "/Users/jwalinshah/bin/cognee"; args = ["mcp"]; };
+  };
+
+  # Hook definitions — shared across tools
+  hooks = {
+    empty = { };
+    gemini_workflow_ladder = {
+      "workflow-ladder-status" = {
+        PreInvocation = [{
+          type = "command";
+          command = "/Users/jwalinshah/.agents/skills/workflow-ladder/scripts/ladder-status.sh";
+          timeout = 10;
+        }];
+      };
+      "workflow-ladder-gate" = {
+        PreToolUse = [{
+          matcher = "write_to_file|replace_file_content|multi_replace_file_content|run_command";
+          hooks = [{
+            type = "command";
+            command = "/Users/jwalinshah/.agents/skills/workflow-ladder/scripts/check-ladder.sh";
+            timeout = 10;
+          }];
+        }];
+      };
+    };
+  };
+
 in
 
 {
-  # Export permissions and services for reference
   _permissions = permissions;
   _services = services;
 
-  description = "Unified AI agent configuration for Claude, Codex, OpenCode, Cursor, Gemini";
+  description = "Unified AI agent configuration — MCPs, hooks, and permissions from single source";
 
-  # Configuration summary:
-  # 1. MCPs are DISABLED across all tools (empty registrations)
-  # 2. Each tool has explicit permission policies (defined in permissions.nix)
-  # 3. Headroom proxy provides context optimization at port 8788
-  # 4. TokenRouter gateway provides unified provider routing at port 18999
-  # 5. All launchers route through appropriate proxies
-  # 6. All configs are version-controlled in dotfiles via home.nix symlinks
-
+  # AGENT SCHEMA: Single source of truth
   agents = {
     "claude-code" = {
       description = "Primary agent — high trust baseline";
       launcher = "claude";
       config_file = "~/.claude/settings.json";
-      mcp = "disabled";
+      uses_headroom = false;
+      mcp_servers = { };  # Disabled
+      hooks = hooks.empty;
       permissions = permissions.claude.permissions;
-      uses_headroom = false;  # OAuth sends no API key, goes direct to Anthropic
-      note = "Direct Anthropic API (OAuth) bypasses Headroom. Use ct for TokenRouter.";
     };
 
     "claude-tokenrouter" = {
-      description = "Claude via TokenRouter (ct launcher) — enables cost optimization";
+      description = "Claude via TokenRouter (ct launcher)";
       launcher = "ct";
       config_file = "~/.claude/settings.json";
-      mcp = "disabled";
+      uses_headroom = true;
+      mcp_servers = { };  # Disabled
+      hooks = hooks.empty;
       permissions = permissions.claude.permissions;
-      uses_headroom = true;  # Routes through headroom@8788 → tokenrouter@18999
-      note = "Set mode=token in ct launcher to enable compression";
     };
 
     "codex" = {
-      description = "OpenAI Codex — secondary agent with GPT models";
+      description = "OpenAI Codex — GPT models";
       launcher = "codex";
       config_file = "~/.codex/config.toml";
-      mcp = "disabled";
+      uses_headroom = false;
+      mcp_servers = { };  # Disabled
+      hooks = hooks.empty;
       permissions = permissions.codex.permissions;
-      uses_headroom = false;  # Direct OpenAI API
     };
 
     "opencode" = {
-      description = "OpenCode via TokenRouter — alternative to Claude";
+      description = "OpenCode via TokenRouter";
       launcher = "ot";
       config_file = "~/.config/opencode/opencode.json";
-      mcp = "disabled";
-      permissions = permissions.opencode.permissions;
       uses_headroom = true;
-      note = "Routes through headroom@8788 → tokenrouter@18999";
+      mcp_servers = { };  # Disabled
+      hooks = hooks.empty;
+      permissions = permissions.opencode.permissions;
     };
 
     "cursor" = {
       description = "Cursor agent CLI — IDE integration";
       launcher = "cu";
       config_file = "~/.cursor/cli-config.json";
-      mcp = "disabled";
-      permissions = permissions.cursor.permissions;
       uses_headroom = false;
-      sandbox = "disabled";
+      mcp_servers = { };  # Disabled (was wrongly enabled, now fixed)
+      hooks = hooks.empty;
+      permissions = permissions.cursor.permissions;
     };
 
     "gemini" = {
-      description = "Agy (Gemini) — Google's multimodal models";
+      description = "Agy (Gemini) — Google's models";
       launcher = "agy";
       config_file = "~/.gemini/antigravity-cli/settings.json";
-      mcp = "disabled";
+      uses_headroom = false;
+      mcp_servers = { };  # Disabled
+      hooks = hooks.gemini_workflow_ladder;  # Workflow ladder hooks enabled
       permissions = permissions.gemini.permissions;
-      uses_headroom = false;  # Direct Google API
     };
   };
 
@@ -98,17 +121,20 @@ in
     "gemini" = [ ];
   };
 
-  # MCP configuration summary
-  mcp_status = {
-    claude_code = "disabled (empty ~/ .config/claude/mcp.json)";
-    opencode = "disabled (empty ~/.config/opencode/mcp.json)";
-    codex = "disabled (no [mcp_servers] in ~/.codex/config.toml)";
-    cursor = "disabled (no mcp config)";
-    gemini = "disabled";
-    canonical_source = "~/projects/dotfiles via home.nix symlinks";
+  # Validation summary
+  validation = {
+    description = "All MCPs disabled across all tools (consistency enforced)";
+    hooks_status = {
+      "claude-code" = "empty";
+      "claude-tokenrouter" = "empty";
+      "codex" = "empty";
+      "opencode" = "empty";
+      "cursor" = "empty";
+      "gemini" = "workflow-ladder only";
+    };
+    canonical_source = "captain/agents.nix (single source of truth)";
   };
 
-  # Services that must be running
   required_services = with services; [
     headroom
     tokenrouter
@@ -117,12 +143,9 @@ in
     cocoindex
   ];
 
-  # How to start everything
   startup_order = [
-    "1. nix rebuild (applies all dotfiles symlinks)"
-    "2. launchctl start headroom-tokenrouter (or it starts at boot)"
-    "3. launchctl start tokenrouter-proxy (or it starts at boot)"
-    "4. ct --version (verify headroom is responding)"
-    "5. Use ct, cx, ot, ca, agy as needed"
+    "1. nix rebuild (generates + validates all configs from agents.nix)"
+    "2. launchctl services start automatically"
+    "3. ct --version (verify system ready)"
   ];
 }
