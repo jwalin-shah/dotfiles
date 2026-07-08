@@ -105,7 +105,7 @@
     # -- Core AI Infrastructure --
     "com.jwalinshah.mlx-chat-server" = {
       serviceConfig = {
-        ProgramArguments = [ "/Users/${user}/bin/start-mlx-server.sh" ];
+        ProgramArguments = [ "/Users/${user}/.local/bin/jw-mlx-chat" ];
         KeepAlive = true;
         RunAtLoad = true;
         ThrottleInterval = 10;
@@ -147,12 +147,8 @@
     };
 
     "com.jwalinshah.cognee-api" = {
-      serviceConfig.ProgramArguments = [
-        "/Users/${user}/.local/share/uv/tools/cognee/bin/python"
-        "-m"
-        "cognee.api.client"
-      ];
       serviceConfig = {
+        ProgramArguments = [ "/Users/${user}/.local/bin/jw-cognee" ];
         KeepAlive = true;
         RunAtLoad = true;
         ThrottleInterval = 10;
