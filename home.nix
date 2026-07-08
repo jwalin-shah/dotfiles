@@ -105,8 +105,6 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/claude/mcp.json";
   home.file.".config/opencode/mcp.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/opencode/mcp.json";
-  home.file.".config/opencode/opencode.json".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/opencode/opencode.json";
 
   home.file.".claude/CLAUDE.md".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
