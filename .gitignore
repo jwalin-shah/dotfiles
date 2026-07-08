@@ -9,4 +9,5 @@ result
 result-*
 
 # no-mistakes local validation state - never commit in this public repo
-.no-mistakes/
+.no-mistakes/*.pyc
+__pycache__/
