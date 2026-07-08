@@ -5,29 +5,38 @@ let
 in
 
 {
-  imports = [ ./captain/user.nix ];
-
   home.username = user;
   home.homeDirectory = "/Users/${user}";
   home.stateVersion = "24.11";
+
   home.packages = with pkgs; [
-    # cli i use constantly
-    ripgrep   # fast search
-    fd        # fast find
-    fzf       # fuzzy finder
-    jq        # json on the command line
+    ripgrep
+    fd
+    fzf
+    jq
     lazygit
     neovim
-    # the font everything renders in
     nerd-fonts.hack
+    bat
+    eza
+    delta
+    btop
+    dust
+    fastfetch
+    ripgrep-all
+    tree
   ];
+
   fonts.fontconfig.enable = true;
-  home.sessionVariables.EDITOR = "nvim";
+  home.sessionVariables = {
+    EDITOR = "nvim";
+    PATH = "${config.home.homeDirectory}/.cargo/bin:${config.home.homeDirectory}/.local/bin:${config.home.homeDirectory}/bin:/opt/homebrew/bin:$PATH";
+  };
 
   programs.zsh = {
     enable = true;
-    autosuggestion.enable = true;      # ghost text from history
-    syntaxHighlighting.enable = true;  # commands turn green when valid
+    autosuggestion.enable = true;
+    syntaxHighlighting.enable = true;
     initContent = ''
       bindkey '^f' autosuggest-accept
     '';
@@ -38,8 +47,15 @@ in
       pull = "git pull";
       m = "git switch main";
       rb = "cd ~/projects/dotfiles && ./rebuild.sh";
-      cc = "claude --dangerously-skip-permissions";
-      co = "codex --full-auto";
+      ls = "eza";
+      ll = "eza -l";
+      la = "eza -la";
+      lt = "eza --tree";
+      c = "claude";
+      cx = "command cx";
+      gha = "npx -y gh-axi";
+      cda = "npx -y chrome-devtools-axi";
+      lva = "npx -y lavish-axi";
     };
   };
 
@@ -56,60 +72,133 @@ in
     };
   };
 
-  # Edit-in-place: the real file stays in my repo, ~/.config just points at it.
+  # Edit-in-place symlinks -- real files live in the dotfiles repo
   home.file.".config/wezterm".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/wezterm";
   home.file.".config/nvim".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/nvim";
   home.file.".config/herdr".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/herdr";
+
+  # Claude config dirs (3) -- same settings, symlinked
+  home.file.".claude/settings.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/settings.json";
+  home.file.".claude/mcp.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/mcp.json";
+  home.file.".claude/mcp.json".force = true;
+  home.file.".claude/CLAUDE.md".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
+
+  home.file.".claude-a/settings.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/settings.json";
+  home.file.".claude-a/settings.json".force = true;
+  home.file.".claude-a/mcp.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude-a/mcp.json";
+  home.file.".claude-a/mcp.json".force = true;
+  home.file.".claude-a/CLAUDE.md".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
+
+  home.file.".claude-token/settings.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/settings.json";
+  home.file.".claude-token/settings.json".force = true;
+  home.file.".claude-token/mcp.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude-token/mcp.json";
+  home.file.".claude-token/mcp.json".force = true;
+  home.file.".claude-token/CLAUDE.md".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
+  home.file.".claude-token/CLAUDE.md".force = true;
+
+  # Other agent configs
+  home.file.".codex/config.toml".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.codex/config.toml";
+  home.file.".codex/hooks.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.codex/hooks.json";
+  home.file.".codex/rules/default.rules".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.codex/rules/default.rules";
+  home.file.".codex/AGENTS.md".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
+
+  home.file.".cursor/cli-config.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.cursor/cli-config.json";
+  home.file.".cursor/mcp.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.cursor/mcp.json";
+  home.file.".cursor/hooks.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.cursor/hooks.json";
+  home.file.".cursor/AGENTS.md".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
+
+  home.file.".gemini/antigravity-cli/settings.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.gemini/antigravity-cli/settings.json";
+  home.file.".gemini/antigravity-cli/settings.json".force = true;
+  home.file.".gemini/config/mcp_config.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.gemini/config/mcp_config.json";
+  home.file.".gemini/settings.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.gemini/settings.json";
+  home.file.".gemini/config/hooks.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.gemini/config/hooks.json";
+  home.file.".gemini/AGENTS.md".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
+
+  home.file.".config/kilo/kilo.jsonc".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/kilo/kilo.jsonc";
+  home.file.".config/kilo/AGENTS.md".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
+  home.file.".config/claude/mcp.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/claude/mcp.json";
+  home.file.".config/opencode/mcp.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/opencode/mcp.json";
+  home.file.".config/opencode/AGENTS.md".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
+
+  # OpenCode config (from captain/config/)
+  home.file.".config/opencode/opencode.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/config/opencode.json";
+  home.file.".config/jw/models.env".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/config/models.env";
+
+  # ~/bin launcher wrappers
   home.file."bin/ct".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/ct";
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/ct-wrapper";
+  home.file."bin/ca".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/ca-wrapper";
+  home.file."bin/cu".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/cu-wrapper";
+  home.file."bin/oo".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/oo-wrapper";
+  home.file."bin/ot".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/ot-wrapper";
+  home.file."bin/ko".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/ko-wrapper";
+  home.file."bin/kt".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/kt-wrapper";
+  home.file."bin/cx".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/cx-wrapper";
+  home.file."bin/claude-launch".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/claude-launch";
+  home.file."bin/claude-endpoints.toml".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/claude-endpoints.toml";
+  home.file."bin/jw-restart".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/jw-restart";
+  home.file."bin/routing-proxy".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/routing-proxy";
+  home.file."bin/tokenrouter-proxy".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tokenrouter-proxy";
+  home.file."bin/openwiki".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/openwiki";
+
+  # Utility scripts
   home.file."bin/audit-config-ownership.sh".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/audit-config-ownership.sh";
   home.file."bin/audit-doc-freshness.sh".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/audit-doc-freshness.sh";
   home.file."bin/verify-core-launchers.sh".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/verify-core-launchers.sh";
-  home.file."bin/openwiki".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/openwiki";
-  home.file."bin/routing-proxy".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/routing-proxy";
-  home.file."bin/tokenrouter-proxy".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tokenrouter-proxy";
-  home.file."bin/claude-launch".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/claude-launch";
-  home.file."bin/claude-endpoints.toml".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/claude-endpoints.toml";
-  home.file.".claude/settings.json".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/settings.json";
-  home.file.".codex/config.toml".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.codex/config.toml";
-  home.file.".cursor/cli-config.json".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.cursor/cli-config.json";
-  home.file.".codex/hooks.json".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.codex/hooks.json";
-  home.file.".codex/rules/default.rules".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.codex/rules/default.rules";
-  home.file.".cursor/hooks.json".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.cursor/hooks.json";
-  home.file.".gemini/antigravity-cli/settings.json".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.gemini/antigravity-cli/settings.json";
-  home.file.".gemini/settings.json".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.gemini/settings.json";
-  home.file.".gemini/config/hooks.json".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.gemini/config/hooks.json";
-  home.file.".config/kilo/kilo.jsonc".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/kilo/kilo.jsonc";
-  home.file.".config/claude/mcp.json".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/claude/mcp.json";
-  home.file.".config/opencode/mcp.json".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/opencode/mcp.json";
+  home.file."bin/prune-opencode-local-state.sh".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/prune-opencode-local-state.sh";
 
-  home.file.".claude/CLAUDE.md".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
-  home.file.".codex/AGENTS.md".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
-  home.file.".config/opencode/AGENTS.md".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
+  # ~/.local/bin
+  home.file.".local/bin/oo".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.local/bin/oo";
+  home.file.".local/bin/rtldr".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.local/bin/rtldr";
 }

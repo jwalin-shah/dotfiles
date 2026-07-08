@@ -2,5 +2,9 @@
 import os
 import sys
 
-os.environ["KILO_API_URL"] = "http://127.0.0.1:18999"
-os.execvp("kilo", ["/opt/homebrew/bin/kilo", "--dangerously-skip-permissions"] + sys.argv[1:])
+os.environ["KILO_API_URL"] = "https://api.tokenrouter.com"
+os.environ["KILO_API_KEY_ENV"] = "TOKENROUTER_API_KEY"
+os.execvp("secret-cache", [
+    "secret-cache", "exec", "--",
+    "/opt/homebrew/bin/kilo"
+] + sys.argv[1:])

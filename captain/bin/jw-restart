@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+# jw-restart - Restart one or all managed services.
+# Usage:
+#   jw-restart              - restart all down services (like jw-watch --restart)
+#   jw-restart --force      - kill then restart everything
+#   jw-restart <name>       - restart one service by name
+set -euo pipefail
+
+CONF="${HOME}/.config/jw/services.conf"
+source "$CONF"
+
+restart_one() {
+  local name="$1" force="${2:-}"
+  for svc_line in "${SERVICES[@]}"; do
+    IFS='|' read -r sname type addr health_path pid_hint cmd dim <<< "$svc_line"
+    [ "$sname" != "$name" ] && continue
+
+    if [ "$force" = "force" ] || [ -n "$force" ]; then
+      case "$type" in
+        pid) kill "$addr" 2>/dev/null || true ;;
+        http|sock)
+          pids=$(pgrep -f "$pid_hint" 2>/dev/null || true)
+          [ -n "$pids" ] && kill $pids 2>/dev/null || true
+          ;;
+        launchd)
+          launchctl bootout "gui/501/${addr}" 2>/dev/null || true
+          ;;
+      esac
+    fi
+
+    case "$type" in
+      pid)
+        eval "$cmd" >/dev/null 2>&1 &
+        echo "$name: starting..."
+        ;;
+      http|sock)
+        if echo "$cmd" | grep -q "^launchctl"; then
+          eval "$cmd" 2>/dev/null && echo "$name: launchctl start OK" || echo "$name: launchctl start FAILED"
+        elif echo "$cmd" | grep -q "ccc run-daemon"; then
+          eval "$cmd" >/dev/null 2>&1 &
+          echo "$name: starting daemon..."
+        else
+          eval "$cmd" >/dev/null 2>&1 &
+          echo "$name: starting..."
+        fi
+        ;;
+      launchd)
+        plist="$HOME/Library/LaunchAgents/${addr}.plist"
+        if [ -e "$plist" ]; then
+          launchctl bootstrap "gui/501" "$plist" 2>/dev/null || \
+          launchctl kickstart "gui/501/${addr}" 2>/dev/null || true
+          echo "$name: loaded via launchd"
+        else
+          echo "$name: missing launchd plist: $plist" >&2
+          return 1
+        fi
+        ;;
+    esac
+    return
+  done
+  echo "unknown service: $name"
+}
+
+case "${1:-}" in
+  "")
+    echo "Restarting down services..."
+    /Users/jwalinshah/bin/jw-watch --restart
+    ;;
+  --force)
+    echo "Force-restarting ALL services..."
+    for svc_line in "${SERVICES[@]}"; do
+      [ -z "$svc_line" ] && continue
+      [[ "$svc_line" == \#* ]] && continue
+      IFS='|' read -r name type addr health_path pid_hint cmd dim <<< "$svc_line"
+      restart_one "$name" force
+    done
+    sleep 3
+    echo ""
+    /Users/jwalinshah/bin/jw-watch
+    ;;
+  -h|--help)
+    echo "Usage: jw-restart [name|--force]"
+    exit 0
+    ;;
+  *)
+    restart_one "${1}"
+    ;;
+esac

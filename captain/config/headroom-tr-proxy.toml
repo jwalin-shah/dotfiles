@@ -1,3 +1,0 @@
-# Headroom TokenRouter proxy configuration.
-# Launched via: secret-cache exec -- headroom-tr-proxy --port 8788
-# This file is managed by the dotfiles captain overlay.

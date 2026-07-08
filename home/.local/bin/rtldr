@@ -1,0 +1,142 @@
+#!/usr/bin/env bash
+# rtldr - unified code intelligence CLI
+# search: fans out to ccc (code) + cognee (session memory) simultaneously
+# structural: delegates to tldr-code
+set -euo pipefail
+
+CMD="${1:-help}"
+shift || true
+
+_cognee_recall() {
+  local query="$*"
+  local COGNEE_PY="$HOME/.local/share/uv/tools/cognee/bin/python"
+  if ! command -v "$COGNEE_PY" &>/dev/null 2>&1; then return; fi
+  timeout 15 "$COGNEE_PY" - "$query" 2>/dev/null <<'PYEOF'
+import asyncio, os, sys, litellm
+litellm.drop_params = True
+os.environ.update({'COGNEE_SKIP_CONNECTION_TEST':'true','EMBEDDING_PROVIDER':'fastembed','EMBEDDING_MODEL':'sentence-transformers/all-MiniLM-L6-v2','EMBEDDING_DIMENSIONS':'384','CACHING':'false','ENABLE_BACKEND_ACCESS_CONTROL':'false','LLM_PROVIDER':'openai','LLM_MODEL':'openai/mlx-community/Qwen3.5-9B-OptiQ-4bit','LLM_API_KEY':'sk-no-key','LLM_ENDPOINT':'http://127.0.0.1:51997/v1'})
+import cognee
+from cognee import SearchType
+query = sys.argv[1]
+async def run():
+    results = await cognee.search(query, query_type=SearchType.CHUNKS, datasets="sessions")
+    if not results:
+        return
+    shown = 0
+    for r in results:
+        if isinstance(r, dict):
+            if r.get('type') in ('IndexSchema', 'DocumentChunk') and not r.get('text') and not r.get('content'):
+                continue
+            text = r.get('text') or r.get('content') or r.get('summary', '')
+        else:
+            text = getattr(r, 'text', None) or getattr(r, 'content', None) or ''
+        text = str(text).strip()
+        if len(text) < 20:
+            continue
+        if shown == 0:
+            print("\n── session memory (cognee) ──────────────────────────")
+        print(text[:300])
+        print()
+        shown += 1
+        if shown >= 3:
+            break
+asyncio.run(run())
+PYEOF
+}
+
+case "$CMD" in
+  search)
+    echo "── code search (ccc / CodeRankEmbed) ────────────────"
+    ccc search "$@" &
+    CCC_PID=$!
+    _cognee_recall "$@" &
+    COGNEE_PID=$!
+    wait $CCC_PID
+    wait $COGNEE_PID
+    ;;
+  recall|memory)
+    _cognee_recall "$@"
+    ;;
+  remember)
+    COGNEE_PY="$HOME/.local/share/uv/tools/cognee/bin/python"
+    timeout 60 "$COGNEE_PY" - "$*" 2>/dev/null <<'PYEOF'
+import asyncio, os, sys, litellm
+litellm.drop_params = True
+os.environ.update({'COGNEE_SKIP_CONNECTION_TEST':'true','EMBEDDING_PROVIDER':'fastembed','EMBEDDING_MODEL':'sentence-transformers/all-MiniLM-L6-v2','EMBEDDING_DIMENSIONS':'384','CACHING':'false','ENABLE_BACKEND_ACCESS_CONTROL':'false','LLM_PROVIDER':'openai','LLM_MODEL':'openai/mlx-community/Qwen3.5-9B-OptiQ-4bit','LLM_API_KEY':'sk-no-key','LLM_ENDPOINT':'http://127.0.0.1:51997/v1','LLM_ARGS':'{"max_tokens": 4096, "response_format": {"type": "json_object"}}','LLM_INSTRUCTOR_MODE':'markdown_json_mode'})
+import cognee
+text = sys.argv[1]
+async def run():
+    await cognee.add(text, dataset_name="sessions", node_set=["sessions"])
+    await cognee.cognify(datasets="sessions")
+    print("stored in session memory")
+asyncio.run(run())
+PYEOF
+    ;;
+  trace|callers)   tldr impact "$@" ;;
+  calls)           tldr calls "$@" ;;
+  context)         tldr context "$@" ;;
+  arch)            tldr arch "$@" ;;
+  dead)            tldr dead "$@" ;;
+  hub|hubs)        tldr hubs "$@" ;;
+  explain)         tldr explain "$@" ;;
+  whatbreaks|wb)   tldr whatbreaks "$@" ;;
+  imports)         tldr imports "$@" ;;
+  smells)          tldr smells "$@" ;;
+  health)
+    echo "── ccc (code index) ─────────────────────────────────"
+    ccc daemon status 2>/dev/null | grep -E "version|Uptime|Projects" || echo "ccc daemon: not running"
+    echo ""
+    echo "── embed servers ────────────────────────────────────"
+    curl -sf http://127.0.0.1:51997/v1/models 2>/dev/null | python3 -c "import json,sys; m=json.load(sys.stdin)['data'][0]['id'].split('/')[-1]; print(f'chat (51997): {m}')" || echo "chat (51997): down"
+    curl -sf http://127.0.0.1:51999/v1/models 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print('code-embed (51999): CodeRankEmbed')" || echo "code-embed (51999): down"
+    echo ""
+    echo "── cognee graph ─────────────────────────────────────"
+    COGNEE_PY="$HOME/.local/share/uv/tools/cognee/bin/python"
+    timeout 10 "$COGNEE_PY" - 2>/dev/null <<'PYEOF' || echo "cognee: unreachable"
+import asyncio, os, litellm
+litellm.drop_params = True
+os.environ.update({'COGNEE_SKIP_CONNECTION_TEST':'true','EMBEDDING_PROVIDER':'fastembed','EMBEDDING_MODEL':'sentence-transformers/all-MiniLM-L6-v2','EMBEDDING_DIMENSIONS':'384','CACHING':'false','ENABLE_BACKEND_ACCESS_CONTROL':'false','LLM_PROVIDER':'openai','LLM_MODEL':'openai/mlx-community/Qwen3.5-9B-OptiQ-4bit','LLM_API_KEY':'sk-no-key','LLM_ENDPOINT':'http://127.0.0.1:51997/v1'})
+import cognee
+from cognee import SearchType
+async def run():
+    try:
+        r = await cognee.search("test", query_type=SearchType.CHUNKS, datasets="sessions")
+        print(f"cognee: ok ({len(r) if r else 0} session chunks indexed)")
+    except Exception as e:
+        print(f"cognee: error - {e}")
+asyncio.run(run())
+PYEOF
+    echo ""
+    echo "── tldr-code ────────────────────────────────────────"
+    tldr --version 2>/dev/null && echo "tldr: ok" || echo "tldr: not found"
+    echo ""
+    echo "── mcp wiring ───────────────────────────────────────"
+    python3 -c "import json,pathlib; d=json.loads(pathlib.Path('$HOME/.config/claude/mcp.json').read_text()); print('servers:', ', '.join(d['mcpServers'].keys()))"
+    echo "symlinked to: ~/.claude ~/.claude-a ~/.claude-token ~/.claude-pioneer ~/.claude-cerebras ~/.cursor"
+    ;;
+  help|--help|-h)
+    cat <<'EOF'
+rtldr - unified code intelligence (ccc + cognee + tldr-code)
+
+  search <query>        code search (ccc) + session memory (cognee) combined
+  recall <query>        session memory only (cognee)
+  remember <text>       store in session memory (cognee)
+
+Structural (tldr-code):
+  context <entry>       ranked call-graph context for entry point
+  trace <fn>            blast radius: who calls this function
+  calls [path]          full call graph
+  arch [path]           architecture layers
+  dead [path]           dead code
+  hub [path]            centrality hub functions
+  explain <fn>          comprehensive function analysis
+  whatbreaks <target>   change impact analysis
+  imports <file>        import dependencies
+  smells [path]         code smell detection
+
+Diagnostics:
+  health                check all components (ccc, cognee, embed servers, tldr, mcp)
+EOF
+    ;;
+  *) echo "Unknown command: $CMD. Run 'rtldr help'." >&2; exit 1 ;;
+esac

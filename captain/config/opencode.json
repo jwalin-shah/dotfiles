@@ -246,7 +246,5 @@
       "prompt": "Review for correctness, security, regressions, and missing tests."
     }
   },
-  "plugin": [
-    "@inference/trace-opencode"
-  ]
+  "plugin": []
 }

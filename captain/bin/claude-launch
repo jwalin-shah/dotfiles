@@ -9,7 +9,7 @@ Usage:
     claude-launch run   <profile> [claude args...]   # launch a session
     claude-launch check <profile>                    # resolve + preflight, no launch
 
-Profiles are whatever claude-endpoints.toml defines (today: a b token pioneer nvidia).
+Profiles are whatever claude-endpoints.toml defines (today: a token pioneer).
 
 Observability: every launch logs a one-line summary (profile, base_url, key
 source, latency) to stderr and ~/.claude/logs/launch.log. With preflight on, the

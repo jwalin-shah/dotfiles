@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "githits": {
+      "command": "/opt/homebrew/bin/githits",
+      "args": ["mcp", "start"]
+    },
+    "tldr": {
+      "command": "/Users/jwalinshah/.local/bin/tldr-mcp"
+    },
+    "cocoindex": {
+      "command": "/Users/jwalinshah/.local/bin/cocoindex-code",
+      "args": ["serve"]
+    },
+    "cognee": {
+      "command": "/Users/jwalinshah/bin/cognee",
+      "args": ["mcp"]
+    },
+    "headroom": {
+      "command": "/Users/jwalinshah/.local/bin/headroom",
+      "args": ["mcp", "serve"]
+    }
+  }
+}

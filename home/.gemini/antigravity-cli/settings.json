@@ -1,7 +1,7 @@
 {
   "allowNonWorkspaceAccess": true,
   "enableTelemetry": false,
-  "model": "Claude Sonnet 4.6 (Thinking)",
+  "model": "Gemini 3.1 Pro (Low)",
   "permissions": {
     "allow": [
       "command(bun)",
@@ -116,7 +116,16 @@
       "command(/Users/jwalinshah/.local/share/uv/tools/headroom-ai/bin/python -m headroom.cli proxy --help)",
       "command(~/bin/jw-spawn.sh)",
       "command(~/bin/jw-squeeze-exec.sh)",
-      "command(pkill)"
+      "command(pkill)",
+      "command(echo)",
+      "command(wc)",
+      "command(sort)",
+      "command(uniq)",
+      "command(chmod +x ~/.agents/skills/workflow-ladder/scripts/check-ladder.sh)",
+      "command(chmod +x ~/.agents/skills/workflow-ladder/scripts/ladder-status.sh)",
+      "command(~/.agents/skills/workflow-ladder/scripts/check-ladder.sh)",
+      "command(~/.agents/skills/workflow-ladder/scripts/ladder-status.sh)",
+      "command(chmod +x ~/.agents/skills/workflow-ladder/scripts/ladder-stamp.sh)"
     ],
     "ask": [
       "command(git push)",

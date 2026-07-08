@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
-"""Claude Code via TokenRouter - WITH AUTOMATIC COMPRESSION HOOKS"""
-import subprocess
+"""Claude Code via TokenRouter - thin launcher."""
 import sys
 import os
 from pathlib import Path
 
-# Resolve the actual path (handle symlinks)
 script_path = Path(os.path.realpath(__file__))
 wrapper = script_path.parent / "ct-wrapper"
 os.execvp(str(wrapper), [str(wrapper)] + sys.argv[1:])

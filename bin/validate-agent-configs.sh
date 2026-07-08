@@ -23,7 +23,10 @@ fi
 
 # Check Claude MCPs (should be disabled)
 echo "Claude Code MCPs:"
-if jq -e '.mcpServers | length > 0' "$DOTFILES_ROOT/home/.config/claude/mcp.json" >/dev/null 2>&1; then
+if jq -e '.mcpServers | length > 0' "$DOTFILES_ROOT/home/.claude/mcp.json" >/dev/null 2>&1 || \
+   jq -e '.mcpServers | length > 0' "$DOTFILES_ROOT/home/.claude-a/mcp.json" >/dev/null 2>&1 || \
+   jq -e '.mcpServers | length > 0' "$DOTFILES_ROOT/home/.claude-token/mcp.json" >/dev/null 2>&1 || \
+   jq -e '.mcpServers | length > 0' "$DOTFILES_ROOT/home/.config/claude/mcp.json" >/dev/null 2>&1; then
   echo "  ✗ FAIL: Claude has MCPs enabled (agents.nix says disabled)"
   ERRORS=$((ERRORS + 1))
 else

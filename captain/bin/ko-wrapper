@@ -2,4 +2,4 @@
 import os
 import sys
 
-os.execvp("kilo", ["/opt/homebrew/bin/kilo", "--dangerously-skip-permissions"] + sys.argv[1:])
+os.execvp("kilo", ["/opt/homebrew/bin/kilo"] + sys.argv[1:])

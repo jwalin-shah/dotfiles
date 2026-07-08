@@ -2,4 +2,4 @@
 import os
 import sys
 
-os.execvp("codex", ["/opt/homebrew/bin/codex", "--full-auto"] + sys.argv[1:])
+os.execvp("codex", ["/opt/homebrew/bin/codex", "--dangerously-bypass-approvals-and-sandbox"] + sys.argv[1:])

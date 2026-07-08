@@ -24,7 +24,6 @@ captain/
   config/
     opencode.json         OpenCode config (TokenRouter only)
     models.env            Local AI model config for MLX/cognee
-    headroom-tr-proxy.toml Headroom proxy config
 ```
 
 Patched upstream files (minimal edits):

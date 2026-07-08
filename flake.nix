@@ -25,7 +25,6 @@
         specialArgs = { inherit user; };
         modules = [
           ./configuration.nix
-          ./captain/system.nix
           nix-homebrew.darwinModules.nix-homebrew
           home-manager.darwinModules.home-manager
           {
