@@ -1,8 +1,6 @@
-#!/usr/bin/env bash
-# Kilo with TokenRouter gateway (unified LLM provider routing).
-set -euo pipefail
-
-export KILO_API_URL="http://127.0.0.1:18999"
-export KILO_API_KEY="${TOKENROUTER_API_KEY}"
-
-exec /opt/homebrew/bin/kilo --dangerously-skip-permissions "$@"
+#!/usr/bin/env python3
+import subprocess, sys, os
+from pathlib import Path
+script_path = Path(os.path.realpath(__file__))
+wrapper = script_path.parent / "kt-wrapper"
+os.execvp(str(wrapper), [str(wrapper)] + sys.argv[1:])

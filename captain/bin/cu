@@ -1,7 +1,6 @@
-#!/usr/bin/env bash
-# Cursor Agent CLI — uses Cursor account auth, not secret-cache.
-# Installed via the official curl installer (https://cursor.com/install), NOT the
-# Homebrew cask. The cask quarantines its unsigned native modules and macOS deletes
-# them on first dlopen. See agent-rules/KNOWN_ISSUES.md.
-set -euo pipefail
-exec "$HOME/.local/bin/cursor-agent" "$@"
+#!/usr/bin/env python3
+import subprocess, sys, os
+from pathlib import Path
+script_path = Path(os.path.realpath(__file__))
+wrapper = script_path.parent / "cu-wrapper"
+os.execvp(str(wrapper), [str(wrapper)] + sys.argv[1:])
