@@ -21,6 +21,9 @@
     "gh"
     "go"
     "golangci-lint"
+    "node"
+    "opencode"
+    "llama.cpp"
     "infisical"
     "jq"
     "lazygit"
@@ -58,8 +61,8 @@
   launchd.user.agents = {
     # ── Core AI Infrastructure ──────────────────────────────────────────────────
     "com.jwalinshah.mlx-chat-server" = {
-      path = [ "/Users/${user}/bin/start-mlx-server.sh" ];
       serviceConfig = {
+        ProgramArguments = [ "/Users/${user}/bin/start-mlx-server.sh" ];
         KeepAlive = true;
         RunAtLoad = true;
         ThrottleInterval = 10;
@@ -73,8 +76,8 @@
     };
 
     "com.jwalinshah.llama-embed-server" = {
-      path = [ "/Users/${user}/.local/bin/jw-llama-embed" ];
       serviceConfig = {
+        ProgramArguments = [ "/Users/${user}/.local/bin/jw-llama-embed" ];
         KeepAlive = true;
         RunAtLoad = true;
         ThrottleInterval = 10;
@@ -87,8 +90,8 @@
     };
 
     "com.jwalinshah.coderank-embed-server" = {
-      path = [ "/Users/${user}/.local/bin/jw-coderank-embed" ];
       serviceConfig = {
+        ProgramArguments = [ "/Users/${user}/.local/bin/jw-coderank-embed" ];
         KeepAlive = true;
         RunAtLoad = true;
         ThrottleInterval = 10;
@@ -137,8 +140,8 @@
 
     # ── Session & Daemon Infrastructure ────────────────────────────────────────
     "com.jwalinshah.mintmux" = {
-      path = [ "/Users/${user}/.local/bin/mintmux" ];
       serviceConfig = {
+        ProgramArguments = [ "/Users/${user}/.local/bin/mintmux" ];
         KeepAlive = true;
         RunAtLoad = true;
         EnvironmentVariables = {
@@ -150,8 +153,8 @@
     };
 
     "com.jwalinshah.jw-sessiond" = {
-      path = [ "/Users/${user}/.local/bin/jw-sessiond" ];
       serviceConfig = {
+        ProgramArguments = [ "/Users/${user}/.local/bin/jw-sessiond" ];
         KeepAlive = true;
         RunAtLoad = true;
         EnvironmentVariables = {
@@ -164,8 +167,8 @@
     };
 
     "com.jwalinshah.jw-sentry" = {
-      path = [ "/Users/${user}/.local/bin/jw-sentry" ];
       serviceConfig = {
+        ProgramArguments = [ "/Users/${user}/.local/bin/jw-sentry" ];
         KeepAlive = true;
         RunAtLoad = true;
         ThrottleInterval = 5;
@@ -196,8 +199,8 @@
 
     # ── Monitoring & Health ────────────────────────────────────────────────────
     "com.jw.heal" = {
-      path = [ "/Users/${user}/.local/bin/jw-heal" ];
       serviceConfig = {
+        ProgramArguments = [ "/Users/${user}/.local/bin/jw-heal" ];
         RunAtLoad = true;
         StartInterval = 300;
         StandardOutPath = "/Users/${user}/.local/share/jw/heal-stdout.log";
@@ -206,8 +209,8 @@
     };
 
     "com.jwalinshah.m5logd" = {
-      path = [ "/Users/${user}/.local/bin/m5logd" ];
       serviceConfig = {
+        ProgramArguments = [ "/Users/${user}/.local/bin/m5logd" ];
         KeepAlive = true;
         RunAtLoad = true;
         EnvironmentVariables = {
@@ -220,8 +223,8 @@
     };
 
     "com.jwalinshah.quota-keychain-sync" = {
-      path = [ "/Users/${user}/.local/bin/jw-quota-keychain-sync" ];
       serviceConfig = {
+        ProgramArguments = [ "/Users/${user}/.local/bin/jw-quota-keychain-sync" ];
         RunAtLoad = true;
         StartInterval = 3600;
         EnvironmentVariables = {
@@ -233,8 +236,8 @@
     };
 
     "com.jwalinshah.jw-cred-canary" = {
-      path = [ "/Users/${user}/bin/jw-cred-canary.sh" ];
       serviceConfig = {
+        ProgramArguments = [ "/bin/bash" "/Users/${user}/bin/jw-cred-canary.sh" ];
         StartCalendarInterval = [
           { Hour = 9; Minute = 0; }
           { Hour = 21; Minute = 0; }
@@ -246,8 +249,8 @@
 
     # ── Desktop Utilities ──────────────────────────────────────────────────────
     "com.jwalinshah.voice-engine" = {
-      path = [ "/Users/${user}/.local/bin/voice-engine" ];
       serviceConfig = {
+        ProgramArguments = [ "/Users/${user}/.local/bin/voice-engine" ];
         KeepAlive = true;
         RunAtLoad = true;
         ThrottleInterval = 10;
@@ -260,20 +263,33 @@
       };
     };
 
-    "com.jwalinshah.cursor-cookie-sync" = {
-      serviceConfig.ProgramArguments = [
-        "/bin/bash"
-        "/Users/${user}/projects/quota-core/bin/sync-cursor-cookie.sh"
-      ];
+    "com.jwalinshah.brave-automation" = {
       serviceConfig = {
+        ProgramArguments = [ "/Users/${user}/bin/brave-automation" ];
         RunAtLoad = true;
-        StartInterval = 21600;
+        StartInterval = 900;
         EnvironmentVariables = {
           PATH = lib.mkForce "/opt/homebrew/bin:/Users/${user}/.local/bin:/usr/local/bin:/usr/bin:/bin";
+          BRAVE_AUTOMATION_BACKGROUND = "1";
+          BRAVE_AUTOMATION_MODE = "ensure";
         };
-        StandardOutPath = "/Users/${user}/.cache/quota-core/cursor-cookie-sync.log";
-        StandardErrorPath = "/Users/${user}/.cache/quota-core/cursor-cookie-sync.log";
+        StandardOutPath = "/Users/${user}/.cache/quota-core/brave-automation.log";
+        StandardErrorPath = "/Users/${user}/.cache/quota-core/brave-automation.log";
       };
+    };
+  };
+
+  launchd.daemons."com.jwalinshah.m5fand" = {
+    serviceConfig = {
+      ProgramArguments = [ "/Users/${user}/.local/bin/m5fand" ];
+      KeepAlive = true;
+      RunAtLoad = true;
+      EnvironmentVariables = {
+        HOME = "/Users/${user}";
+        PATH = lib.mkForce "/Users/${user}/.local/bin:/usr/local/bin:/usr/bin:/bin";
+      };
+      StandardOutPath = "/Users/${user}/Library/Logs/m5fand.log";
+      StandardErrorPath = "/Users/${user}/Library/Logs/m5fand.log";
     };
   };
 }

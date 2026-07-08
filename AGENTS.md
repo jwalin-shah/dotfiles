@@ -8,6 +8,10 @@ This repo is a fork of `kunchenguid/dotfiles` with a `captain/` overlay on top.
   It forces declaring every Homebrew package in the Nix config instead of installing ad-hoc.
   Do not soften it to `uninstall` or `none`.
 - Never commit `.no-mistakes/` validation evidence to this public repo.
+- Use `bin/audit-config-ownership.sh` to verify live config ownership and catch stale active references before calling the repo clean.
+- Use `bin/audit-doc-freshness.sh` to verify active docs do not contain stale
+  machine references or broken local links before treating the repo as current.
+  It is for markdown docs only; config drift belongs in the ownership audit.
 
 ## Captain overlay structure
 

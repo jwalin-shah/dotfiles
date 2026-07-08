@@ -1,0 +1,26 @@
+approvals_reviewer = "user"
+model = "gpt-5.4-mini"
+model_reasoning_effort = "medium"
+
+
+[projects."/Users/jwalinshah"]
+trust_level = "trusted"
+
+[projects."/Users/jwalinshah/projects/firstmate"]
+trust_level = "trusted"
+
+[projects."/Users/jwalinshah/projects"]
+trust_level = "trusted"
+
+[tui.model_availability_nux]
+"gpt-5.5" = 4
+
+[features]
+
+# --- Headroom init features ---
+hooks = false
+memories = true
+
+[notice]
+hide_full_access_warning = true
+# --- end Headroom init features ---

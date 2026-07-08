@@ -16,6 +16,8 @@ Running the switch builds:
 - Editor (Neovim config)
 - Terminal (WezTerm config)
 - Agent configs (Claude, Codex, opencode all share one AGENTS.md)
+- AXI helpers (GitHub, browser, and rich review wrappers exposed through shell aliases)
+- Launcher scripts and endpoint profiles in `captain/bin/` (`ct`, `openwiki`, `routing-proxy`, `claude-launch`, `claude-endpoints.toml`)
 
 ## Prerequisites
 
@@ -40,7 +42,7 @@ Change the host label or CPU architecture if needed, and read the Homebrew clean
 ./bootstrap.sh
 ```
 
-`bootstrap.sh` does four things, in order:
+`bootstrap.sh` does six things, in order:
 
 1. Installs Determinate Nix, if it isn't already installed.
 2. Symlinks this repo to `~/.dotfiles`.
@@ -48,8 +50,10 @@ Change the host label or CPU architecture if needed, and read the Homebrew clean
 3. Checks the `user` configured in `flake.nix` against your actual macOS username, and offers to fix it for you if they differ.
 4. Runs the first `darwin-rebuild switch`.
    It fetches the `darwin-rebuild` tool from the nix-darwin 26.05 release branch, then applies this repo's locked flake config.
+5. Installs `treehouse` from the official install script if it is missing and prints the AXI wrapper aliases.
+6. Verifies the core launcher set with `bin/verify-core-launchers.sh`.
 
-After that, `darwin-rebuild` exists and you're on the normal workflow below.
+After that, `darwin-rebuild` exists, `treehouse` is available if the install step succeeded, the launcher set is reachable, and you're on the normal workflow below.
 
 ### Validate without applying
 
@@ -113,6 +117,7 @@ If you don't use it, just remove it from `brews` in your copy.
   If you clone this repo, you'd silently inherit my agent instructions - edit or delete `home/AGENTS.md` if you don't want that.
 - The `cc` and `co` shell aliases in `home.nix` are high-agency shortcuts: `claude --dangerously-skip-permissions` and `codex --full-auto`.
   They're convenient for me, but know what they do before you use them.
+- The `gha`, `cda`, and `lva` aliases in `captain/user.nix` are the AXI wrappers: `gh-axi`, `chrome-devtools-axi`, and `lavish-axi` through `npx -y`.
 
 ## Repo tour
 
@@ -123,6 +128,7 @@ If you don't use it, just remove it from `brews` in your copy.
 - `rebuild.sh` - re-applies the config after the first switch.
   Run this every time you make a change.
 - `home/` - the actual config files that get symlinked into place (Neovim, WezTerm, herdr, Claude settings, the shared `AGENTS.md`).
+- `captain/bin/` - launcher scripts that are symlinked into `~/bin/` by `home.nix`.
 
 ## How the symlinks work
 
@@ -134,6 +140,30 @@ You only run `./rebuild.sh` when you change something that isn't just a symlinke
 
 The first time you launch `nvim`, it bootstraps [lazy.nvim](https://github.com/folke/lazy.nvim) by cloning plugins from GitHub.
 That needs network access once; after that it's offline.
+
+For a deterministic ownership and stale-reference check, run `bin/audit-config-ownership.sh`.
+It verifies the live agent configs match the repo copies and fails if active files still mention old machine paths or retired tooling.
+
+For active docs freshness, run `bin/audit-doc-freshness.sh`.
+It checks markdown docs for stale machine references and broken local links while leaving `docs/archive/` alone.
+Use `bin/audit-config-ownership.sh` for live config files and launcher ownership.
+
+## Fresh-machine acceptance check
+
+After `./bootstrap.sh`, confirm the machine layer is ready:
+
+```sh
+command -v openwiki
+command -v ct
+command -v routing-proxy
+command -v tokenrouter-proxy
+command -v claude-launch
+command -v treehouse
+command -v npx
+zsh -ic 'alias gha && alias cda && alias lva'
+```
+
+If any of those fail, fix the dotfiles layer before trying to use firstmate.
 
 ## License
 

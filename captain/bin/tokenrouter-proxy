@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Backward-compatible wrapper for the TokenRouter daemon.
+exec "$HOME/bin/routing-proxy" "$@"

@@ -60,4 +60,27 @@ sudo "$NIX_BIN" run github:nix-darwin/nix-darwin/nix-darwin-26.05#darwin-rebuild
 # If this still fails with "nix: command not found", open a new terminal
 # (Determinate adds nix to new shells' PATH) and re-run ./bootstrap.sh.
 
+echo "==> Step 5: agent tool bootstrap"
+if command -v treehouse >/dev/null 2>&1; then
+  echo "    treehouse already installed, skipping"
+else
+  echo "    Installing treehouse from the official install script"
+  curl -fsSL https://kunchenguid.github.io/treehouse/install.sh | sh
+fi
+if command -v npx >/dev/null 2>&1; then
+  echo "    AXI command wrappers are exposed through shell aliases: gha, cda, lva"
+else
+  echo "    npx not found yet; AXI wrappers will be usable once node is available"
+fi
+
+echo "==> Step 6: verify the installed toolchain"
+"$DIR/bin/verify-core-launchers.sh"
+echo "    treehouse: $(command -v treehouse)"
+echo "    npx: $(command -v npx)"
+echo "    openwiki: $(command -v openwiki)"
+echo "    ct: $(command -v ct)"
+echo "    routing-proxy: $(command -v routing-proxy)"
+echo "    tokenrouter-proxy: $(command -v tokenrouter-proxy)"
+echo "    claude-launch: $(command -v claude-launch)"
+
 echo "==> Done. Use ./rebuild.sh for future changes."

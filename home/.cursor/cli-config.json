@@ -1,0 +1,160 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(*)",
+      "Shell(bun *)",
+      "Shell(bun)",
+      "Shell(ccc *)",
+      "Shell(ccc)",
+      "Shell(chrome-devtools-axi *)",
+      "Shell(chrome-devtools-axi)",
+      "Shell(cocoindex-code *)",
+      "Shell(cocoindex-code)",
+      "Shell(cognee-cli *)",
+      "Shell(cognee-cli)",
+      "Shell(ctx7 *)",
+      "Shell(ctx7)",
+      "Shell(du -s *)",
+      "Shell(du -s)",
+      "Shell(du -sh *)",
+      "Shell(du -sh)",
+      "Shell(fastedit *)",
+      "Shell(fastedit)",
+      "Shell(gh-axi *)",
+      "Shell(gh-axi)",
+      "Shell(githits *)",
+      "Shell(githits)",
+      "Shell(gtimeout *)",
+      "Shell(gtimeout)",
+      "Shell(inf *)",
+      "Shell(inf)",
+      "Shell(jq *)",
+      "Shell(jq)",
+      "Shell(lavish-axi *)",
+      "Shell(lavish-axi)",
+      "Shell(llm-tldr *)",
+      "Shell(llm-tldr)",
+      "Shell(pioneer *)",
+      "Shell(pioneer)",
+      "Shell(rtk *)",
+      "Shell(rtk)",
+      "Shell(secret-cache exec *)",
+      "Shell(secret-cache exec)",
+      "Shell(timeout *)",
+      "Shell(timeout)",
+      "Shell(treehouse *)",
+      "Shell(treehouse)",
+      "Shell(uv *)",
+      "Shell(uv)",
+      "Shell(yq *)",
+      "Shell(yq)"
+    ],
+    "deny": [
+      "Shell(rm *)",
+      "Shell(rm)",
+      "Shell(git reset --hard *)",
+      "Shell(git reset --hard)",
+      "Shell(git clean -fd *)",
+      "Shell(git clean -fd)",
+      "Shell(git clean -fdx *)",
+      "Shell(git clean -fdx)",
+      "Shell(git checkout -- .)",
+      "Shell(git switch --discard-changes *)",
+      "Shell(git switch --discard-changes)",
+      "Shell(git push --force *)",
+      "Shell(git push --force)",
+      "Shell(git push -f *)",
+      "Shell(git push -f)",
+      "Shell(sudo *)",
+      "Shell(sudo)",
+      "Shell(chown *)",
+      "Shell(chown)",
+      "Shell(chmod 777 *)",
+      "Shell(chmod 777)",
+      "Shell(launchctl *)",
+      "Shell(launchctl)",
+      "Shell(brew uninstall *)",
+      "Shell(brew uninstall)",
+      "Shell(dd *)",
+      "Shell(dd)",
+      "Shell(mkfs*)"
+    ]
+  },
+  "version": 1,
+  "editor": {
+    "vimMode": false
+  },
+  "display": {
+    "showLineNumbers": false,
+    "showThinkingBlocks": false,
+    "showStatusIndicators": false,
+    "showStatusLineRunningTime": false
+  },
+  "notifications": true,
+  "hints": true,
+  "rewind": true,
+  "suggestNextPrompt": false,
+  "model": {
+    "modelId": "composer-2.5",
+    "displayModelId": "composer-2.5",
+    "displayName": "Composer 2.5 Fast",
+    "displayNameShort": "Composer 2.5 Fast",
+    "aliases": [],
+    "maxMode": false
+  },
+  "hasChangedDefaultModel": true,
+  "maxMode": false,
+  "modelParameters": {
+    "composer-2.5": [
+      {
+        "id": "fast",
+        "value": "true"
+      }
+    ]
+  },
+  "selectedModel": {
+    "modelId": "composer-2.5",
+    "parameters": [
+      {
+        "id": "fast",
+        "value": "true"
+      }
+    ]
+  },
+  "privacyCache": {
+    "ghostMode": true,
+    "privacyMode": 2,
+    "updatedAt": 1783121249027
+  },
+  "serverConfigCache": {
+    "backendUrl": "https://api2.cursor.sh",
+    "authCacheKey": "auth:google-oauth2|user_01JSSDV9D16EKPX9G63JDNVF7N",
+    "agentUrlConfig": {
+      "agentUrl": "https://agentn.global.api5.cursor.sh",
+      "agentnUrl": "https://agentn.global.api5.cursor.sh"
+    },
+    "cliSandboxDefaultEnabled": false,
+    "serverHttp2Config": 0,
+    "updatedAt": 1783117484278
+  },
+  "authInfo": {
+    "email": "jwalinshah13@gmail.com",
+    "displayName": "Jwalin",
+    "userId": 195519894,
+    "authId": "google-oauth2|user_01JSSDV9D16EKPX9G63JDNVF7N"
+  },
+  "network": {
+    "useHttp1ForAgent": false
+  },
+  "approvalMode": "allowlist",
+  "sandbox": {
+    "mode": "disabled",
+    "networkAccess": "user_config_with_defaults"
+  },
+  "showSandboxIntro": false,
+  "runEverythingSettingsPromptStreak": 1,
+  "attribution": {
+    "attributeCommitsToAgent": true,
+    "attributePRsToAgent": true
+  }
+}

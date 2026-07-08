@@ -5,7 +5,16 @@
 
 set -euo pipefail
 
-TEMPLATES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../templates" && pwd)"
+# Find templates directory, handling both direct script and symlink cases
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_REAL="$(cd "$SCRIPT_DIR" && readlink -f "${BASH_SOURCE[0]}")"
+SCRIPT_REAL_DIR="$(dirname "$SCRIPT_REAL")"
+TEMPLATES_DIR="$SCRIPT_REAL_DIR/../templates"
+
+if [[ ! -d "$TEMPLATES_DIR" ]]; then
+  TEMPLATES_DIR="$SCRIPT_DIR/../templates"
+fi
+
 PROJECT_PATH="${2:-.}"
 LANGUAGE="${1:?Usage: scaffold-project.sh <language> [project-path]}"
 
