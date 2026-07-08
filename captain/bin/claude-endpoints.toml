@@ -50,8 +50,8 @@ config_dir = "~/.claude-token"
 base_url = "http://127.0.0.1:8788"
 gateway_discovery = false
 custom_model_option = "MiniMax-M3"
-key.source = "literal"
-key.value = "sk-ant-api03-dG9rZW5yb3V0ZXItcHJveHktZmFrZS1rZXktcGxhY2Vib2xkZXItcGFkLXRvLWxlbi14eAAA"
+key.source = "env"
+key.env = "TOKENROUTER_API_KEY"
 
 [profiles.headroom.env]
 ANTHROPIC_DEFAULT_OPUS_MODEL = "deepseek/deepseek-v4-pro"
@@ -66,8 +66,8 @@ config_dir = "~/.claude-token"
 base_url = "http://127.0.0.1:18999"
 gateway_discovery = false
 custom_model_option = "MiniMax-M3"
-key.source = "literal"
-key.value = "sk-ant-api03-dG9rZW5yb3V0ZXItcHJveHktZmFrZS1rZXktcGxhY2Vib2xkZXItcGFkLXRvLWxlbi14eAAA"
+key.source = "env"
+key.env = "TOKENROUTER_API_KEY"
 
 [profiles.token.env]
 ANTHROPIC_DEFAULT_OPUS_MODEL = "deepseek/deepseek-v4-pro"
@@ -86,6 +86,16 @@ key.source = "infisical"
 key.path = "/providers/pioneer"
 key.field = "api_key"
 key.env = "PIONEER_API_KEY"
+
+# Headroom OpenAI profile - for tools using OpenAI API format
+# Routes through Headroom for tool output compression (JSON, logs, code)
+[profiles.headroom-openai]
+config_dir = "~/.claude-openai"
+base_url = "http://127.0.0.1:8788"
+gateway_discovery = false
+custom_model_option = "gpt-5.5"
+key.source = "env"
+key.env = "OPENAI_API_KEY"
 
 # NVIDIA NIM removed from Claude Code profiles.
 # Reason: NVIDIA NIM is OpenAI-only; translating through :4001 proxy adds 1.1s
