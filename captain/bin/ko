@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Kilo CLI with OpenAI/ChatGPT Plus provider.
+set -euo pipefail
+
+# Start headroom opportunistically; failure must not block the launcher.
+"$HOME/bin/headroom-bridge-hook.sh" ensure >/dev/null 2>&1 &
+
+exec env KILO_PROVIDER=openai kilo "$@"

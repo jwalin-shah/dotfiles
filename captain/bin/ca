@@ -1,0 +1,2 @@
+#!/bin/bash
+exec ~/bin/claude-launch run a --permission-mode auto "$@"

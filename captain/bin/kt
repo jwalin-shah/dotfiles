@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Kilo with TokenRouter gateway (unified LLM provider routing).
+set -euo pipefail
+
+export KILO_API_URL="http://127.0.0.1:18999"
+export KILO_API_KEY="${TOKENROUTER_API_KEY}"
+
+exec /opt/homebrew/bin/kilo --dangerously-skip-permissions "$@"

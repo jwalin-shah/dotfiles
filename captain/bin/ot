@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# OpenCode via OpenAI-compatible API (TokenRouter)
+# Routes through Headroom@8788 for tool output compression
+set -euo pipefail
+
+check_headroom() {
+  curl -sS -m 5 -o /dev/null -w "%{http_code}" \
+    http://127.0.0.1:8788/health | grep -qx '200'
+}
+
+if ! check_headroom; then
+  echo "ot: WARNING - Headroom not responding on :8788. Using direct TokenRouter fallback." >&2
+fi
+
+# OpenCode config is at ~/.config/opencode/opencode.json
+# It points to TokenRouter for model routing
+exec /opt/homebrew/bin/opencode --dangerously-skip-permissions "$@"

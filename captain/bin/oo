@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# OpenCode with OpenAI authentication (ChatGPT models).
+set -euo pipefail
+
+exec /opt/homebrew/bin/opencode --dangerously-skip-permissions "$@"
