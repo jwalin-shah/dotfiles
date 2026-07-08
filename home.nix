@@ -2,18 +2,10 @@
 
 let
   dotfiles = "${config.home.homeDirectory}/.dotfiles";
-  permissions = import ./captain/permissions.nix;
-  services = import ./captain/services.nix;
-  agents = import ./captain/agents.nix;
 in
 
 {
   imports = [ ./captain/user.nix ];
-
-  # Centralized configuration modules
-  _agent_config = agents;
-  _permissions = permissions;
-  _services = services;
 
   home.username = user;
   home.homeDirectory = "/Users/${user}";
