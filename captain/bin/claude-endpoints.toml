@@ -43,7 +43,7 @@ key.env = "TOKENROUTER_API_KEY"
 
 [profiles.token.env]
 ANTHROPIC_DEFAULT_OPUS_MODEL = "deepseek/deepseek-v4-pro"
-ANTHROPIC_DEFAULT_SONNET_MODEL = "z-ai/glm-5.2"
+ANTHROPIC_DEFAULT_SONNET_MODEL = "deepseek/deepseek-v4-flash"
 ANTHROPIC_DEFAULT_HAIKU_MODEL = "moonshotai/kimi-k2.7-code"
 ANTHROPIC_DEFAULT_FABLE_MODEL = "MiniMax-M3"
 
