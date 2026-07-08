@@ -5,6 +5,7 @@ import sys
 import os
 from pathlib import Path
 
-# Run the compression wrapper
-wrapper = Path(__file__).parent / "ca-wrapper"
+# Resolve the actual path (handle symlinks)
+script_path = Path(os.path.realpath(__file__))
+wrapper = script_path.parent / "ca-wrapper"
 os.execvp(str(wrapper), [str(wrapper)] + sys.argv[1:])

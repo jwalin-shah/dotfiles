@@ -5,5 +5,7 @@ import sys
 import os
 from pathlib import Path
 
-wrapper = Path(__file__).parent / "ct-wrapper"
+# Resolve the actual path (handle symlinks)
+script_path = Path(os.path.realpath(__file__))
+wrapper = script_path.parent / "ct-wrapper"
 os.execvp(str(wrapper), [str(wrapper)] + sys.argv[1:])

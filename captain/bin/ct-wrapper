@@ -24,7 +24,9 @@ class CompressedLauncher:
         return result.content
 
     def run(self, args):
-        cmd = ["~/bin/claude-launch", "run", "token", "--dangerously-skip-permissions"] + args
+        # Use secret-cache to inject TOKENROUTER_API_KEY from keychain
+        cmd = ["~/.local/bin/secret-cache", "exec", "--",
+               "~/bin/claude-launch", "run", "token", "--dangerously-skip-permissions"] + args
         cmd = [os.path.expanduser(c) for c in cmd]
 
         try:
