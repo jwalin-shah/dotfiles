@@ -2,6 +2,7 @@
   "env": {
     "ENABLE_TOOL_SEARCH": "true"
   },
+  "model": "sonnet",
   "hooks": {
     "SessionStart": [
       {
@@ -25,6 +26,5 @@
   "theme": "dark-ansi",
   "verbose": false,
   "agentPushNotifEnabled": true,
-  "_comment": "Minimal shared Claude settings. Transport is chosen by the launcher wrapper (claude-wrapper, ca-wrapper, ct-wrapper).",
-  "model": "z-ai/glm-5.2"
+  "_comment": "Minimal shared Claude settings. Transport is chosen by the launcher wrapper (claude-wrapper, ca-wrapper, ct-wrapper)."
 }
