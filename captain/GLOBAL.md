@@ -9,9 +9,9 @@ The captain owns this machine. Every action you take must respect the
 approval gates and verification requirements defined here. When in doubt, ask.
 
 The full system map (workspaces, keybindings, boot chain, LaunchAgents,
-installed apps, config files, cleanup history) lives at
-`~/machine-scratch/docs/orbit-setup.md`.
-Read it when you need hardware, layout, or daemon context. This file
+installed apps, config files) is defined in this repo's `configuration.nix`,
+`home.nix`, and `docs/ARCHITECTURE.md`.
+Read those when you need hardware, layout, or daemon context. This file
 concentrates on agent behavior.
 
 ---

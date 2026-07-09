@@ -1,0 +1,13 @@
+# CocoIndex Code — global settings.
+# Code search uses CodeRankEmbed (code-specialized) on :8082.
+# Cognee uses Qwen3-Embedding (general-purpose) on :8081.
+
+embedding:
+  provider: litellm
+  model: openai/coderankembed
+  indexing_params: {}
+  query_params: {}
+envs:
+  OPENAI_API_BASE: "http://127.0.0.1:8082/v1"
+  OPENAI_API_KEY: "sk-local"
+  PYTHONPATH: "/Users/jwalinshah/.local/share/uv/tools/cocoindex-code/lib/python3.11/site-packages"

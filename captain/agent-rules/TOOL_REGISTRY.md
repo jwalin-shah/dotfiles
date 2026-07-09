@@ -1,8 +1,6 @@
 # Tool Registry
 
-Source of truth: `~/machine-scratch/agent-rules/`.
-Policy file: `~/machine-scratch/config/tool-policy.json`.
-Architecture + testing: `~/machine-scratch/docs/TOOL_POLICY.md`.
+Source of truth: `~/.agent-rules/`.
 Vendor harness schemas: `ctx7 docs` — see `docs/vendor/agent-harnesses/llms.txt`.
 
 ## Status Key

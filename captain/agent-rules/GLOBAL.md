@@ -2,8 +2,6 @@
 1. Read the project AGENTS.md first for build, test, architecture.
 Behavioral rules for coding agents on this machine.
 
-Source of truth: `~/machine-scratch/agent-rules/`.
-
 ---
 
 ## Section 1: Tool Hierarchy

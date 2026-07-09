@@ -76,11 +76,14 @@ in
       push = "git push";
       pull = "git pull";
       m = "git switch main";
-      rb = "cd ~/projects/dotfiles && ./rebuild.sh";
+      rb = "cd ~/dotfiles && ./rebuild.sh";
       ls = "eza";
       ll = "eza -l";
       la = "eza -la";
       lt = "eza --tree";
+      cat = "bat";
+      grep = "rg";
+      find = "fd";
       c = "claude";
       cx = "command cx";
       gha = "npx -y gh-axi";
@@ -88,6 +91,7 @@ in
       lva = "npx -y lavish-axi";
       g = "git";
       gs = "git status";
+      rm = "trash";
       gc = "git commit";
       gcm = "git commit -m";
       gp = "git push";
@@ -222,23 +226,13 @@ in
   home.file."bin/openwiki".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/openwiki";
 
-  # Personal tool wrappers
-  home.file."bin/c".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/c";
-  home.file."bin/rb".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/rb";
-  home.file."bin/route".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/route";
-  home.file."bin/cognee".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/cognee";
+  # Personal tool wrappers (only useful ones — dead wrappers removed)
   home.file."bin/brave-automation".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/brave-automation";
   home.file."bin/brave-axi".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/brave-axi";
   home.file."bin/cursor-login".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/cursor-login";
-  home.file."bin/mlx-chat-server".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/mlx-chat-server";
   home.file."bin/quota-fetch".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/quota-fetch";
 
@@ -247,6 +241,8 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/audit-config-ownership.sh";
   home.file."bin/audit-doc-freshness.sh".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/audit-doc-freshness.sh";
+  home.file."bin/auto-save.sh".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/auto-save.sh";
 
   # Global linter/formatter configs
   home.file.".config/lint/.prettierrc".source =

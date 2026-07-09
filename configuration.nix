@@ -122,196 +122,213 @@
   };
 
   # LaunchAgents -- background services
-  launchd.user.agents = {
-    # -- Core AI Infrastructure --
+  launchd.user.agents = let
+    home = "/Users/${user}";
+    localBin = "${home}/.local/bin";
+    uvBin = "${home}/.local/share/uv/tools";
+    brewBin = "/opt/homebrew/bin";
+    defaultPATH = "${localBin}:${brewBin}:/usr/local/bin:/usr/bin:/bin";
+  in {
+
+    # -- Local AI Stack --
+    # mlx-chat: Gemma 4 4B chat server on :8080
     "com.jwalinshah.mlx-chat-server" = {
       serviceConfig = {
-        ProgramArguments = [ "/Users/${user}/.local/bin/jw-mlx-chat" ];
+        ProgramArguments = [
+          "/bin/bash" "-c"
+          "source ${home}/.config/jw/models.env && exec ${uvBin}/mlx-lm/bin/mlx_lm.server --model \"$JW_CHAT_MODEL_REPO\" --host 127.0.0.1 --port 8080 --trust-remote-code"
+        ];
         KeepAlive = true;
         RunAtLoad = true;
         ThrottleInterval = 10;
         EnvironmentVariables = {
-          HOME = "/Users/${user}";
-          PATH = "/Users/${user}/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin";
+          HOME = home;
+          PATH = defaultPATH;
         };
-        StandardOutPath = "/Users/${user}/.local/share/jw/mlx-chat.log";
-        StandardErrorPath = "/Users/${user}/.local/share/jw/mlx-chat.log";
+        StandardOutPath = "${home}/.local/share/jw/mlx-chat.log";
+        StandardErrorPath = "${home}/.local/share/jw/mlx-chat.log";
       };
     };
 
+    # llama-embed: Qwen3-Embedding 0.6B on :8081 (1024-dim)
     "com.jwalinshah.llama-embed-server" = {
       serviceConfig = {
-        ProgramArguments = [ "/Users/${user}/.local/bin/jw-llama-embed" ];
+        ProgramArguments = [
+          "${brewBin}/llama-server"
+          "-m" "${home}/.cache/huggingface/hub/models--Qwen--Qwen3-Embedding-0.6B-GGUF/snapshots/main/Qwen3-Embedding-0.6B-Q8_0.gguf"
+          "--embedding" "--host" "127.0.0.1" "--port" "8081"
+          "-c" "512" "-np" "1" "-b" "512" "-ub" "512" "-ngl" "99"
+        ];
         KeepAlive = true;
         RunAtLoad = true;
         ThrottleInterval = 10;
         EnvironmentVariables = {
-          PATH = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin";
+          PATH = "${brewBin}:/usr/local/bin:/usr/bin:/bin";
         };
-        StandardOutPath = "/Users/${user}/.local/share/jw/llama-embed.log";
-        StandardErrorPath = "/Users/${user}/.local/share/jw/llama-embed.log";
+        StandardOutPath = "${home}/.local/share/jw/llama-embed.log";
+        StandardErrorPath = "${home}/.local/share/jw/llama-embed.log";
       };
     };
 
+    # coderank-embed: CodeRankEmbed on :8082 (768-dim, 2048 ctx trained)
     "com.jwalinshah.coderank-embed-server" = {
       serviceConfig = {
-        ProgramArguments = [ "/Users/${user}/.local/bin/jw-coderank-embed" ];
+        ProgramArguments = [
+          "${brewBin}/llama-server"
+          "-m" "${home}/.cache/huggingface/hub/models--handwoven8588--CodeRankEmbed-GGUF/snapshots/14be4104a35a5f4e32e6e225955ccf271fb5b956/CodeRankEmbed-Q8_0.gguf"
+          "--embedding" "--host" "127.0.0.1" "--port" "8082"
+          "-c" "2048" "-np" "1" "-b" "2048" "-ub" "2048" "-ngl" "99"
+        ];
         KeepAlive = true;
         RunAtLoad = true;
         ThrottleInterval = 10;
         EnvironmentVariables = {
-          PATH = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin";
+          PATH = "${brewBin}:/usr/local/bin:/usr/bin:/bin";
         };
-        StandardOutPath = "/Users/${user}/.local/share/jw/coderank-embed.log";
-        StandardErrorPath = "/Users/${user}/.local/share/jw/coderank-embed.log";
+        StandardOutPath = "${home}/.local/share/jw/coderank-embed.log";
+        StandardErrorPath = "${home}/.local/share/jw/coderank-embed.log";
       };
     };
 
+    # cognee: knowledge graph API on :8000
     "com.jwalinshah.cognee-api" = {
       serviceConfig = {
-        ProgramArguments = [ "/Users/${user}/.local/bin/jw-cognee" ];
+        ProgramArguments = [
+          "/bin/bash" "-c"
+          "source ${home}/.config/jw/models.env && exec ${uvBin}/cognee/bin/cognee-cli serve --host 127.0.0.1 --port 8000"
+        ];
         KeepAlive = true;
         RunAtLoad = true;
         ThrottleInterval = 10;
         EnvironmentVariables = {
-          PATH = "/opt/homebrew/bin:/Users/${user}/.local/bin:/usr/local/bin:/usr/bin:/bin";
+          HOME = home;
+          PATH = defaultPATH;
           CACHING = "true";
           COGNEE_SKIP_CONNECTION_TEST = "true";
-          ENABLE_BACKEND_ACCESS_CONTROL = "false";
-          HTTP_API_HOST = "127.0.0.1";
-          HTTP_API_PORT = "8000";
-          EMBEDDING_API_KEY = "local";
-          EMBEDDING_DIMENSIONS = "1024";
-          EMBEDDING_ENDPOINT = "http://127.0.0.1:8081/v1";
-          EMBEDDING_MODEL = "mlx-community/Qwen3-Embedding-0.6B-4bit-DWQ";
-          EMBEDDING_PROVIDER = "openai_compatible";
-          LLM_API_KEY = "local";
-          LLM_ARGS = "{\"extra_body\": {\"thinking\": {\"type\": \"disabled\"}}, \"max_tokens\": 4096}";
-          LLM_ENDPOINT = "http://127.0.0.1:8080/v1";
-          LLM_INSTRUCTOR_MODE = "markdown_json_mode";
-          LLM_MAX_COMPLETION_TOKENS = "32768";
-          LLM_MODEL = "openai/mlx-community/Qwen2.5-1.5B-Instruct-4bit";
-          LLM_PROVIDER = "openai";
         };
-        StandardOutPath = "/Users/${user}/.local/share/jw/cognee-api.log";
-        StandardErrorPath = "/Users/${user}/.local/share/jw/cognee-api.log";
+        StandardOutPath = "${home}/.local/share/jw/cognee-api.log";
+        StandardErrorPath = "${home}/.local/share/jw/cognee-api.log";
       };
     };
 
-    # -- Session & Daemon Infrastructure --
+    # cocoindex: incremental code index daemon (watch + auto-reindex)
+    "com.jwalinshah.cocoindex-daemon" = {
+      serviceConfig = {
+        ProgramArguments = [ "${uvBin}/cocoindex-code/bin/ccc" "run-daemon" ];
+        KeepAlive = true;
+        RunAtLoad = true;
+        ThrottleInterval = 10;
+        WorkingDirectory = home;
+        EnvironmentVariables = {
+          HOME = home;
+          PATH = defaultPATH;
+        };
+        StandardOutPath = "${home}/.local/share/cocoindex/daemon-stdout.log";
+        StandardErrorPath = "${home}/.local/share/cocoindex/daemon-stderr.log";
+      };
+    };
+
+    # -- Session Infrastructure --
+    # mintmux: PTY multiplexer
     "com.jwalinshah.mintmux" = {
       serviceConfig = {
-        ProgramArguments = [ "/Users/${user}/.local/bin/mintmux" ];
+        ProgramArguments = [ "${localBin}/mintmux" ];
         KeepAlive = true;
         RunAtLoad = true;
         EnvironmentVariables = {
-          PATH = "/opt/homebrew/bin:/Users/${user}/.local/bin:/usr/local/bin:/usr/bin:/bin";
+          PATH = defaultPATH;
         };
-        StandardOutPath = "/Users/${user}/.cache/mintmux/launchd-stdout.log";
-        StandardErrorPath = "/Users/${user}/.cache/mintmux/launchd-stderr.log";
+        StandardOutPath = "${home}/.cache/mintmux/launchd-stdout.log";
+        StandardErrorPath = "${home}/.cache/mintmux/launchd-stderr.log";
         ThrottleInterval = 5;
         ExitTimeOut = 10;
       };
     };
 
-    "com.jwalinshah.jw-sessiond" = {
+    # herdr: agent-native terminal multiplexer (session provider)
+    "com.jwalinshah.herdr" = {
       serviceConfig = {
-        ProgramArguments = [ "/Users/${user}/.local/bin/jw-sessiond" ];
+        ProgramArguments = [ "${brewBin}/herdr" "server" ];
         KeepAlive = true;
         RunAtLoad = true;
         EnvironmentVariables = {
-          HOME = "/Users/${user}";
-          PATH = "/opt/homebrew/bin:/Users/${user}/.local/bin:/usr/local/bin:/usr/bin:/bin";
+          HOME = home;
+          PATH = defaultPATH;
         };
-        StandardOutPath = "/Users/${user}/.local/share/jw/sessiond-stdout.log";
-        StandardErrorPath = "/Users/${user}/.local/share/jw/sessiond-stderr.log";
+        StandardOutPath = "${home}/.local/share/jw/herdr.log";
+        StandardErrorPath = "${home}/.local/share/jw/herdr.log";
         ThrottleInterval = 5;
-        ExitTimeOut = 10;
-      };
-    };
-
-    "com.jwalinshah.jw-sentry" = {
-      serviceConfig = {
-        ProgramArguments = [ "/Users/${user}/.local/bin/jw-sentry" ];
-        KeepAlive = true;
-        RunAtLoad = true;
-        ThrottleInterval = 5;
-        EnvironmentVariables = {
-          PATH = "/Users/${user}/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin";
-        };
-        StandardOutPath = "/Users/${user}/.local/share/jw/sentry-stdout.log";
-        StandardErrorPath = "/Users/${user}/.local/share/jw/sentry-stderr.log";
         ExitTimeOut = 10;
       };
     };
 
     # -- Monitoring & Health --
-    "com.jw.heal" = {
+    # auto-save: commit + push uncommitted changes every 5 min (never lose work)
+    "com.jwalinshah.auto-save" = {
       serviceConfig = {
-        ProgramArguments = [ "/Users/${user}/.local/bin/jw-heal" ];
+        ProgramArguments = [ "/bin/bash" "${home}/bin/auto-save.sh" ];
         RunAtLoad = true;
         StartInterval = 300;
-        StandardOutPath = "/Users/${user}/.local/share/jw/heal-stdout.log";
-        StandardErrorPath = "/Users/${user}/.local/share/jw/heal-stderr.log";
+        EnvironmentVariables = {
+          HOME = home;
+          PATH = defaultPATH;
+        };
+        StandardOutPath = "${home}/.local/share/jw/auto-save.log";
+        StandardErrorPath = "${home}/.local/share/jw/auto-save.log";
       };
     };
 
+    "com.jw.heal" = {
+      serviceConfig = {
+        ProgramArguments = [ "${localBin}/jw-heal" ];
+        RunAtLoad = true;
+        StartInterval = 300;
+        StandardOutPath = "${home}/.local/share/jw/heal-stdout.log";
+        StandardErrorPath = "${home}/.local/share/jw/heal-stderr.log";
+      };
+    };
+
+    # m5logd: M5 hardware logging daemon
     "com.jwalinshah.m5logd" = {
       serviceConfig = {
-        ProgramArguments = [ "/Users/${user}/.local/bin/m5logd" ];
+        ProgramArguments = [ "${localBin}/m5logd" ];
         KeepAlive = true;
         RunAtLoad = true;
         EnvironmentVariables = {
-          HOME = "/Users/${user}";
-          PATH = "/Users/${user}/.local/bin:/usr/local/bin:/usr/bin:/bin";
+          HOME = home;
+          PATH = "${localBin}:/usr/local/bin:/usr/bin:/bin";
         };
-        StandardOutPath = "/Users/${user}/Library/Logs/m5logd-stdout.log";
-        StandardErrorPath = "/Users/${user}/Library/Logs/m5logd-stderr.log";
+        StandardOutPath = "${home}/Library/Logs/m5logd-stdout.log";
+        StandardErrorPath = "${home}/Library/Logs/m5logd-stderr.log";
       };
     };
 
+    # jw-cred-canary: credential expiry checker, 9am + 9pm
     "com.jwalinshah.jw-cred-canary" = {
       serviceConfig = {
-        ProgramArguments = [ "/bin/bash" "/Users/${user}/bin/jw-cred-canary.sh" ];
+        ProgramArguments = [ "/bin/bash" "${home}/bin/jw-cred-canary.sh" ];
         StartCalendarInterval = [
           { Hour = 9; Minute = 0; }
           { Hour = 21; Minute = 0; }
         ];
-        StandardOutPath = "/Users/${user}/.local/share/jw/cred-canary.log";
-        StandardErrorPath = "/Users/${user}/.local/share/jw/cred-canary.log";
+        StandardOutPath = "${home}/.local/share/jw/cred-canary.log";
+        StandardErrorPath = "${home}/.local/share/jw/cred-canary.log";
       };
     };
 
-    # -- Desktop Utilities --
+    # voice-engine: macOS dictation menubar app
     "com.jwalinshah.voice-engine" = {
       serviceConfig = {
-        ProgramArguments = [ "/Users/${user}/.local/bin/voice-engine" ];
+        ProgramArguments = [ "${localBin}/voice-engine" ];
         KeepAlive = true;
         RunAtLoad = true;
         ThrottleInterval = 10;
         EnvironmentVariables = {
-          HOME = "/Users/${user}";
-          PATH = "/Users/${user}/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin";
+          HOME = home;
+          PATH = defaultPATH;
         };
         StandardOutPath = "/tmp/voice-engine.log";
         StandardErrorPath = "/tmp/voice-engine.log";
-      };
-    };
-
-    # -- Session Provider (firstmate crew dispatch) --
-    "com.jwalinshah.herdr" = {
-      serviceConfig = {
-        ProgramArguments = [ "/opt/homebrew/bin/herdr" "server" ];
-        KeepAlive = true;
-        RunAtLoad = true;
-        EnvironmentVariables = {
-          HOME = "/Users/${user}";
-          PATH = "/opt/homebrew/bin:/Users/${user}/.local/bin:/usr/local/bin:/usr/bin:/bin";
-        };
-        StandardOutPath = "/Users/${user}/.local/share/jw/herdr.log";
-        StandardErrorPath = "/Users/${user}/.local/share/jw/herdr.log";
-        ThrottleInterval = 5;
-        ExitTimeOut = 10;
       };
     };
   };
