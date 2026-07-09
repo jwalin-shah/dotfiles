@@ -151,11 +151,11 @@ fi
 
 # ── Step 5: done ───────────────────────────────────────────────────
 echo ""
-echo "Agent stack is ready. Human docs (openwiki) are separate — run when needed."
-
+echo "Agent stack is ready."
 echo
 echo "=== Done: $NAME ==="
-echo "  Skills:  ✓ /to-issues /triage /to-prd /diagnose /tdd /grill-with-docs /improve-codebase-architecture"
+echo "  Skills:  ✓ /wayfinder /to-tickets /to-spec /implement /codebase-design /research /domain-modeling"
+echo "           ✓ /code-review /simplify /tdd /triage /grill-me /grill-with-docs /diagnose /prototype"
+echo "           ✓ /improve-codebase-architecture /plan /zoom-out /stow"
 echo "  Index:   ✓ ccc search \"<query>\""
-echo "  Openwiki:  run 'openwiki' when you want docs"
 echo "  Rebuild:   ./rebuild.sh (to apply LaunchAgent changes)"

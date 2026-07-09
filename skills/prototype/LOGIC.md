@@ -1,10 +1,3 @@
----
-name: prototype
-description: Build a tiny interactive terminal app that lets the user drive a state model by hand to stress-test business logic, state transitions, or data shape.
-metadata:
-  type: skill
----
-
 # Logic Prototype
 
 A tiny interactive terminal app that lets the user drive a state model by hand. Use this when the question is about **business logic, state transitions, or data shape** — the kind of thing that looks reasonable on paper but only feels wrong once you push it through real cases.
