@@ -227,6 +227,8 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/openwiki";
 
   # Personal tool wrappers (only useful ones — dead wrappers removed)
+  home.file."bin/ctx7".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/ctx7";
   home.file."bin/brave-automation".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/brave-automation";
   home.file."bin/brave-axi".source =
@@ -243,6 +245,10 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/audit-doc-freshness.sh";
   home.file."bin/auto-save.sh".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/auto-save.sh";
+  home.file."bin/fm-prep-context".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/fm-prep-context";
+  home.file."bin/jw-init".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/jw-init";
 
   # Global linter/formatter configs
   home.file.".config/lint/.prettierrc".source =
