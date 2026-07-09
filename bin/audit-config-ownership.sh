@@ -126,3 +126,15 @@ for f in "$HOME/.agent-rules/GLOBAL.md" "$HOME/.agent-rules/TOOL_REGISTRY.md" "$
 done
 
 printf 'audit-config-ownership: ok\n'
+
+# 6. Scan Mach-O binaries for hardcoded ~/.local/bin paths
+echo "=== scanning binaries for hardcoded paths ==="
+for bin in "$HOME"/.local/bin/*; do
+  [ -f "$bin" ] && [ -x "$bin" ] || continue
+  file "$bin" 2>/dev/null | grep -q "Mach-O" || continue
+  deps=$(strings "$bin" 2>/dev/null | grep -oE "$HOME/\\.(local/bin|bin)/[a-zA-Z0-9_-]+" | sort -u)
+  [ -z "$deps" ] && continue
+  while IFS= read -r dep; do
+    [ -e "$dep" ] || echo "MISSING: $bin references $dep"
+  done <<< "$deps"
+done
