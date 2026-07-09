@@ -149,14 +149,9 @@ if [ -d "$FM_PROJECTS" ]; then
   fi
 fi
 
-# ── Step 5: openwiki (fully automated) ────────────────────────────
-if [ ! -f ".openwiki/state.json" ] 2>/dev/null; then
-  echo "  → openwiki — generating initial documentation..."
-  openwiki --init -p "Generate comprehensive documentation for $NAME. This is a code project hosted at $REMOTE on branch $BRANCH. Document the architecture, key modules, build system, dependencies, and how to contribute." 2>&1 | tail -3
-  echo "  ✓ openwiki — initial docs generated"
-else
-  echo "  ✓ openwiki — docs already exist"
-fi
+# ── Step 5: done ───────────────────────────────────────────────────
+echo ""
+echo "Agent stack is ready. Human docs (openwiki) are separate — run when needed."
 
 echo
 echo "=== Done: $NAME ==="
