@@ -78,7 +78,6 @@ stale_hits="$(
     -g '!**/audit-config-ownership.sh' \
     -g '!**/audit-doc-freshness.sh' \
     -e '/Users/jwalinshah/projects/machine-scratch' \
-    -e 'tool-guard' \
     -e 'orca' \
     -e 'rtk' \
     -e 'machine-bootstrap router' \
