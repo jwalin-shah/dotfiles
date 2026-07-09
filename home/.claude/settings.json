@@ -2,7 +2,7 @@
   "env": {
     "ENABLE_TOOL_SEARCH": "true"
   },
-  "model": "opus",
+  "model": "claude-fable-5[1m]",
   "hooks": {
     "SessionStart": [
       {
