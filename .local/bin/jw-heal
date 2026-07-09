@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# jw-heal — machine self-healing loop. Every 5 min via launchd.
+# Zero Python. Zero Node. Pure bash + curl + pgrep.
+
+set -u
+H="$HOME/.local/share/jw/heal.log"
+E="$HOME/.local/share/jw/events.jsonl"
+mkdir -p "$(dirname "$H")"
+
+log() { printf '[%s] %s\n' "$(date +%H:%M:%S)" "$*" >> "$H"; }
+ev() { python3 -c "
+import json; print(json.dumps({'ts':'$(date -u +%Y-%m-%dT%H:%M:%SZ)','source':'jw-heal','event':'heal','text':'''$*'''}, separators=(',',':')))
+" >> "$E" 2>/dev/null; }
+
+log "=== jw-heal ==="
+
+# 1. Stale lock files (>5 min)
+for lock in "$HOME/.cache/quota-core/collect.lock"; do
+  [ -f "$lock" ] || continue
+  age=$(($(date +%s) - $(stat -f %m "$lock" 2>/dev/null || echo 0)))
+  if [ "$age" -gt 300 ]; then
+    rm -f "$lock"
+    log "removed stale lock: $lock (${age}s)"
+    ev "removed stale lock: $lock (${age}s)"
+  fi
+done
+
+# 2. Stale cognee remember processes (>10 min)
+for pid in $(pgrep -f "cognee.*remember" 2>/dev/null); do
+  etime=$(ps -o etime= -p "$pid" 2>/dev/null | tr -d ' ')
+  min=$(echo "$etime" | awk -F'[-:]' 'NF==4{print $1*1440+$2*60+$3} NF==3{print $1*60+$2} NF==2{print $1}')
+  [ -z "$min" ] && min=0
+  if [ "$min" -gt 10 ]; then
+    kill "$pid" 2>/dev/null && log "killed stale cognee pid=$pid (${min}m)" && ev "killed stale cognee pid=$pid (${min}m)"
+  fi
+done
+
+# 3. Service health — curl check, restart if down
+for svc in \
+  "mlx:8080/health:org.nixos.com.jwalinshah.mlx-chat-server" \
+  "llama-embed:8081/health:org.nixos.com.jwalinshah.llama-embed-server" \
+  "coderank:8082/health:org.nixos.com.jwalinshah.coderank-embed-server" \
+  "cognee:8000/health:org.nixos.com.jwalinshah.cognee-api"; do
+  name="${svc%%:*}"
+  rest="${svc#*:}"
+  url="http://localhost:${rest%%:*}"
+  label="${rest##*:}"
+  if ! curl -sf --max-time 3 "$url" >/dev/null 2>&1; then
+    log "$name DOWN — kickstarting $label"
+    ev "$name DOWN — restarting"
+    launchctl kickstart -k "gui/$(id -u)/$label" 2>/dev/null || true
+  fi
+done
+
+# 4. Oversized logs (>5MB → truncate)
+for logf in "$HOME"/.local/share/cocoindex/launchd-stderr.log \
+            "$HOME"/.local/share/cocoindex/launchd-stdout.log; do
+  [ -f "$logf" ] || continue
+  sz=$(stat -f %z "$logf" 2>/dev/null || echo 0)
+  [ "$sz" -gt 5242880 ] && { :> "$logf"; log "truncated $(basename "$logf") ($((sz/1048576))MB)"; ev "truncated $(basename "$logf")"; }
+done
+
+# 5. Voice-engine liveness
+pgrep -f "voice-engine" >/dev/null 2>&1 || {
+  log "voice-engine down — restarting"
+  ev "voice-engine down — restarting"
+  "$HOME/.local/bin/voice-engine" &
+}
+
+log "done"

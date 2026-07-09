@@ -20,11 +20,39 @@
       InitialKeyRepeat = 15;
       _HIHideMenuBar = true;
       AppleShowAllExtensions = true;
+      ApplePressAndHoldEnabled = false;
+      NSAutomaticCapitalizationEnabled = false;
+      NSAutomaticPeriodSubstitutionEnabled = false;
+      NSAutomaticQuoteSubstitutionEnabled = false;
+      NSAutomaticDashSubstitutionEnabled = false;
+      NSScrollAnimationEnabled = false;
     };
-    dock.autohide = true;
-    finder.FXPreferredViewStyle = "Nlsv";
-    finder.CreateDesktop = false;
+    dock = {
+      autohide = true;
+      show-recents = false;
+      mru-spaces = false;
+      minimize-to-application = true;
+      tilesize = 36;
+    };
+    finder = {
+      FXPreferredViewStyle = "Nlsv";
+      CreateDesktop = false;
+      ShowPathbar = true;
+      ShowStatusBar = true;
+      AppleShowAllFiles = true;
+      FXEnableExtensionChangeWarning = false;
+    };
     trackpad.Clicking = true;
+    trackpad.TrackpadRightClick = true;
+    screensaver = {
+      askForPassword = true;
+      askForPasswordDelay = 5;
+    };
+    screencapture = {
+      location = "~/Desktop/screenshots";
+      type = "png";
+      disable-shadow = true;
+    };
   };
 
   # Homebrew via nix-homebrew
@@ -50,10 +78,8 @@
       "direnv"
       "dust"
       "eza"
-      "fastfetch"
       "fd"
       "ffmpeg"
-      "fswatch"
       "fzf"
       "gh"
       "go"
@@ -62,17 +88,15 @@
       "herdr"
       "infisical"
       "jq"
-      "lazygit"
       "llama.cpp"
-      "llvm"
       "ncdu"
       "node"
       "opencode"
       "ruff"
+      "python@3.14"
       "rustup"
       "shellcheck"
       "swift-format"
-      "spotify_player"
       "tailscale"
       "tmux"
       "tree"
@@ -87,12 +111,9 @@
 
     casks = [
       "aerospace"
-      "antigravity-cli"
       "brave-browser"
-      "claude-code"
       "cursor"
       "ghostty"
-      "hiddenbar"
       "karabiner-elements"
       "lulu"
       "monitorcontrol"
@@ -153,7 +174,7 @@
         RunAtLoad = true;
         ThrottleInterval = 10;
         EnvironmentVariables = {
-          PATH = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin";
+          PATH = "/opt/homebrew/bin:/Users/${user}/.local/bin:/usr/local/bin:/usr/bin:/bin";
           CACHING = "true";
           COGNEE_SKIP_CONNECTION_TEST = "true";
           ENABLE_BACKEND_ACCESS_CONTROL = "false";
@@ -280,7 +301,7 @@
     # -- Session Provider (firstmate crew dispatch) --
     "com.jwalinshah.herdr" = {
       serviceConfig = {
-        ProgramArguments = [ "/opt/homebrew/bin/herdr" ];
+        ProgramArguments = [ "/opt/homebrew/bin/herdr" "server" ];
         KeepAlive = true;
         RunAtLoad = true;
         EnvironmentVariables = {

@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# quota-fetch — provider usage in one shot. AGY via mm-quota, rest via CLI.
+# Cache: ~/.cache/jw/quota.json (5 min TTL). Run with --watch for LaunchAgent.
+set -euo pipefail
+
+OUT="${HOME}/.cache/jw/quota.json"
+mkdir -p "$(dirname "$OUT")"
+TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+[ "${1:-}" = "--watch" ] && [ -f "$OUT" ] && {
+  age=$(($(date +%s) - $(stat -f %m "$OUT" 2>/dev/null || date +%s)))
+  [ "$age" -lt 300 ] && exit 0
+}
+
+# ── Providers ───────────────────────────────────────────────────────
+
+claude() {
+  ca --print "/usage" 2>/dev/null | python3 -c "
+import sys, json, re
+text = sys.stdin.read()
+print(json.dumps({
+  'session_pct': int(re.search(r'Current session:\s*(\d+)%', text).group(1)) if re.search(r'Current session:\s*(\d+)%', text) else None,
+  'weekly_pct': int(re.search(r'Current week.*?:\s*(\d+)%', text).group(1)) if re.search(r'Current week.*?:\s*(\d+)%', text) else None,
+  'session_reset': (re.search(r'session.*?resets\s+(.+?)\)', text).group(1) if re.search(r'session.*?resets\s+(.+?)\)', text) else ''),
+  'weekly_reset': (re.search(r'week.*?resets\s+(.+?)\)', text).group(1) if re.search(r'week.*?resets\s+(.+?)\)', text) else ''),
+  'requests_7d': int(re.search(r'(\d+)\s*requests', text).group(1)) if re.search(r'(\d+)\s*requests', text) else None,
+  'sessions_7d': int(re.search(r'(\d+)\s*sessions', text).group(1)) if re.search(r'(\d+)\s*sessions', text) else None,
+}))
+" 2>/dev/null || echo '{}'
+}
+
+agy() { mm-quota --format json --timeout 20 2>/dev/null || echo '[]'; }
+
+codex() {
+  script -q /dev/null bash -c \
+    '/opt/homebrew/bin/codex --dangerously-bypass-approvals-and-sandbox "/usage" 2>/dev/null | head -40' 2>/dev/null \
+    | tr -d ',' | python3 -c "import sys,json;print(json.dumps({'raw':sys.stdin.read().strip()[:500] or 'unavailable'}))" 2>/dev/null \
+    || echo '{"raw":"unavailable"}'
+}
+
+# ── Collect ─────────────────────────────────────────────────────────
+python3 -c "
+import json
+print(json.dumps({
+  'fetched_at': '$TIMESTAMP',
+  'claude': $(claude),
+  'agy': $(agy),
+  'codex': $(codex),
+}, indent=2))
+" > "$OUT"
+echo "quota-fetch: $(wc -c < "$OUT" | tr -d ' ') bytes → $OUT"

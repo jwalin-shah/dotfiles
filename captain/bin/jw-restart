@@ -64,7 +64,7 @@ restart_one() {
 case "${1:-}" in
   "")
     echo "Restarting down services..."
-    /Users/jwalinshah/bin/jw-watch --restart
+    $HOME/bin/jw-watch --restart
     ;;
   --force)
     echo "Force-restarting ALL services..."
@@ -76,7 +76,7 @@ case "${1:-}" in
     done
     sleep 3
     echo ""
-    /Users/jwalinshah/bin/jw-watch
+    $HOME/bin/jw-watch
     ;;
   -h|--help)
     echo "Usage: jw-restart [name|--force]"

@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+# Launch Brave Browser with remote debugging enabled on port 9222.
+# Used by brave-axi (chrome-devtools-axi wrapper).
+set -euo pipefail
+
+URL="${1:-about:blank}"
+BRAVE_BIN="/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
+USER_DATA_DIR="${BRAVE_USER_DATA_DIR:-$HOME/.config/brave-automation}"
+LOG_FILE="${BRAVE_AUTOMATION_LOG:-$HOME/.cache/quota-core/brave-automation.log}"
+BACKGROUND="${BRAVE_AUTOMATION_BACKGROUND:-0}"
+HEADLESS="${BRAVE_AUTOMATION_HEADLESS:-0}"
+MODE="${BRAVE_AUTOMATION_MODE:-navigate}"
+
+if curl -sf http://127.0.0.1:9222/json/version >/dev/null 2>&1; then
+  if [ "$MODE" != "ensure" ] && [ -n "${URL:-}" ]; then
+    python3 - "$URL" <<'PY'
+import sys
+from playwright.sync_api import sync_playwright
+
+url = sys.argv[1]
+with sync_playwright() as p:
+    browser = p.chromium.connect_over_cdp("http://127.0.0.1:9222")
+    context = browser.contexts[0] if browser.contexts else browser.new_context()
+    page = context.pages[0] if context.pages else context.new_page()
+    page.goto(url, wait_until="domcontentloaded", timeout=30000)
+PY
+  fi
+  echo "Brave automation already running on :9222" >&2
+  exit 0
+fi
+
+mkdir -p "$(dirname "$LOG_FILE")"
+mkdir -p "$USER_DATA_DIR"
+rm -f "$USER_DATA_DIR/SingletonLock" "$USER_DATA_DIR/SingletonSocket" "$USER_DATA_DIR/SingletonCookie" \
+      "$USER_DATA_DIR/SingletonSocketLock" "$USER_DATA_DIR/SingletonCookieLock"
+
+# Kill any stale automation instance using the same profile before relaunching.
+pkill -f -- "--user-data-dir=$USER_DATA_DIR" 2>/dev/null || true
+
+if [ "$HEADLESS" = "1" ] || [ "$HEADLESS" = "true" ]; then
+  "$BRAVE_BIN" \
+    --headless=new \
+    --disable-gpu \
+    --remote-debugging-port=9222 \
+    --user-data-dir="$USER_DATA_DIR" \
+    --profile-directory=Default \
+    "$URL" \
+    >"$LOG_FILE" 2>&1 &
+elif [ "$BACKGROUND" = "1" ] || [ "$BACKGROUND" = "true" ]; then
+  open -gj -na "Brave Browser" --args \
+    --remote-debugging-port=9222 \
+    --user-data-dir="$USER_DATA_DIR" \
+    --profile-directory=Default \
+    "$URL" \
+    >"$LOG_FILE" 2>&1 &
+else
+  open -na "Brave Browser" --args \
+    --remote-debugging-port=9222 \
+    --user-data-dir="$USER_DATA_DIR" \
+    --profile-directory=Default \
+    "$URL" \
+    >"$LOG_FILE" 2>&1 &
+fi
+
+for _ in $(seq 1 30); do
+  if curl -sf http://127.0.0.1:9222/json/version >/dev/null 2>&1; then
+    break
+  fi
+  sleep 1
+done
+
+if ! curl -sf http://127.0.0.1:9222/json/version >/dev/null 2>&1; then
+  echo "ERROR: Brave automation did not start on :9222" >&2
+  echo "       See $LOG_FILE" >&2
+  exit 1
+fi
+
+if [ "$MODE" != "ensure" ] && [ -n "${URL:-}" ]; then
+  python3 - "$URL" <<'PY'
+import sys
+from playwright.sync_api import sync_playwright
+
+url = sys.argv[1]
+with sync_playwright() as p:
+    browser = p.chromium.connect_over_cdp("http://127.0.0.1:9222")
+    context = browser.contexts[0] if browser.contexts else browser.new_context()
+    page = context.pages[0] if context.pages else context.new_page()
+    page.goto(url, wait_until="domcontentloaded", timeout=30000)
+PY
+fi

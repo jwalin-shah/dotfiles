@@ -22,7 +22,7 @@
     "tokenrouter": {
       "options": {
         "apiKey": "{env:TOKENROUTER_API_KEY}",
-        "baseURL": "http://127.0.0.1:18999/v1"
+        "baseURL": "https://api.tokenrouter.com/v1"
       },
       "models": {
         "deepseek/deepseek-v4-flash": {

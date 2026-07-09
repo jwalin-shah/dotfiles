@@ -74,13 +74,9 @@ else
 fi
 
 echo "==> Step 6: verify the installed toolchain"
-"$DIR/bin/verify-core-launchers.sh"
 echo "    treehouse: $(command -v treehouse)"
 echo "    npx: $(command -v npx)"
 echo "    openwiki: $(command -v openwiki)"
 echo "    ct: $(command -v ct)"
-echo "    routing-proxy: $(command -v routing-proxy)"
-echo "    tokenrouter-proxy: $(command -v tokenrouter-proxy)"
-echo "    claude-launch: $(command -v claude-launch)"
 
 echo "==> Done. Use ./rebuild.sh for future changes."

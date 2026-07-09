@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd /Users/jwalinshah/projects/dotfiles
+exec ./rebuild.sh "$@"

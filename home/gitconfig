@@ -1,0 +1,31 @@
+[user]
+	name = Jwalin Shah
+	email = you@example.com
+[http]
+	postBuffer = 157286400
+[alias]
+	st = status
+	co = checkout
+	br = branch
+	ci = commit
+	unstage = reset HEAD --
+	last = log -1 HEAD
+	lg = log --color --graph --pretty=format:\"%C(yellow)%h%Creset -%C(red)%d%Creset %s %C(green)(%cr) %C(bold blue)<%an>%Creset\" --abbrev-commit
+	ll = log --pretty=format:\"%C(yellow)%h%Creset %C(cyan)%ad%Creset %C(green)%an%Creset %C(red)%d%Creset %s\" --date=short --decorate
+	new = checkout -b
+	undo = reset --soft HEAD~1
+[filter "lfs"]
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+	clean = git-lfs clean -- %f
+[core]
+	hooksPath = /Users/jwalinshah/.git-hooks
+[commit]
+	template = /Users/jwalinshah/.git-commit-template
+[credential "https://github.com"]
+	helper = 
+	helper = !/opt/homebrew/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/opt/homebrew/bin/gh auth git-credential

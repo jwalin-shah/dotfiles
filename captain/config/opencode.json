@@ -7,7 +7,7 @@
       "npm": "@ai-sdk/openai-compatible",
       "name": "TokenRouter",
       "options": {
-        "baseURL": "http://127.0.0.1:18999/v1",
+        "baseURL": "https://api.tokenrouter.com/v1",
         "apiKey": "{env:TOKENROUTER_API_KEY}"
       },
       "models": {

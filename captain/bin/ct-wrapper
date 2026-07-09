@@ -1,8 +1,14 @@
-#!/usr/bin/env python3
-import os
-import sys
+#!/usr/bin/env bash
+set -euo pipefail
 
-os.execvp("secret-cache", [
-    "secret-cache", "exec", "--",
-    os.path.expanduser("~/bin/claude-launch"), "run", "token", "--dangerously-skip-permissions"
-] + sys.argv[1:])
+exec "$HOME/.local/bin/secret-cache" exec -- bash -lc '
+  CLAUDE_CONFIG_DIR="$HOME/.claude-token" \
+  ANTHROPIC_API_KEY="$TOKENROUTER_API_KEY" \
+  ANTHROPIC_BASE_URL="https://api.tokenrouter.com" \
+  ANTHROPIC_DEFAULT_OPUS_MODEL="deepseek/deepseek-v4-pro" \
+  ANTHROPIC_DEFAULT_SONNET_MODEL="deepseek/deepseek-v4-flash" \
+  ANTHROPIC_DEFAULT_HAIKU_MODEL="moonshotai/kimi-k2.7-code" \
+  ANTHROPIC_DEFAULT_FABLE_MODEL="MiniMax-M3" \
+  ANTHROPIC_CUSTOM_MODEL_OPTION="z-ai/glm-5.2" \
+  exec npx -y @anthropic-ai/claude-code --dangerously-skip-permissions "$@"
+' bash "$@"

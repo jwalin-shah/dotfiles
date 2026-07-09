@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-import os
-import sys
-
-os.execvp("agy", ["agy", "--dangerously-skip-permissions"] + sys.argv[1:])
+#!/usr/bin/env bash
+set -euo pipefail
+exec /opt/homebrew/bin/agy --dangerously-skip-permissions "$@"

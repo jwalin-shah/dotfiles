@@ -1,6 +1,0 @@
-#!/usr/bin/env python3
-import subprocess, sys, os
-from pathlib import Path
-script_path = Path(os.path.realpath(__file__))
-wrapper = script_path.parent / "ko-wrapper"
-os.execvp(str(wrapper), [str(wrapper)] + sys.argv[1:])

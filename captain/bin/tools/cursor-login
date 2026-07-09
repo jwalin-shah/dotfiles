@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# cursor-login - Open Cursor login in the dedicated Brave automation profile.
+# The automation profile is now the source of truth; cookie refresh is no
+# longer part of the flow.
+#
+# Usage:
+#   cursor-login       # Open Brave to cursor.com login
+
+set -euo pipefail
+
+CMD="${1:-login}"
+
+case "$CMD" in
+  login)
+    echo "Opening Cursor login in debug-capable Brave automation profile..." >&2
+    "$HOME/bin/brave-automation" "https://cursor.com/login"
+    echo "" >&2
+    echo "After logging in, the automation profile keeps the session state." >&2
+    ;;
+
+  status)
+    echo "Checking the Cursor automation browser..." >&2
+    if curl -sf http://127.0.0.1:9222/json/version >/dev/null 2>&1; then
+      echo "  ✅ Automation browser is up on :9222"
+    else
+      echo "  ❌ Automation browser is not running"
+      exit 1
+    fi
+    ;;
+
+  *)
+    echo "Usage: cursor-login {login|status}" >&2
+    exit 1
+    ;;
+esac

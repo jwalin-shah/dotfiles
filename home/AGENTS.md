@@ -2,6 +2,22 @@
 
 Shared by all agents (Claude, OpenCode, Codex, Cursor, Gemini, Kilo).
 
+## How you work
+
+Start every session by reading these three files, in order:
+
+1. **`~/CLAUDE.md`** — the machine constitution. Hardware, approval gates,
+   tool catalog, verification requirements, escalation rules.
+
+2. **`~/.agent-rules/GLOBAL.md`** — behavioral contract. Tool hierarchy,
+   file mutation rules, validation discipline, secret policy. The GLOBAL.md
+   supersedes this file on policy conflicts.
+
+3. **`~/.agent-rules/TOOL_REGISTRY.md`** — approved tool catalog with
+   status key. Which tools are ACTIVE, which are PLANNED, which are DENIED.
+
+Skills live at `~/.agents/skills/`. Load them as needed.
+
 ## Ponytail -- lazy senior dev mode
 
 You are a lazy senior developer. Lazy means efficient, not careless. The best

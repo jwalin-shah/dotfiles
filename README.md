@@ -17,7 +17,7 @@ Running the switch builds:
 - Terminal (WezTerm config)
 - Agent configs (Claude, Codex, opencode all share one AGENTS.md)
 - AXI helpers (GitHub, browser, and rich review wrappers exposed through shell aliases)
-- Launcher scripts and endpoint profiles in `captain/bin/` (`ct`, `openwiki`, `routing-proxy`, `claude-launch`, `claude-endpoints.toml`)
+- Launcher scripts in `captain/bin/` (`ct`, `openwiki`, all agent wrappers)
 
 ## Prerequisites
 
@@ -51,7 +51,7 @@ Change the host label or CPU architecture if needed, and read the Homebrew clean
 4. Runs the first `darwin-rebuild switch`.
    It fetches the `darwin-rebuild` tool from the nix-darwin 26.05 release branch, then applies this repo's locked flake config.
 5. Installs `treehouse` from the official install script if it is missing and prints the AXI wrapper aliases.
-6. Verifies the core launcher set with `bin/verify-core-launchers.sh`.
+6. Runs the config ownership audit (`bin/audit-config-ownership.sh`).
 
 After that, `darwin-rebuild` exists, `treehouse` is available if the install step succeeded, the launcher set is reachable, and you're on the normal workflow below.
 
@@ -117,7 +117,7 @@ If you don't use it, just remove it from `brews` in your copy.
   If you clone this repo, you'd silently inherit my agent instructions - edit or delete `home/AGENTS.md` if you don't want that.
 - The `cc` and `co` shell aliases in `home.nix` are high-agency shortcuts: `claude --dangerously-skip-permissions` and `codex --full-auto`.
   They're convenient for me, but know what they do before you use them.
-- The `gha`, `cda`, and `lva` aliases in `captain/user.nix` are the AXI wrappers: `gh-axi`, `chrome-devtools-axi`, and `lavish-axi` through `npx -y`.
+- The `gha`, `cda`, and `lva` aliases in `home.nix` are the AXI wrappers: `gh-axi`, `chrome-devtools-axi`, and `lavish-axi` through `npx -y`.
 
 ## Repo tour
 
@@ -155,9 +155,6 @@ After `./bootstrap.sh`, confirm the machine layer is ready:
 ```sh
 command -v openwiki
 command -v ct
-command -v routing-proxy
-command -v tokenrouter-proxy
-command -v claude-launch
 command -v treehouse
 command -v npx
 zsh -ic 'alias gha && alias cda && alias lva'

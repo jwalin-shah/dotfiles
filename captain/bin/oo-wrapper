@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-import os
-import sys
-
-os.environ["OPENCODE_CONFIG"] = os.path.expanduser("~/.config/opencode/profiles/oo.json")
-os.execvp("opencode", ["/opt/homebrew/bin/opencode"] + sys.argv[1:])
+#!/usr/bin/env bash
+set -euo pipefail
+OPENCODE_CONFIG="$HOME/.config/opencode/profiles/oo.json" exec /opt/homebrew/bin/opencode "$@"

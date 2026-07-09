@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-import os
-import sys
-
-os.execvp("Cursor", ["/Applications/Cursor.app/Contents/MacOS/Cursor"] + sys.argv[1:])
+#!/usr/bin/env bash
+set -euo pipefail
+exec "$HOME/.local/bin/cursor-agent" --trust --yolo -f "$@"

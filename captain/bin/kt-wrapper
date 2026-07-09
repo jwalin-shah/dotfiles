@@ -1,10 +1,7 @@
-#!/usr/bin/env python3
-import os
-import sys
+#!/usr/bin/env bash
+set -euo pipefail
 
-os.environ["KILO_API_URL"] = "https://api.tokenrouter.com"
-os.environ["KILO_API_KEY_ENV"] = "TOKENROUTER_API_KEY"
-os.execvp("secret-cache", [
-    "secret-cache", "exec", "--",
-    "/opt/homebrew/bin/kilo"
-] + sys.argv[1:])
+exec "$HOME/.local/bin/secret-cache" exec -- env \
+  KILO_API_URL="https://api.tokenrouter.com" \
+  KILO_API_KEY_ENV="TOKENROUTER_API_KEY" \
+  /opt/homebrew/bin/kilo "$@"

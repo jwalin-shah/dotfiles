@@ -1,7 +1,7 @@
-#!/usr/bin/env python3
-import os
-import sys
+#!/usr/bin/env bash
+set -euo pipefail
 
-os.execvp("claude-launch", [
-    os.path.expanduser("~/bin/claude-launch"), "run", "a", "--dangerously-skip-permissions"
-] + sys.argv[1:])
+CLAUDE_CONFIG_DIR="$HOME/.claude-a" \
+ANTHROPIC_API_KEY="" \
+ANTHROPIC_BASE_URL="" \
+exec npx -y @anthropic-ai/claude-code --dangerously-skip-permissions "$@"

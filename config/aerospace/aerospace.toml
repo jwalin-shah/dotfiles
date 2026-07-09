@@ -1,0 +1,128 @@
+# O R B I T
+# Keyboard-driven desktop. Aerospace manages apps, tmux manages terminals.
+config-version = 2
+start-at-login = true
+
+after-startup-command = [
+    'exec-and-forget borders active_color=0xff38bdf8 inactive_color=0x494d64 width=5.0 &',
+]
+
+# ── Workspaces ─────────────────────────────────────────────────
+# ws1 = Ghostty (terminal + tmux)
+# ws2 = Messages + misc (comms, whatever)
+# ws3 = Flex (free workspace)
+# ws4 = Float zone / PiP
+# ws5 = Brave only (browser, LG monitor)
+persistent-workspaces = ["1", "2", "3", "4", "5"]
+
+# ── Layout defaults ───────────────────────────────────────────
+default-root-container-layout = 'tiles'
+default-root-container-orientation = 'auto'
+
+# No gaps
+gaps.inner.horizontal = 0
+gaps.inner.vertical = 0
+gaps.outer.left = 0
+gaps.outer.bottom = 0
+gaps.outer.top = 0
+gaps.outer.right = 0
+
+# ── Auto-routing ──────────────────────────────────────────────
+on-window-detected = [
+    { if = 'test %{app-bundle-id} = com.mitchellh.ghostty',  run = 'move-node-to-workspace 1' },
+    { if = 'test %{app-bundle-id} = com.apple.MobileSMS',    run = 'move-node-to-workspace 2' },
+    { if = 'test %{app-bundle-id} = com.brave.Browser',      run = 'move-node-to-workspace 5' },
+    { if = 'test %{window-title} ~= picture.in.picture',     run = ['layout floating', 'move-node-to-workspace 4'] },
+]
+
+# ── Monitor assignment ────────────────────────────────────────
+[workspace-to-monitor-force-assignment]
+1 = "main"
+2 = "main"
+3 = "main"
+4 = "secondary"
+5 = "secondary"
+
+# ═══════════════════════════════════════════════════════════════
+#  KEYBINDINGS
+# ═══════════════════════════════════════════════════════════════
+# Caps Lock → Option (via Karabiner). All alt-* are on Caps Lock.
+# asdfg = workspace switching   hjkl = focus/move (vim style)
+
+[mode.main.binding]
+    # ── Workspaces ──────────────────────────────────────────
+    alt-a = 'workspace 1'
+    alt-s = 'workspace 2'
+    alt-d = 'workspace 3'
+    alt-f = 'workspace 4'
+    alt-g = 'workspace 5'
+
+    alt-shift-a = 'move-node-to-workspace 1'
+    alt-shift-s = 'move-node-to-workspace 2'
+    alt-shift-d = 'move-node-to-workspace 3'
+    alt-shift-f = 'move-node-to-workspace 4'
+    alt-shift-g = 'move-node-to-workspace 5'
+
+    alt-tab = 'workspace-back-and-forth'
+    alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
+
+    # ── Focus (vim directions) ──────────────────────────────
+    alt-h = 'focus left'
+    alt-j = 'focus down'
+    alt-k = 'focus up'
+    alt-l = 'focus right'
+
+    # ── Move windows ────────────────────────────────────────
+    alt-shift-h = 'move left'
+    alt-shift-j = 'move down'
+    alt-shift-k = 'move up'
+    alt-shift-l = 'move right'
+
+    # ── Swap (arrows) ───────────────────────────────────────
+    alt-left  = 'swap left'
+    alt-down  = 'swap down'
+    alt-up    = 'swap up'
+    alt-right = 'swap right'
+
+    # ── Layout ──────────────────────────────────────────────
+    alt-z = 'layout horizontal vertical'
+    alt-c = 'layout tiles accordion'
+    alt-v = 'layout floating tiling'
+    alt-b = 'balance-sizes'
+
+    # ── Resize ──────────────────────────────────────────────
+    alt-minus       = 'resize smart -50'
+    alt-equal       = 'resize smart +50'
+    alt-shift-minus = 'resize smart -200'
+    alt-shift-equal = 'resize smart +200'
+
+    # ── Groups ──────────────────────────────────────────────
+    alt-shift-left  = 'join-with left'
+    alt-shift-down  = 'join-with down'
+    alt-shift-up    = 'join-with up'
+    alt-shift-right = 'join-with right'
+    alt-shift-z = 'flatten-workspace-tree'
+
+    # ── Launch ──────────────────────────────────────────────
+    # Cmd-Enter / Cmd-Shift-Enter → tmux splits (configured in Ghostty config)
+    alt-o     = 'exec-and-forget open -a "Brave Browser"'
+    # alt-p passes through to Brave for native PiP (Google PiP extension)
+
+    # ── Layout sessions ─────────────────────────────────────
+    alt-q = 'exec-and-forget bash -c "$HOME/bin/rb"'
+    alt-w = '# alt-w available'
+    alt-n = '# alt-n available'
+
+    # ── Resize mode ─────────────────────────────────────────
+    alt-r = 'mode resize'
+
+# ═══════════════════════════════════════════════════════════════
+#  RESIZE MODE (alt-r → hjkl resize, esc/enter exit)
+# ═══════════════════════════════════════════════════════════════
+[mode.resize.binding]
+    h = 'resize smart -100'
+    l = 'resize smart +100'
+    k = 'resize smart -100'
+    j = 'resize smart +100'
+    esc = 'mode main'
+    enter = 'mode main'

@@ -54,14 +54,10 @@ check_content_match /Users/jwalinshah/.config/opencode/AGENTS.md "$repo/home/AGE
 check_content_match /Users/jwalinshah/.config/herdr/config.toml "$repo/home/.config/herdr/config.toml"
 check_content_match /Users/jwalinshah/.config/jw/models.env "$repo/captain/config/models.env"
 check_content_match /Users/jwalinshah/bin/ct "$repo/captain/bin/ct-wrapper"
+check_content_match /Users/jwalinshah/bin/claude "$repo/captain/bin/claude-wrapper"
 check_content_match /Users/jwalinshah/bin/audit-config-ownership.sh "$repo/bin/audit-config-ownership.sh"
 check_content_match /Users/jwalinshah/bin/audit-doc-freshness.sh "$repo/bin/audit-doc-freshness.sh"
-check_content_match /Users/jwalinshah/bin/verify-core-launchers.sh "$repo/bin/verify-core-launchers.sh"
 check_content_match /Users/jwalinshah/bin/openwiki "$repo/captain/bin/openwiki"
-check_content_match /Users/jwalinshah/bin/routing-proxy "$repo/captain/bin/routing-proxy"
-check_content_match /Users/jwalinshah/bin/tokenrouter-proxy "$repo/captain/bin/tokenrouter-proxy"
-check_content_match /Users/jwalinshah/bin/claude-launch "$repo/captain/bin/claude-launch"
-check_content_match /Users/jwalinshah/bin/claude-endpoints.toml "$repo/captain/bin/claude-endpoints.toml"
 check_content_match /Users/jwalinshah/bin/jw-restart "$repo/captain/bin/jw-restart"
 check_content_match /Users/jwalinshah/bin/ca "$repo/captain/bin/ca-wrapper"
 check_content_match /Users/jwalinshah/bin/cu "$repo/captain/bin/cu-wrapper"
@@ -93,5 +89,41 @@ if [ -n "$stale_hits" ]; then
   printf '%s\n' "$stale_hits" >&2
   fail "stale references found in active files"
 fi
+
+# ── Verify everything referenced in configs exists ─────────────────
+
+# 1. Every tool in TOOL_REGISTRY.md marked ACTIVE must be on PATH
+echo "=== verifying TOOL_REGISTRY.md ACTIVE tools ==="
+while IFS= read -r line; do
+  tool=$(echo "$line" | sed 's/^[[:space:]]*| \([a-zA-Z0-9_-]*\).*/\1/')
+  [ -z "$tool" ] && continue
+  command -v "$tool" >/dev/null 2>&1 || echo "WARNING: $tool is ACTIVE in TOOL_REGISTRY.md but not on PATH"
+done < <(grep '| ACTIVE' "$repo/captain/agent-rules/TOOL_REGISTRY.md" 2>/dev/null || true)
+
+# 2. ~/.agent-rules/ must exist
+[ -e "$HOME/.agent-rules" ] || echo "WARNING: ~/.agent-rules/ does not exist"
+
+# 3. Every LaunchAgent binary referenced in configuration.nix must exist
+echo "=== verifying LaunchAgent binaries ==="
+while IFS= read -r binary; do
+  [ -z "$binary" ] && continue
+  eval "resolved=$binary" 2>/dev/null || true
+  [ -x "$resolved" ] || echo "WARNING: LaunchAgent binary not found: $binary"
+done < <(grep 'ProgramArguments.*\.local\|ProgramArguments.*/opt/homebrew' "$repo/configuration.nix" 2>/dev/null | sed 's/.*"\(.*\)".*/\1/' | head -20)
+
+# 4. Every service in services.conf must have a reachable health check
+echo "=== verifying services.conf ports ==="
+while IFS= read -r line; do
+  echo "$line" | grep -q '|http|' || continue
+  addr=$(echo "$line" | cut -d'|' -f3)
+  path=$(echo "$line" | cut -d'|' -f4)
+  [ -z "$addr" ] && continue
+  curl -sf --max-time 3 "http://${addr}${path}" >/dev/null 2>&1 || echo "WARNING: service health check failed: $addr$path"
+done < <(grep -v '^#' "$HOME/.config/jw/services.conf" 2>/dev/null | grep '|')
+
+# 5. Verify agent-rules symlink chain is intact
+for f in "$HOME/.agent-rules/GLOBAL.md" "$HOME/.agent-rules/TOOL_REGISTRY.md" "$HOME/.agent-rules/KNOWN_ISSUES.md"; do
+  [ -f "$f" ] || echo "WARNING: agent rule not reachable: $f"
+done
 
 printf 'audit-config-ownership: ok\n'

@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Single source of truth for model config — edit ~/.config/jw/models.env to switch models.
+# shellcheck source=/dev/null
+source "${HOME}/.config/jw/models.env"
+
+MLX_PORT=8080
+
+# Verify the inference server is up.
+if ! curl -s "http://localhost:$MLX_PORT/v1/models" >/dev/null 2>&1; then
+  echo "cognee: warning: mlx-lm server not running on :$MLX_PORT" >&2
+fi
+
+# MCP mode: run the FastMCP server from the local cognee-mcp source.
+# Search for "mcp" anywhere in the argument list (not just $1) so flags like
+# --api-url can precede it. Pass all non-"mcp" args through to server.py.
+COGNEE_MCP_DIR="$HOME/projects/cognee/cognee-mcp"
+for arg in "$@"; do
+  if [[ "$arg" == "mcp" ]] && [[ -d "$COGNEE_MCP_DIR" ]]; then
+    SERVER_ARGS=()
+    for a in "$@"; do
+      [[ "$a" != "mcp" ]] && SERVER_ARGS+=("$a")
+    done
+    exec uv run --directory "$COGNEE_MCP_DIR" python src/server.py "${SERVER_ARGS[@]}"
+  fi
+done
+
+exec cognee-cli "$@"

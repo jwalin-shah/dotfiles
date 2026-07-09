@@ -40,9 +40,38 @@ in
     initContent = ''
       bindkey '^f' autosuggest-accept
       eval "$(direnv hook zsh)"
+
+      # History
+      HISTSIZE=50000
+      SAVEHIST=50000
+      HISTFILE=~/.zsh_history
+      setopt HIST_IGNORE_ALL_DUPS
+      setopt HIST_IGNORE_SPACE
+      setopt HIST_REDUCE_BLANKS
+      setopt INC_APPEND_HISTORY
+      setopt SHARE_HISTORY
+
+      # Completion
+      zstyle ':completion:*' menu select
+      zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+      zstyle ':completion:*' completer _expand _complete _ignored _approximate
+      zstyle ':completion:*' max-errors 2
+
+      # Better globbing
+      setopt EXTENDED_GLOB
+      setopt NO_CASE_GLOB
+
+      # Nice defaults
+      setopt AUTO_CD
+      setopt INTERACTIVE_COMMENTS
+      unsetopt BEEP
+
+      # Include dotfiles in glob patterns
+      setopt GLOB_DOTS
     '';
     shellAliases = {
       ".." = "cd ..";
+      "..." = "cd ../..";
       add = "git add .";
       push = "git push";
       pull = "git pull";
@@ -57,6 +86,16 @@ in
       gha = "npx -y gh-axi";
       cda = "npx -y chrome-devtools-axi";
       lva = "npx -y lavish-axi";
+      g = "git";
+      gs = "git status";
+      gc = "git commit";
+      gcm = "git commit -m";
+      gp = "git push";
+      gl = "git pull";
+      gd = "git diff";
+      glog = "git log --oneline --graph --decorate";
+      reload = "exec zsh";
+      path = "echo $PATH | tr ':' '\n'";
     };
   };
 
@@ -160,8 +199,12 @@ in
   # ~/bin launcher wrappers
   home.file."bin/ct".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/ct-wrapper";
+  home.file."bin/claude".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/claude-wrapper";
   home.file."bin/ca".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/ca-wrapper";
+  home.file."bin/agy".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/agy-wrapper";
   home.file."bin/cu".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/cu-wrapper";
   home.file."bin/oo".source =
@@ -174,28 +217,36 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/kt-wrapper";
   home.file."bin/cx".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/cx-wrapper";
-  home.file."bin/claude-launch".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/claude-launch";
-  home.file."bin/claude-endpoints.toml".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/claude-endpoints.toml";
   home.file."bin/jw-restart".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/jw-restart";
-  home.file."bin/routing-proxy".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/routing-proxy";
-  home.file."bin/tokenrouter-proxy".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tokenrouter-proxy";
   home.file."bin/openwiki".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/openwiki";
+
+  # Personal tool wrappers
+  home.file."bin/c".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/c";
+  home.file."bin/rb".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/rb";
+  home.file."bin/route".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/route";
+  home.file."bin/cognee".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/cognee";
+  home.file."bin/brave-automation".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/brave-automation";
+  home.file."bin/brave-axi".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/brave-axi";
+  home.file."bin/cursor-login".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/cursor-login";
+  home.file."bin/mlx-chat-server".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/mlx-chat-server";
+  home.file."bin/quota-fetch".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/quota-fetch";
 
   # Utility scripts
   home.file."bin/audit-config-ownership.sh".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/audit-config-ownership.sh";
   home.file."bin/audit-doc-freshness.sh".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/audit-doc-freshness.sh";
-  home.file."bin/verify-core-launchers.sh".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/verify-core-launchers.sh";
-  home.file."bin/prune-opencode-local-state.sh".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/prune-opencode-local-state.sh";
 
   # Global linter/formatter configs
   home.file.".config/lint/.prettierrc".source =
@@ -218,4 +269,10 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.local/bin/oo";
   home.file.".local/bin/rtldr".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.local/bin/rtldr";
+
+  # Window manager + keyboard
+  home.file.".aerospace.toml".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/aerospace/aerospace.toml";
+  home.file.".config/karabiner/karabiner.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/karabiner/karabiner.json";
 }

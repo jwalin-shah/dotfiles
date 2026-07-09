@@ -14,10 +14,6 @@
     "cognee": {
       "command": "/Users/jwalinshah/bin/cognee",
       "args": ["mcp"]
-    },
-    "headroom": {
-      "command": "/Users/jwalinshah/.local/bin/headroom",
-      "args": ["mcp", "serve"]
     }
   }
 }
