@@ -8,6 +8,9 @@ home/.config/herdr/*.sock
 result
 result-*
 
+# session knowledge capture (local, gitignored by design — see skills/stow/)
+data/
+
 # no-mistakes local validation state - never commit in this public repo
 .no-mistakes/*.pyc
 __pycache__/
