@@ -39,13 +39,24 @@ codex() {
 }
 
 # ── Collect ─────────────────────────────────────────────────────────
+TMPDIR="${TMPDIR:-/tmp}"
+CLAUDE_FILE="$TMPDIR/quota-claude-$$.json"
+AGY_FILE="$TMPDIR/quota-agy-$$.json"
+
+claude  > "$CLAUDE_FILE" 2>/dev/null || echo '{}' > "$CLAUDE_FILE"
+agy     > "$AGY_FILE"    2>/dev/null || echo '[]' > "$AGY_FILE"
+
 python3 -c "
 import json
+def loadf(path):
+    try: return json.load(open(path))
+    except: return {}
 print(json.dumps({
-  'fetched_at': '$TIMESTAMP',
-  'claude': $(claude),
-  'agy': $(agy),
-  'codex': $(codex),
-}, indent=2))
+    'fetched_at': '$TIMESTAMP',
+    'claude': loadf('$CLAUDE_FILE'),
+    'agy': loadf('$AGY_FILE'),
+}, indent=2, default=str))
 " > "$OUT"
+
+rm -f "$CLAUDE_FILE" "$AGY_FILE"
 echo "quota-fetch: $(wc -c < "$OUT" | tr -d ' ') bytes → $OUT"
