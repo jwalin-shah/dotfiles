@@ -31,3 +31,4 @@
 2026-07-09T23:00:29.338617Z  INFO herdr::logging: api request completed event="api.request.complete" subsystem="api" outcome="error" request_id="cli:pane:close" method="pane.close"
 2026-07-09T23:01:45.855587Z  INFO herdr::logging: api request received event="api.request.start" subsystem="api" outcome="started" request_id="cli:pane:close" method="pane.close" changes_ui=true
 2026-07-09T23:01:45.855747Z  INFO herdr::logging: api request completed event="api.request.complete" subsystem="api" outcome="error" request_id="cli:pane:close" method="pane.close"
+2026-07-09T23:07:30.944535Z  INFO herdr::logging: checking for updates event="update.check.start" subsystem="update" outcome="started"
