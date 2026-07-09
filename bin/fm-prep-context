@@ -1,56 +1,57 @@
 #!/usr/bin/env bash
-# fm-prep-context — gather context for a crewmate before spawn.
-# Queries external docs (githits, ctx7) + local code (tldr, ccc, rg, git)
-# and outputs a tight context block ready for prompt injection.
+# fm-prep-context — gather context for crewmate before spawn.
+# Pure bash. No model. No decomposition. No ambiguity.
+# Always runs the same pipeline: structure → search → git → package.
 #
-# Usage:
-#   fm-prep-context "fix token validation" auth.go session.go
-#   fm-prep-context --task "add OAuth" --files internal/auth/login.go
-#   fm-prep-context "how does session refresh work" --lang go
-#
-# Output: markdown block on stdout. Pipe into crewmate prompt.
+# Usage: fm-prep-context "fix token validation" [file.go] [file2.go]
 set -euo pipefail
 
-TASK=""
-FILES=()
-LANG=""
-EXTERNAL=0  # whether to query external tools (githits, ctx7)
+TASK="${1:-}"
+shift 2>/dev/null || true
+FILES=("$@")
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --task) TASK="$2"; shift 2 ;;
-    --files) IFS=' ' read -ra FILES <<< "$2"; shift 2 ;;
-    --lang) LANG="$2"; shift 2 ;;
-    --external) EXTERNAL=1; shift ;;
-    -*) shift ;;
-    *)
-      if [ -z "$TASK" ]; then TASK="$1"
-      elif [[ "$1" == *.* ]]; then FILES+=("$1")
-      fi
-      shift
-      ;;
-  esac
-done
+# ── Package header ─────────────────────────────────────────────────
+output="## Context"
+output+=$'\n\n'
+output+="**Task:** $TASK"
+output+=$'\n\n'
 
-# ── Build header ──────────────────────────────────────────────────
-echo "## Context"
-echo ""
+# ── 1. GIT: what changed recently ──────────────────────────────────
+output+="### Recent changes"
+output+=$'\n'
+output+='```'
+output+=$'\n'
+output+="$(git log --oneline -5 2>/dev/null || echo 'no git history')"
+output+=$'\n'
+output+='```'
+output+=$'\n\n'
 
-if [ -n "$TASK" ]; then
-  echo "**Task:** $TASK"
-  echo ""
+# ── 2. GIT: any uncommitted work ───────────────────────────────────
+dirty=$(git status --porcelain 2>/dev/null | head -20)
+if [ -n "$dirty" ]; then
+  output+="### Uncommitted changes"
+  output+=$'\n'
+  output+='```'
+  output+=$'\n'
+  output+="$dirty"
+  output+=$'\n'
+  output+='```'
+  output+=$'\n\n'
 fi
 
-# ── L1: Local structure (tldr) ───────────────────────────────────
+# ── 3. FILES: structure + hot lines ────────────────────────────────
 if [ ${#FILES[@]} -gt 0 ]; then
-  echo "### Files"
+  output+="### Files"
+  output+=$'\n\n'
   for f in "${FILES[@]}"; do
-    resolved=$(find . -name "$(basename "$f")" -not -path '*/.git/*' 2>/dev/null | head -1)
-    if [ -z "$resolved" ]; then resolved="$f"; fi
+    resolved=$(find . -path "*/$f" -not -path '*/.git/*' 2>/dev/null | head -1)
+    [ -z "$resolved" ] && resolved="$f"
     if [ -f "$resolved" ]; then
-      echo "#### $(basename "$resolved") ($(wc -l < "$resolved" | tr -d ' ') lines)"
-      echo '```'
-      tldr structure "$resolved" 2>/dev/null | python3 -c "
+      lines=$(wc -l < "$resolved" | tr -d ' ')
+      output+="**$(basename "$resolved")** ($lines lines)"
+      output+=$'\n'
+      # Structure via tldr
+      struct=$(tldr structure "$resolved" 2>/dev/null | python3 -c "
 import json, sys
 try:
     d = json.load(sys.stdin)
@@ -60,86 +61,89 @@ try:
             n = defn.get('name', '?')
             ls = defn.get('line_start', '?')
             le = defn.get('line_end', '?')
-            sig = defn.get('signature', '')[:120]
-            print(f'  {k:10s} {n:30s} L{ls}-{le}  {sig}')
+            sig = defn.get('signature', '')[:100]
+            print(f'  {k:8s} {n:25s} L{ls}-{le}  {sig}')
 except: pass
-" 2>/dev/null || echo "  (structure extraction failed)"
-      echo '```'
-      echo ""
+" 2>/dev/null || echo "  (structure unavailable)")
+
+      if [ -n "$struct" ]; then
+        output+='```'
+        output+=$'\n'
+        output+="$struct"
+        output+=$'\n'
+        output+='```'
+        output+=$'\n'
+      fi
+
+      # Hot lines: extract key terms from task, grep the file
+      terms=$(echo "$TASK" | tr -cs '[:alnum:]' '\n' | grep -viE '^(a|an|the|is|in|it|of|to|and|or|be|do|we|no|so|if|at|on|by|as|he|she|me|my|for|fix|add|the|that|this|with|from|when|how|what|where|which|who|why|can|will|should|could|would|does|has|had|not|but|all|are|was|were|need|want|get|got)$' | sort -u | head -8 | tr '\n' '|' | sed 's/|$//')
+      if [ -n "$terms" ]; then
+        matches=$(rg -n "$terms" "$resolved" 2>/dev/null | head -15)
+        if [ -n "$matches" ]; then
+          output+="*Matching lines:*"
+          output+=$'\n'
+          output+='```'
+          output+=$'\n'
+          output+="$matches"
+          output+=$'\n'
+          output+='```'
+          output+=$'\n'
+        fi
+      fi
+      output+=$'\n'
     fi
   done
 fi
 
-# ── L2: Pattern search (rg) ───────────────────────────────────────
-if [ -n "$TASK" ]; then
-  # Extract key terms from the task
-  TERMS=$(echo "$TASK" | tr -c '[:alnum:]' '\n' | grep -viE '^(a|an|the|is|in|it|of|to|and|or|be|do|we|no|so|if|at|on|by|as|he|she|me|my|for|fix|add|the|that|this|with|from|when|how|what|where|which|who|why|can|will|should|could|would|does|has|had|not|but|all|are|was|were)$' | sort -u | head -10 | tr '\n' '|' | sed 's/|$//')
+# ── 4. SEMANTIC: cocoindex search ──────────────────────────────────
+if command -v ccc >/dev/null 2>&1; then
+  sem=$(ccc search "$TASK" 2>/dev/null | head -8)
+  if [ -n "$sem" ] && [ "$sem" != "(index not available)" ]; then
+    output+="### Semantic matches (cocoindex)"
+    output+=$'\n'
+    output+='```'
+    output+=$'\n'
+    output+="$sem"
+    output+=$'\n'
+    output+='```'
+    output+=$'\n\n'
+  fi
+fi
 
-  if [ -n "$TERMS" ]; then
-    MATCHES=$(rg -n --max-count 5 "$TERMS" --type-add 'code:*.{go,py,rs,ts,tsx,js,c,cpp,swift}' -t code -l 2>/dev/null | head -10)
-    if [ -n "$MATCHES" ]; then
-      echo "### Pattern matches"
-      echo '```'
-      rg -n --max-count 3 "$TERMS" --type-add 'code:*.{go,py,rs,ts,tsx,js,c,cpp,swift}' -t code 2>/dev/null | head -20
-      echo '```'
-      echo ""
+# ── 5. EXTERNAL: githits example (if file references a known package) ──
+if command -v githits >/dev/null 2>&1; then
+  pkg=$(echo "$TASK" | rg -o 'npm:[a-zA-Z@._-]+|pypi:[a-zA-Z._-]+|go:[a-zA-Z._/-]+' 2>/dev/null | head -1)
+  if [ -n "$pkg" ]; then
+    ext=$(githits example "$TASK" 2>/dev/null | head -20)
+    if [ -n "$ext" ]; then
+      output+="### External examples (githits)"
+      output+=$'\n'
+      output+='```'
+      output+=$'\n'
+      output+="$ext"
+      output+=$'\n'
+      output+='```'
+      output+=$'\n\n'
     fi
   fi
 fi
 
-# ── L3: Semantic search (cocoindex) ───────────────────────────────
-if [ -n "$TASK" ] && command -v ccc >/dev/null 2>&1; then
-  echo "### Semantic matches"
-  echo '```'
-  ccc search "$TASK" 2>/dev/null | head -10 || echo "  (index not available)"
-  echo '```'
-  echo ""
-fi
-
-# ── L4: Recent changes (git) ──────────────────────────────────────
-CHANGED=$(git diff --name-only HEAD~5 2>/dev/null | head -10 || true)
-if [ -n "$CHANGED" ]; then
-  echo "### Recent changes (last 5 commits)"
-  echo '```'
-  git log --oneline -5 2>/dev/null
-  echo '```'
-  echo ""
-fi
-
-if [ ${#FILES[@]} -gt 0 ]; then
-  echo "### File history"
-  echo '```'
-  git log --oneline -3 -- "${FILES[@]}" 2>/dev/null
-  echo '```'
-  echo ""
-fi
-
-# ── L5: External docs (githits, ctx7) ─────────────────────────────
-if [ "$EXTERNAL" -eq 1 ] && [ -n "$TASK" ]; then
-  echo "### External references"
-  echo ""
-
-  # githits: real-world examples
-  if command -v githits >/dev/null 2>&1; then
-    echo "#### Open-source examples"
-    echo '```'
-    githits example "$TASK" 2>/dev/null | head -10 || echo "  (no results)"
-    echo '```'
-    echo ""
-  fi
-
-  # ctx7: library docs (if package names mentioned)
-  PACKAGES=$(echo "$TASK" | grep -oE '[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+' | head -3 || true)
-  if [ -n "$PACKAGES" ] && command -v npx >/dev/null 2>&1; then
-    for pkg in $PACKAGES; do
-      echo "#### $pkg docs"
-      echo '```'
-      npx -y ctx7 docs "$pkg" "usage example" 2>/dev/null | head -15 || echo "  (not available)"
-      echo '```'
-      echo ""
-    done
+# ── 6. TESTS: if task mentions test/validate/check ──────────────────
+if echo "$TASK" | grep -qi 'test\|validate\|check\|verify\|pass\|fail'; then
+  if [ -f "Makefile" ]; then
+    test_result=$(make test 2>&1 | tail -15)
+    if [ -n "$test_result" ]; then
+      output+="### Test results"
+      output+=$'\n'
+      output+='```'
+      output+=$'\n'
+      output+="$test_result"
+      output+=$'\n'
+      output+='```'
+      output+=$'\n\n'
+    fi
   fi
 fi
 
-echo "---"
-echo "*Context gathered at $(date +%H:%M:%S)*"
+# ── Cap at ~800 tokens ─────────────────────────────────────────────
+echo "$output" | head -250
