@@ -291,11 +291,14 @@ in
   imports = [
     ({ config, ... }: {
       home.file = let
-        skills = builtins.readDir ./skills;
+        # no-mistakes generates and refreshes its own user-level skill during
+        # `no-mistakes init`; Home Manager must not race that updater.
+        skills = builtins.filter (name: name != "no-mistakes")
+          (builtins.attrNames (builtins.readDir ./skills));
       in builtins.listToAttrs (map (name: {
         name = ".agents/skills/${name}";
         value = { source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/skills/${name}"; };
-      }) (builtins.attrNames skills));
+      }) skills);
     })
   ];
 }

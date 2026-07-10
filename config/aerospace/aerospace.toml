@@ -16,10 +16,12 @@ after-startup-command = [
 persistent-workspaces = ["1", "2", "3", "4", "5"]
 
 # ── Layout defaults ───────────────────────────────────────────
-default-root-container-layout = 'tiles'
+# accordion = windows stack on top of each other (no 50/50 splits).
+# Use alt-z to toggle to tiles when you want side-by-side.
+default-root-container-layout = 'accordion'
 default-root-container-orientation = 'auto'
 
-# No gaps
+# No gaps (captain prefers no breathing room)
 gaps.inner.horizontal = 0
 gaps.inner.vertical = 0
 gaps.outer.left = 0
@@ -33,6 +35,10 @@ on-window-detected = [
     { if = 'test %{app-bundle-id} = com.apple.MobileSMS',    run = 'move-node-to-workspace 2' },
     { if = 'test %{app-bundle-id} = com.brave.Browser',      run = 'move-node-to-workspace 5' },
     { if = 'test %{window-title} ~= picture.in.picture',     run = ['layout floating', 'move-node-to-workspace 4'] },
+
+    # ── Float helpers (don't tile, stay on current workspace) ──
+    { if = 'test %{app-bundle-id} = com.apple.systempreferences', run = 'layout floating' },
+    { if = 'test %{app-bundle-id} = com.openai.chat',             run = 'layout floating' },
 ]
 
 # ── Monitor assignment ────────────────────────────────────────
