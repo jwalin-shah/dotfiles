@@ -186,6 +186,7 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
 
   home.activation.mergeRuntimeConfigs = config.lib.dag.entryAfter ["writeBoundary"] ''
+    export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:$PATH"
     ${dotfiles}/bin/merge-runtime-configs.py ${dotfiles}/home/.gemini/antigravity-cli/settings.json $HOME/.gemini/antigravity-cli/settings.json || true
     ${dotfiles}/bin/merge-runtime-configs.py ${dotfiles}/home/.cursor/cli-config.json $HOME/.cursor/cli-config.json || true
     ${dotfiles}/bin/merge-runtime-configs.py ${dotfiles}/captain/config/opencode.json $HOME/.config/opencode/opencode.json || true
