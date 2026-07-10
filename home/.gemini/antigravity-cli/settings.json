@@ -109,12 +109,7 @@
       "command(echo)",
       "command(wc)",
       "command(sort)",
-      "command(uniq)",
-      "command(chmod +x ~/.agents/skills/workflow-ladder/scripts/check-ladder.sh)",
-      "command(chmod +x ~/.agents/skills/workflow-ladder/scripts/ladder-status.sh)",
-      "command(~/.agents/skills/workflow-ladder/scripts/check-ladder.sh)",
-      "command(~/.agents/skills/workflow-ladder/scripts/ladder-status.sh)",
-      "command(chmod +x ~/.agents/skills/workflow-ladder/scripts/ladder-stamp.sh)"
+      "command(uniq)"
     ],
     "ask": [
       "command(git push)",

@@ -288,4 +288,14 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/aerospace/aerospace.toml";
   home.file.".config/karabiner/karabiner.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/karabiner/karabiner.json";
+  imports = [
+    ({ config, ... }: {
+      home.file = let
+        skills = builtins.readDir ./skills;
+      in builtins.listToAttrs (map (name: {
+        name = ".agents/skills/${name}";
+        value = { source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/skills/${name}"; };
+      }) (builtins.attrNames skills));
+    })
+  ];
 }
