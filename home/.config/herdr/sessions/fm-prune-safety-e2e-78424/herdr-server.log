@@ -1,0 +1,13 @@
+2026-07-10T05:24:39.154507Z  INFO herdr::api::server: api server listening path=/Users/jwalinshah/.config/herdr/sessions/fm-prune-safety-e2e-78424/herdr.sock
+2026-07-10T05:24:39.154928Z  INFO herdr::app: using pane scrollback configuration pane_scrollback_limit_bytes=10000000
+2026-07-10T05:24:39.163763Z  INFO herdr::logging: api request received event="api.request.start" subsystem="api" outcome="started" request_id="cli:workspace:create" method="workspace.create" changes_ui=true
+2026-07-10T05:24:39.168601Z  INFO herdr::logging: checking for updates event="update.check.start" subsystem="update" outcome="started"
+2026-07-10T05:24:39.173315Z  INFO herdr::server::headless: client protocol socket listening path=/Users/jwalinshah/.config/herdr/sessions/fm-prune-safety-e2e-78424/herdr-client.sock
+2026-07-10T05:24:39.173340Z  INFO herdr::server::headless: herdr server started api_socket=/Users/jwalinshah/.config/herdr/sessions/fm-prune-safety-e2e-78424/herdr.sock client_socket=/Users/jwalinshah/.config/herdr/sessions/fm-prune-safety-e2e-78424/herdr-client.sock
+2026-07-10T05:24:39.173361Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="server" outcome="started" pid=78499
+2026-07-10T05:24:39.173455Z  INFO herdr::logging: spawning pane terminal event="pane.spawn.start" subsystem="pane" outcome="started" pane_id=1 rows=24 cols=80 scrollback_limit_bytes=10000000
+2026-07-10T05:24:39.176007Z  INFO herdr::logging: pane child spawned event="pane.spawned" subsystem="pane" outcome="ok" pane_id=1 pid=78591
+2026-07-10T05:24:39.176240Z  INFO herdr::logging: workspace created event="workspace.create" subsystem="workspace" outcome="ok" workspace_id="w1" pane_id=1
+2026-07-10T05:24:39.176255Z  INFO herdr::logging: workspace focused event="workspace.focus" subsystem="workspace" outcome="ok" workspace_id="w1"
+2026-07-10T05:24:39.176270Z  INFO herdr::logging: tab focused event="tab.focus" subsystem="tab" outcome="ok" workspace_id="w1" tab_id="w1:t1"
+2026-07-10T05:24:39.176789Z  INFO herdr::logging: api request completed event="api.request.complete" subsystem="api" outcome="ok" request_id="cli:workspace:create" method="workspace.create"
