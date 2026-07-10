@@ -56,8 +56,16 @@ for repo in "${REPOS[@]}"; do
     git add -A 2>/dev/null || true
     git commit -m "auto: save work in progress" 2>/dev/null || true
     branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
-    git push origin "$branch" 2>/dev/null || true
-    log "saved: $(basename "$repo") ($branch)"
+    # Never auto-push a protected default branch. Silent pushes to main are how
+    # runtime state leaked to origin. WIP is still saved via the local commit
+    # above (recoverable); a deliberate push to main stays a human decision.
+    case "$branch" in
+      main|master)
+        log "local-only: $(basename "$repo") ($branch) — default branch, not pushing" ;;
+      *)
+        git push origin "$branch" 2>/dev/null || true
+        log "saved: $(basename "$repo") ($branch)" ;;
+    esac
   fi
 
   popd > /dev/null
