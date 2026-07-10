@@ -151,3 +151,11 @@
 2026-07-10T05:23:49.973736Z  INFO herdr::server::headless: herdr server started api_socket=/Users/jwalinshah/.config/herdr/sessions/myses/herdr.sock client_socket=/Users/jwalinshah/.config/herdr/sessions/myses/herdr-client.sock
 2026-07-10T05:23:49.973757Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="server" outcome="started" pid=28408
 2026-07-10T05:23:49.973884Z  INFO herdr::logging: api request completed event="api.request.complete" subsystem="api" outcome="error" request_id="cli:pane:close" method="pane.close"
+2026-07-10T05:29:33.313230Z  INFO herdr::api::server: api server listening path=/Users/jwalinshah/.config/herdr/sessions/myses/herdr.sock
+2026-07-10T05:29:33.313802Z  INFO herdr::app: using pane scrollback configuration pane_scrollback_limit_bytes=10000000
+2026-07-10T05:29:33.325369Z  INFO herdr::logging: checking for updates event="update.check.start" subsystem="update" outcome="started"
+2026-07-10T05:29:33.330113Z  INFO herdr::server::headless: client protocol socket listening path=/Users/jwalinshah/.config/herdr/sessions/myses/herdr-client.sock
+2026-07-10T05:29:33.330159Z  INFO herdr::server::headless: herdr server started api_socket=/Users/jwalinshah/.config/herdr/sessions/myses/herdr.sock client_socket=/Users/jwalinshah/.config/herdr/sessions/myses/herdr-client.sock
+2026-07-10T05:29:33.330176Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="server" outcome="started" pid=75377
+2026-07-10T05:29:33.886018Z  INFO herdr::logging: api request received event="api.request.start" subsystem="api" outcome="started" request_id="cli:pane:close" method="pane.close" changes_ui=true
+2026-07-10T05:29:33.886108Z  INFO herdr::logging: api request completed event="api.request.complete" subsystem="api" outcome="error" request_id="cli:pane:close" method="pane.close"
