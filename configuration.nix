@@ -65,7 +65,11 @@
   homebrew = {
     enable = true;
     onActivation.cleanup = "zap";
-    onActivation.autoUpdate = true;
+    # Do NOT auto-update Homebrew taps on every rebuild - that is the slow
+    # "Auto-updating Homebrew... Updated N taps" phase and the hint/untap noise.
+    # brew still installs/upgrades the listed formulae; it just skips refreshing
+    # the tap index each switch. Run `brew update` by hand when you want it.
+    onActivation.autoUpdate = false;
     onActivation.extraFlags = [ "--force" ];
 
     brews = [
@@ -85,7 +89,6 @@
       "go"
       "gofumpt"
       "golangci-lint"
-      "herdr"
       "infisical"
       "jq"
       "llama.cpp"
@@ -245,22 +248,6 @@
       };
     };
 
-    # herdr: agent-native terminal multiplexer (session provider)
-    "com.jwalinshah.herdr" = {
-      serviceConfig = {
-        ProgramArguments = [ "${brewBin}/herdr" "server" ];
-        KeepAlive = true;
-        RunAtLoad = true;
-        EnvironmentVariables = {
-          HOME = home;
-          PATH = defaultPATH;
-        };
-        StandardOutPath = "${home}/.local/share/jw/herdr.log";
-        StandardErrorPath = "${home}/.local/share/jw/herdr.log";
-        ThrottleInterval = 5;
-        ExitTimeOut = 10;
-      };
-    };
 
     # -- Monitoring & Health --
     # auto-save: commit + push uncommitted changes every 5 min (never lose work)

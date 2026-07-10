@@ -121,8 +121,6 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/wezterm";
   home.file.".config/nvim".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/nvim";
-  home.file.".config/herdr".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/herdr";
 
   # Claude config dirs (3) -- same settings, symlinked
   home.file.".claude/settings.json".source =
@@ -153,6 +151,8 @@ in
   home.file.".claude-token/CLAUDE.md".force = true;
 
   # Other agent configs
+  home.file.".agent-rules".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/agent-rules";
   home.file.".codex/config.toml".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.codex/config.toml";
   home.file.".codex/hooks.json".source =
