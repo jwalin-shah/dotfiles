@@ -1,5 +1,5 @@
 approvals_reviewer = "user"
-model = "gpt-5.6-luna"
+model = "gpt-5.6-sol"
 model_reasoning_effort = "medium"
 personality = "pragmatic"
 
@@ -27,7 +27,7 @@ trust_level = "trusted"
 
 [tui.model_availability_nux]
 "gpt-5.5" = 4
-"gpt-5.6-sol" = 1
+"gpt-5.6-sol" = 2
 
 [features]
 hooks = true
