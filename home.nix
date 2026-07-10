@@ -162,8 +162,11 @@ in
   home.file.".codex/AGENTS.md".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
 
-  home.file.".cursor/cli-config.json".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.cursor/cli-config.json";
+  # NOTE: .cursor/cli-config.json is RUNTIME state Cursor rewrites (model
+  # selection). home-manager must NOT manage it: deploying it either force-wipes
+  # your selection every rebuild, or (without force) hits the backup path and
+  # aborts the whole switch when a stale .backup exists. Cursor self-initializes
+  # this file, so leave it app-owned. (finding #9)
   home.file.".cursor/mcp.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.cursor/mcp.json";
   home.file.".cursor/hooks.json".source =
@@ -171,9 +174,9 @@ in
   home.file.".cursor/AGENTS.md".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
 
-  home.file.".gemini/antigravity-cli/settings.json".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.gemini/antigravity-cli/settings.json";
-  home.file.".gemini/antigravity-cli/settings.json".force = true;
+  # NOTE: .gemini/antigravity-cli/settings.json is RUNTIME state the antigravity
+  # CLI rewrites; force=true was silently wiping it every rebuild. Leave it
+  # app-owned like .cursor/cli-config.json above. (finding #9)
   home.file.".gemini/config/mcp_config.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.gemini/config/mcp_config.json";
   home.file.".gemini/settings.json".source =
