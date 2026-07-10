@@ -37,8 +37,7 @@ Every tool below is installed and available. Use the right tool for the job.
 
 | Tool | Command | Purpose | When to Use |
 |------|---------|---------|-------------|
-| Claude Code | `claude`, `c` | Primary coding assistant | Default for most tasks. Direct Anthropic OAuth. |
-| Claude (direct) | `ca` | Anthropic direct, compiled binary | When you need pure Anthropic without routing. |
+| Claude (direct) | `ca` | Anthropic direct OAuth, no routing proxy | Default for most tasks. Pure Anthropic. |
 | Claude (TokenRouter) | `ct` | TokenRouter proxy — DeepSeek V4, Kimi, Grok, MiniMax | Cost-sensitive or multi-model tasks. |
 | Codex | `codex`, `cx` | OpenAI CLI | When a task specifically benefits from OpenAI models. |
 | Agy (Gemini) | `agy` | Google Antigravity CLI — Gemini models | Google-specific workloads or model comparison. |
