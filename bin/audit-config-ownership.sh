@@ -1,12 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-repo="/Users/jwalinshah/projects/dotfiles"
-
 fail() {
   printf 'audit-config-ownership: %s\n' "$1" >&2
   exit 1
 }
+
+# Resolve the repo from this script's own location, then fall back to the
+# conventional path - and FAIL CLOSED if neither is the real repo. The old
+# hardcoded /Users/jwalinshah/projects/dotfiles is now a 27-byte pointer file,
+# not a directory, so every check_content_match died on a bogus mismatch.
+resolve_repo() {
+  local self dir
+  self=$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null || echo "${BASH_SOURCE[0]}")
+  dir=$(cd "$(dirname "$self")/.." 2>/dev/null && pwd -P || true)
+  if [ -n "$dir" ] && [ -f "$dir/home.nix" ]; then printf '%s\n' "$dir"; return 0; fi
+  if [ -f "${HOME}/dotfiles/home.nix" ]; then printf '%s\n' "${HOME}/dotfiles"; return 0; fi
+  return 1
+}
+repo=$(resolve_repo) || fail "cannot locate the dotfiles repo (no home.nix at script parent or ~/dotfiles)"
 
 check_link() {
   local live=$1 expected=$2

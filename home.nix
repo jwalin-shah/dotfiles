@@ -243,6 +243,8 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/audit-config-ownership.sh";
   home.file."bin/audit-doc-freshness.sh".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/audit-doc-freshness.sh";
+  home.file."bin/audit-hook-ownership.sh".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/audit-hook-ownership.sh";
   home.file."bin/auto-save.sh".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/auto-save.sh";
   home.file."bin/fm-prep-context".source =

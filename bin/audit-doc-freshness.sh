@@ -7,8 +7,23 @@ import re
 import sys
 
 
-REPO = pathlib.Path("/Users/jwalinshah/projects/dotfiles")
-HOME = pathlib.Path("/Users/jwalinshah")
+def _resolve_repo() -> pathlib.Path:
+    # Resolve from this script's own location, then fall back to ~/dotfiles, and
+    # FAIL CLOSED if neither holds home.nix. The old hardcoded
+    # /Users/jwalinshah/projects/dotfiles is now a 27-byte pointer file, so the
+    # walker scanned zero files and reported ok - a fail-open.
+    here = pathlib.Path(os.path.realpath(__file__)).parent.parent
+    if (here / "home.nix").is_file():
+        return here
+    fallback = pathlib.Path.home() / "dotfiles"
+    if (fallback / "home.nix").is_file():
+        return fallback
+    print("audit-doc-freshness: FAIL closed - cannot locate the dotfiles repo (no home.nix)", file=sys.stderr)
+    raise SystemExit(2)
+
+
+REPO = _resolve_repo()
+HOME = pathlib.Path.home()
 SKIP_DIRS = {".git", "docs/archive", "templates", "node_modules"}
 SKIP_FILES = {
     "bin/audit-config-ownership.sh",
