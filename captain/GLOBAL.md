@@ -44,7 +44,7 @@ Every tool below is installed and available. Use the right tool for the job.
 | Agy (Gemini) | `agy` | Google Antigravity CLI — Gemini models | Google-specific workloads or model comparison. |
 | Kilo | `kilo`, `ko`, `kt` | AI coding agent with TUI | Alternative agent with LanceDB indexing. `ko` for OpenAI, `kt` for TokenRouter. |
 | OpenCode | `ot` | OpenCode via TokenRouter | Alternative coding agent for diversity. |
-| Cursor Agent | `cu` | Cursor Agent CLI | When cursor-specific features are needed. |
+| Cursor Agent | `cursor-agent` | Cursor Agent CLI | When cursor-specific features are needed. |
 
 ### Code Intelligence
 
