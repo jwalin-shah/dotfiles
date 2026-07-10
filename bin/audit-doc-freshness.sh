@@ -68,6 +68,15 @@ def iter_files() -> list[pathlib.Path]:
     return files
 
 
+def strip_code(text: str) -> str:
+    # Remove fenced code blocks and inline code before scanning for paths/links,
+    # so a code example (a dict access like x["embedder"], a shell snippet) is
+    # never mistaken for a broken prose link. Keeps the check to real navigation.
+    text = re.sub(r"```.*?```", "", text, flags=re.DOTALL)
+    text = re.sub(r"`[^`]*`", "", text)
+    return text
+
+
 def strip_fragment(target: str) -> str:
     target = target.split("#", 1)[0]
     target = target.split("?", 1)[0]
@@ -98,36 +107,48 @@ def resolve_target(source: pathlib.Path, target: str) -> pathlib.Path | None:
 
 def main() -> None:
     stale_hits: list[str] = []
-    broken_links: list[str] = []
+    broken_paths: list[str] = []
+    warn_links: list[str] = []
 
     for path in iter_files():
         text = path.read_text()
         rel = path.relative_to(REPO).as_posix()
 
+        # Stale-token check runs on the raw text: a reference to deleted infra is
+        # a real regression even inside a code block.
         for token in STALE_TOKENS:
             if token in text:
                 stale_hits.append(f"{rel}: contains {token}")
 
         if path.suffix.lower() in {".md", ".markdown", ".txt"}:
-            for match in ABS_PATH_RE.findall(text):
-                resolved = pathlib.Path(match)
+            scan = strip_code(text)
+            # Broken absolute paths are almost always real stale references -> fatal.
+            for match in ABS_PATH_RE.findall(scan):
+                resolved = pathlib.Path(strip_line_suffix(strip_fragment(match)))
                 if not resolved.exists():
-                    broken_links.append(f"{rel}: missing absolute path {match}")
+                    broken_paths.append(f"{rel}: missing absolute path {match}")
 
-            for target in MD_LINK_RE.findall(text):
+            # Relative markdown links are often illustrative examples in skill
+            # docs (a format spec citing ./src/ordering/CONTEXT.md), so their
+            # drift is advisory, not a rebuild-blocking failure.
+            for target in MD_LINK_RE.findall(scan):
                 resolved = resolve_target(path, target)
                 if resolved is None:
                     continue
                 if not resolved.exists():
-                    broken_links.append(f"{rel}: missing link target {target}")
+                    warn_links.append(f"{rel}: unresolved link target {target}")
+
+    if warn_links:
+        print("audit-doc-freshness: WARNING - unresolved doc link targets (advisory):", file=sys.stderr)
+        print("\n".join(warn_links), file=sys.stderr)
 
     if stale_hits:
         print("\n".join(stale_hits), file=sys.stderr)
         fail("stale references found in active docs")
 
-    if broken_links:
-        print("\n".join(broken_links), file=sys.stderr)
-        fail("broken doc links found in active docs")
+    if broken_paths:
+        print("\n".join(broken_paths), file=sys.stderr)
+        fail("broken absolute paths found in active docs")
 
     print("audit-doc-freshness: ok")
 

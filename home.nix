@@ -178,8 +178,6 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.gemini/config/mcp_config.json";
   home.file.".gemini/settings.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.gemini/settings.json";
-  home.file.".gemini/config/hooks.json".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.gemini/config/hooks.json";
   home.file.".gemini/AGENTS.md".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
 
@@ -245,6 +243,11 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/audit-doc-freshness.sh";
   home.file."bin/audit-hook-ownership.sh".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/audit-hook-ownership.sh";
+  # Neutral, harness-agnostic herdr SessionStart hook. One script, owned here,
+  # called by every harness's hook with its own --source/--label (replacing the
+  # hand-placed per-harness copies).
+  home.file."bin/herdr-agent-state.sh".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/herdr-agent-state.sh";
   home.file."bin/auto-save.sh".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/auto-save.sh";
   home.file."bin/fm-prep-context".source =

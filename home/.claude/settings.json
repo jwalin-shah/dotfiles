@@ -10,7 +10,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash '/Users/jwalinshah/.claude/hooks/herdr-agent-state.sh' session",
+            "command": "bash '/Users/jwalinshah/bin/herdr-agent-state.sh' session --source claude-code --label claude-code",
             "timeout": 10
           }
         ]
