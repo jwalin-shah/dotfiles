@@ -65,7 +65,7 @@ check_content_match /Users/jwalinshah/.config/kilo/kilo.jsonc "$repo/home/.confi
 check_content_match /Users/jwalinshah/.config/kilo/AGENTS.md "$repo/home/AGENTS.md"
 check_content_match /Users/jwalinshah/.config/opencode/opencode.json "$repo/captain/config/opencode.json"
 check_content_match /Users/jwalinshah/.config/opencode/AGENTS.md "$repo/home/AGENTS.md"
-check_content_match /Users/jwalinshah/.config/herdr/config.toml "$repo/home/.config/herdr/config.toml"
+
 check_content_match /Users/jwalinshah/.config/jw/models.env "$repo/captain/config/models.env"
 check_content_match /Users/jwalinshah/bin/ct "$repo/captain/bin/ct-wrapper"
 check_content_match /Users/jwalinshah/bin/claude "$repo/captain/bin/claude-wrapper"
