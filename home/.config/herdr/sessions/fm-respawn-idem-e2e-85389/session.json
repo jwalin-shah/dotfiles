@@ -1,0 +1,56 @@
+{
+  "version": 3,
+  "workspaces": [
+    {
+      "id": "w1",
+      "custom_name": "firstmate",
+      "identity_cwd": "/private/var/folders/sj/b3pb98ls4mx03dx50srzyq380000gn/T/fm-herdr-respawn-idem.cWWzfg/proj",
+      "public_pane_numbers": {
+        "2": 2,
+        "3": 3
+      },
+      "next_public_pane_number": 4,
+      "public_tab_numbers": [
+        2,
+        3
+      ],
+      "next_public_tab_number": 4,
+      "tabs": [
+        {
+          "custom_name": "fm-respawn-crew1",
+          "layout": {
+            "Pane": 2
+          },
+          "panes": {
+            "2": {
+              "cwd": "/private/var/folders/sj/b3pb98ls4mx03dx50srzyq380000gn/T/fm-herdr-respawn-idem.cWWzfg/proj"
+            }
+          },
+          "zoomed": false,
+          "focused": 2,
+          "root_pane": 2
+        },
+        {
+          "custom_name": "fm-respawn-sm1",
+          "layout": {
+            "Pane": 3
+          },
+          "panes": {
+            "3": {
+              "cwd": "/private/var/folders/sj/b3pb98ls4mx03dx50srzyq380000gn/T/fm-herdr-respawn-idem.cWWzfg/proj"
+            }
+          },
+          "zoomed": false,
+          "focused": 3,
+          "root_pane": 3
+        }
+      ],
+      "active_tab": 0
+    }
+  ],
+  "active": 0,
+  "selected": 0,
+  "sidebar_width": 26,
+  "sidebar_section_split": 0.5,
+  "collapsed_space_keys": []
+}

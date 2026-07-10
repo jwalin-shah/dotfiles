@@ -1,0 +1,15 @@
+{
+  "version": 3,
+  "workspaces": [
+    {
+      "tabs": [
+        {
+          "panes": {}
+        },
+        {
+          "panes": {}
+        }
+      ]
+    }
+  ]
+}
