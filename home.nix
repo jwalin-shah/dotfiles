@@ -185,8 +185,13 @@ in
   home.file.".gemini/AGENTS.md".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
 
-  home.file.".config/kilo/kilo.jsonc".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/kilo/kilo.jsonc";
+  home.activation.mergeRuntimeConfigs = config.lib.dag.entryAfter ["writeBoundary"] ''
+    ${dotfiles}/bin/merge-runtime-configs.py ${dotfiles}/home/.gemini/antigravity-cli/settings.json $HOME/.gemini/antigravity-cli/settings.json || true
+    ${dotfiles}/bin/merge-runtime-configs.py ${dotfiles}/home/.cursor/cli-config.json $HOME/.cursor/cli-config.json || true
+    ${dotfiles}/bin/merge-runtime-configs.py ${dotfiles}/captain/config/opencode.json $HOME/.config/opencode/opencode.json || true
+    ${dotfiles}/bin/merge-runtime-configs.py ${dotfiles}/home/.config/kilo/kilo.jsonc $HOME/.config/kilo/kilo.jsonc || true
+  '';
+
   home.file.".config/kilo/AGENTS.md".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
   home.file.".config/claude/mcp.json".source =
@@ -197,8 +202,6 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
 
   # OpenCode config (from captain/config/)
-  home.file.".config/opencode/opencode.json".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/config/opencode.json";
   home.file.".config/jw/models.env".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/config/models.env";
 

@@ -61,9 +61,7 @@ check_content_match /Users/jwalinshah/.claude-token/settings.json "$repo/home/.c
 check_content_match /Users/jwalinshah/.claude-token/CLAUDE.md "$repo/home/AGENTS.md"
 check_absent /Users/jwalinshah/.config/opencode/AGENTS-face.md
 check_absent /Users/jwalinshah/.config/opencode/profiles/face.json
-check_content_match /Users/jwalinshah/.config/kilo/kilo.jsonc "$repo/home/.config/kilo/kilo.jsonc"
 check_content_match /Users/jwalinshah/.config/kilo/AGENTS.md "$repo/home/AGENTS.md"
-check_content_match /Users/jwalinshah/.config/opencode/opencode.json "$repo/captain/config/opencode.json"
 check_content_match /Users/jwalinshah/.config/opencode/AGENTS.md "$repo/home/AGENTS.md"
 
 check_content_match /Users/jwalinshah/.config/jw/models.env "$repo/captain/config/models.env"
