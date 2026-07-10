@@ -44,8 +44,8 @@
       PMPrintingExpandedStateForPrint = true;       # Expanded print dialog
       PMPrintingExpandedStateForPrint2 = true;      # Same for v2
       AppleFontSmoothing = 1;                       # Medium font smoothing
-      AppleICUForce24HourTime = true;               # 24-hour clock
-      AppleMetricUnits = true;                      # Metric system
+      AppleICUForce24HourTime = 1;                  # 24-hour clock (1=on, not bool)
+      AppleMetricUnits = 1;                         # Metric system (1=on, not bool)
       AppleEnableSwipeNavigateWithScrolls = false;  # Kill accidental back-swipe in browsers
       AppleKeyboardUIMode = 3;                      # Tab through ALL dialog controls
     };
