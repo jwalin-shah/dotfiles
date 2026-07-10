@@ -86,6 +86,7 @@ in
       find = "fd";
       c = "claude";
       cx = "command cx";
+      codex = "cx";
       gha = "npx -y gh-axi";
       cda = "npx -y chrome-devtools-axi";
       lva = "npx -y lavish-axi";
