@@ -91,3 +91,14 @@
 2026-07-10T04:50:16.070508Z  INFO herdr::logging: api request completed event="api.request.complete" subsystem="api" outcome="error" request_id="cli:pane:close" method="pane.close"
 2026-07-10T04:50:35.520730Z  INFO herdr::logging: api request received event="api.request.start" subsystem="api" outcome="started" request_id="cli:pane:close" method="pane.close" changes_ui=true
 2026-07-10T04:50:35.520804Z  INFO herdr::logging: api request completed event="api.request.complete" subsystem="api" outcome="error" request_id="cli:pane:close" method="pane.close"
+2026-07-10T05:00:54.948253Z  INFO herdr::platform::macos: raised server file descriptor soft limit previous=256 target=8192
+2026-07-10T05:00:54.948598Z  INFO herdr::api::server: api server listening path=/Users/jwalinshah/.config/herdr/sessions/myses/herdr.sock
+2026-07-10T05:00:54.948883Z  INFO herdr::app: using pane scrollback configuration pane_scrollback_limit_bytes=10000000
+2026-07-10T05:00:54.956329Z  INFO herdr::logging: api request received event="api.request.start" subsystem="api" outcome="started" request_id="cli:pane:close" method="pane.close" changes_ui=true
+2026-07-10T05:00:54.959997Z  INFO herdr::logging: checking for updates event="update.check.start" subsystem="update" outcome="started"
+2026-07-10T05:00:54.963937Z  INFO herdr::server::headless: client protocol socket listening path=/Users/jwalinshah/.config/herdr/sessions/myses/herdr-client.sock
+2026-07-10T05:00:54.963968Z  INFO herdr::server::headless: herdr server started api_socket=/Users/jwalinshah/.config/herdr/sessions/myses/herdr.sock client_socket=/Users/jwalinshah/.config/herdr/sessions/myses/herdr-client.sock
+2026-07-10T05:00:54.963982Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="server" outcome="started" pid=84265
+2026-07-10T05:00:54.964055Z  INFO herdr::logging: api request completed event="api.request.complete" subsystem="api" outcome="error" request_id="cli:pane:close" method="pane.close"
+2026-07-10T05:01:16.004877Z  INFO herdr::logging: api request received event="api.request.start" subsystem="api" outcome="started" request_id="cli:pane:close" method="pane.close" changes_ui=true
+2026-07-10T05:01:16.004955Z  INFO herdr::logging: api request completed event="api.request.complete" subsystem="api" outcome="error" request_id="cli:pane:close" method="pane.close"
