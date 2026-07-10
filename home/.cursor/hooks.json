@@ -1,10 +1,4 @@
 {
-  "hooks": {
-    "sessionStart": [
-      {
-        "command": "bash '/Users/jwalinshah/bin/herdr-agent-state.sh' session --source cursor --label cursor"
-      }
-    ]
-  },
+  "hooks": {},
   "version": 1
 }
