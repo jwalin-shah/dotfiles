@@ -2,7 +2,7 @@
   "env": {
     "ENABLE_TOOL_SEARCH": "true"
   },
-  "model": "opus",
+  "model": "sonnet",
   "hooks": {},
   "statusLine": {
     "type": "command",
