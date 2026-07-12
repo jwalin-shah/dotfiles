@@ -84,3 +84,17 @@ One symlink. One bash wrapper. One real binary. No loops.
   `~/bin/` that are NOT managed by Nix. They must be built separately by each project.
 - When pulling upstream, only `flake.nix` and `home.nix` need conflict resolution.
   The `captain/` directory is entirely additive.
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues at `jwalin-shah/dotfiles`. Use the `gh` CLI for all operations. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default canonical labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context repo. Read `CONTEXT.md` at root and `docs/adr/` for architectural decisions. See `docs/agents/domain.md`.
