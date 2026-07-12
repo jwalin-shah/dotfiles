@@ -1,5 +1,5 @@
 approvals_reviewer = "user"
-model = "gpt-5.6-sol"
+model = "gpt-5.6-terra"
 model_reasoning_effort = "medium"
 personality = "pragmatic"
 
@@ -25,9 +25,12 @@ trust_level = "trusted"
 [projects."/Users/jwalinshah/dotfiles"]
 trust_level = "trusted"
 
+[projects."/Users/jwalinshah/projects/bridge"]
+trust_level = "trusted"
+
 [tui.model_availability_nux]
 "gpt-5.5" = 4
-"gpt-5.6-sol" = 2
+"gpt-5.6-sol" = 4
 
 [features]
 hooks = true
