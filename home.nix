@@ -87,9 +87,9 @@ in
       c = "claude";
       cx = "command cx";
       codex = "cx";
-      gha = "npx -y gh-axi";
-      cda = "npx -y chrome-devtools-axi";
-      lva = "npx -y lavish-axi";
+      gha = "/opt/homebrew/bin/gh-axi";
+      cda = "/opt/homebrew/bin/chrome-devtools-axi";
+      lva = "/opt/homebrew/bin/lavish-axi";
       g = "git";
       gs = "git status";
       rm = "trash";
@@ -184,6 +184,13 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.gemini/settings.json";
   home.file.".gemini/AGENTS.md".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
+
+  home.activation.npmGlobalTools = config.lib.dag.entryAfter ["writeBoundary"] ''
+    (
+      export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:$PATH"
+      /opt/homebrew/bin/npm install -g gh-axi chrome-devtools-axi lavish-axi || true
+    )
+  '';
 
   home.activation.mergeRuntimeConfigs = config.lib.dag.entryAfter ["writeBoundary"] ''
     (

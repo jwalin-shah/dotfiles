@@ -176,6 +176,7 @@
       "btop"
       "clang-format"
       "cmake"
+      "container"
       "coreutils"
       "direnv"
       "dust"
