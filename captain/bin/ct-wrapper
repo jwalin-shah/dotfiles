@@ -15,5 +15,5 @@ exec "$HOME/.local/bin/secret-cache" exec -- bash -lc '
   ANTHROPIC_DEFAULT_FABLE_MODEL_SUPPORTED_CAPABILITIES="effort,xhigh_effort,max_effort" \
   ANTHROPIC_CUSTOM_MODEL_OPTION="z-ai/glm-5.2" \
   ANTHROPIC_CUSTOM_MODEL_OPTION_SUPPORTED_CAPABILITIES="effort,xhigh_effort,max_effort" \
-  exec npx -y @anthropic-ai/claude-code --dangerously-skip-permissions "$@"
+  exec /opt/homebrew/bin/claude --dangerously-skip-permissions "$@"
 ' bash "$@"
