@@ -139,7 +139,7 @@ else:
 fi
 
 # ── Step 4: Firstmate project registry ────────────────────────────
-FM_PROJECTS="$HOME/firstmate/projects"
+FM_PROJECTS="$HOME/projects/firstmate/projects"
 if [ -d "$FM_PROJECTS" ]; then
   if [ ! -e "$FM_PROJECTS/$NAME" ] && [ ! -e "$FM_PROJECTS/$NAME.git" ]; then
     echo "$PWD" > "$FM_PROJECTS/$NAME"

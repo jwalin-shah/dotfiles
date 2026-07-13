@@ -141,7 +141,6 @@ before working in that repo.
 | jw-tui | `~/projects/jw-tui` | Bubble Tea TUI for briefing/monitoring/approving threads | `go build` |
 | jw-adblock | `~/projects/jw-adblock` | C++ daemon -- fetches StevenBlack hosts, injects into /etc/hosts, flushes DNS | C++ build |
 | jw-watcher | `~/projects/jw-watcher` | C++ daemon -- macOS FSEvents watcher, auto-runs formatters on changed files | C++ build |
-| quota-core | `~/projects/quota-core` | Go CLI -- API usage quota collection/validation/display | `go build` |
 
 ### FirstMate Layer (1 repo)
 
@@ -490,7 +489,7 @@ showing a nonzero last-exit, worth checking). Also present but not
 nix-managed: tailscale (via `brew services`), no-mistakes (vendor-installed
 daemon).
 
-`jw-sentry`, `jw-sessiond`, and `quota-keychain-sync` were previously listed
+`jw-sentry`, and `jw-sessiond` were previously listed
 here but have no LaunchAgent anywhere on this machine as of 2026-07-13 --
 their binaries exist in `~/.local/bin` (source recoverable from GitHub) but
 are not deployed as services. If they're wanted, they need to be declared

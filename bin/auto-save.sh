@@ -8,11 +8,9 @@ LOG="$HOME_DIR/.local/share/jw/auto-save.log"
 mkdir -p "$(dirname "$LOG")"
 
 # Canonical repos to track. ~/projects/ auto-walks all sub-repos.
-# firstmate stays at ~/firstmate (orchestrator, not a project).
 # dotfiles is tracked separately since it's the config source.
 REPOS=(
   "$HOME_DIR/dotfiles"
-  "$HOME_DIR/firstmate"
   "$HOME_DIR/projects"
 )
 

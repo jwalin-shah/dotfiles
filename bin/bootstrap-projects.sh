@@ -5,14 +5,14 @@
 set -euo pipefail
 
 PROJECTS_DIR="${PROJECTS_DIR:-$HOME/projects}"
-FIRSTMATE="$HOME/firstmate"
+FIRSTMATE="$PROJECTS_DIR/firstmate"
 GH_OWNER="jwalin-shah"
 
 # ── Project list ─────────────────────────────────────────────────
 # Add new projects here. Order: most critical first.
 PROJECTS=(
   "$HOME/dotfiles"
-  "$HOME/firstmate"
+  "$PROJECTS_DIR/firstmate"
   "$PROJECTS_DIR/bridge"           # hard dep: ~/bin/bridge-ca symlinks into this repo
   "$PROJECTS_DIR/mintmux"
   "$PROJECTS_DIR/m5tools"
@@ -83,14 +83,6 @@ else
   dim "  → bridge — not found, skipping"
 fi
 
-if [ -d "$PROJECTS_DIR/quota-core" ]; then
-  dim "  → secret-cache — go build ./cmd/secret-cache"
-  (cd "$PROJECTS_DIR/quota-core" && go build -o "$HOME/.local/bin/secret-cache" ./cmd/secret-cache) \
-    && green "  ✓ secret-cache — built to ~/.local/bin/secret-cache" \
-    || red "  ✗ secret-cache — build failed"
-else
-  dim "  → secret-cache (quota-core) — not found, skipping"
-fi
 
 if [ -d "$HOME/dotfiles/tools/smc" ]; then
   dim "  → smc — make"
@@ -152,4 +144,4 @@ echo "Projects needing skills: $need_skills"
 echo "Projects needing docs:   $need_docs"
 echo
 echo "To automate: use firstmate scouts. One scout per project."
-echo "Example: cd ~/firstmate && fm-spawn.sh scout 'run /setup-matt-pocock-skills on dotfiles'"
+echo "Example: cd ~/projects/firstmate && fm-spawn.sh scout 'run /setup-matt-pocock-skills on dotfiles'"

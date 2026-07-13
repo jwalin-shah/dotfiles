@@ -274,8 +274,6 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/brave-axi";
   home.file."bin/cursor-login".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/cursor-login";
-  home.file."bin/quota-fetch".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/quota-fetch";
 
   # Utility scripts
   home.file."bin/audit-config-ownership.sh".source =

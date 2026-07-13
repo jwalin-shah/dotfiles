@@ -10,8 +10,7 @@ exclude_patterns:
 - '**/.cocoindex_code'
 include_paths:
 - /Users/jwalinshah/dotfiles
-- /Users/jwalinshah/firstmate
-- /Users/jwalinshah/projects/quota-core
+- /Users/jwalinshah/projects/firstmate
 - /Users/jwalinshah/projects/treehouse
 - /Users/jwalinshah/projects/mintmux
 - /Users/jwalinshah/projects/no-mistakes

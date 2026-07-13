@@ -134,7 +134,6 @@
   },
   "trustedWorkspaces": [
     "/Users/jwalinshah",
-    "/Users/jwalinshah/projects/quota-core",
     "/Users/jwalinshah/projects/mintmux/cmd/mm-route",
     "/Users/jwalinshah/projects",
     "/Users/jwalinshah/projects/firstmate",
@@ -142,7 +141,6 @@
     "/Users/jwalinshah/projects/mintmux",
     "/Users/jwalinshah/projects/cognee/cognee-mcp",
     "/Users/jwalinshah/.treehouse/mintmux-12f032/1/mintmux/cmd/mm-route",
-    "/Users/jwalinshah/projects/quota-core/internal/collect",
     "/Users/jwalinshah/projects/datamine"
   ]
 }
