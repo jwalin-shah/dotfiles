@@ -311,6 +311,7 @@
           PATH = defaultPATH;
           CACHING = "true";
           COGNEE_SKIP_CONNECTION_TEST = "true";
+          COGNEE_DATA_DIR = "${home}/.local/share/cognee";
         };
         StandardOutPath = "${home}/.local/share/jw/cognee-api.log";
         StandardErrorPath = "${home}/.local/share/jw/cognee-api.log";
