@@ -439,6 +439,23 @@
         StandardErrorPath = "${home}/.local/share/jw/inbox-server.log";
       };
     };
+
+    # voice-paste: pastes voice transcription into focused app.
+    # WatchPaths-triggered: only wakes when /tmp/ve-paste-ready is written.
+    # Built from ~/projects/voice-engine-swift (swift build -c release).
+    "com.jwalinshah.voice-paste" = {
+      serviceConfig = {
+        ProgramArguments = [ "${localBin}/voice-paste" ];
+        WatchPaths = [ "/tmp/ve-paste-ready" ];
+        RunAtLoad = false;
+        EnvironmentVariables = {
+          HOME = home;
+          PATH = defaultPATH;
+        };
+        StandardOutPath = "${home}/.local/share/jw/voice-paste.log";
+        StandardErrorPath = "${home}/.local/share/jw/voice-paste.log";
+      };
+    };
   };
 
   # -- Root Daemons --

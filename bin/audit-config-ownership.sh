@@ -81,6 +81,27 @@ check_content_match /Users/jwalinshah/bin/cx "$repo/captain/bin/cx-wrapper"
 check_content_match /Users/jwalinshah/.local/bin/oo "$repo/home/.local/bin/oo"
 check_content_match /Users/jwalinshah/.local/bin/rtldr "$repo/home/.local/bin/rtldr"
 
+# Bridge worker adapters and session backends (load-bearing — bridge and mintmux fail without these)
+check_content_match /Users/jwalinshah/bin/bridge-ca "$repo/captain/bin/bridge-ca"
+check_content_match /Users/jwalinshah/bin/bridge-ct "$repo/captain/bin/bridge-ct"
+check_content_match /Users/jwalinshah/bin/backends/herdr.sh "$repo/captain/bin/backends/herdr.sh"
+check_content_match /Users/jwalinshah/bin/backends/tmux.sh "$repo/captain/bin/backends/tmux.sh"
+check_content_match /Users/jwalinshah/bin/backends/orca.sh "$repo/captain/bin/backends/orca.sh"
+check_content_match /Users/jwalinshah/bin/backends/zellij.sh "$repo/captain/bin/backends/zellij.sh"
+
+# Research browser bridges
+check_content_match /Users/jwalinshah/bin/chatgpt-bridge "$repo/captain/bin/chatgpt-bridge"
+check_content_match /Users/jwalinshah/bin/gemini-bridge "$repo/captain/bin/gemini-bridge"
+check_content_match /Users/jwalinshah/bin/perplexity-bridge "$repo/captain/bin/perplexity-bridge"
+
+# Credential canary (called by com.jwalinshah.jw-cred-canary LaunchAgent)
+check_content_match /Users/jwalinshah/bin/jw-cred-canary.sh "$repo/captain/bin/jw-cred-canary.sh"
+
+# uv-managed tools: check the key binaries exist (uv tool install runs on rb, these prove it worked)
+for uv_bin in ccc cocoindex cognee-cli tldr secret-cache; do
+  [ -x "$HOME/.local/bin/$uv_bin" ] || echo "WARNING: uv tool binary missing: $uv_bin (run: uv tool install ...)"
+done
+
 stale_hits="$(
   rg -n \
     -g '!**/.git/**' \
@@ -89,8 +110,9 @@ stale_hits="$(
     -g '!**/node_modules/**' \
     -g '!**/audit-config-ownership.sh' \
     -g '!**/audit-doc-freshness.sh' \
+    -g '!**/captain/bin/backends/**' \
+    -g '!**/skills/**' \
     -e '/Users/jwalinshah/projects/machine-scratch' \
-    -e 'orca' \
     -e 'rtk' \
     -e 'machine-bootstrap router' \
     "$repo" || true

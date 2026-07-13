@@ -201,6 +201,20 @@ in
     )
   '';
 
+  # uv-managed tools: installs are idempotent (uv tool install is a no-op when
+  # already at the right version). These provide binaries that LaunchAgents and
+  # bridge's context assembly depend on. Without this, they're lost on fresh machine.
+  home.activation.uvTools = config.lib.dag.entryAfter ["writeBoundary"] ''
+    (
+      export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:$PATH"
+      uv tool install mlx-lm || true
+      uv tool install cocoindex-code || true
+      uv tool install cognee || true
+      uv tool install "llm-tldr[mcp]" || true
+      uv tool install secret-cache || true
+    )
+  '';
+
   home.activation.mergeRuntimeConfigs = config.lib.dag.entryAfter ["writeBoundary"] ''
     (
       export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:$PATH"
