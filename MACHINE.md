@@ -64,11 +64,10 @@ confirmed via `gh-axi repo list jwalin-shah`.
 | btw-v1 | yes | needs its own `uv` venv (see Python section) | OPEN |
 | jw-desk | yes | scaffold only — 2 commits, no implementation yet, NOT obsolete, NOT superseded by research-bridge (unrelated project, confirmed 2026-07-13) | early-stage, no action needed |
 | research-bridge | yes | `uv`/pip venv at `~/projects/research-bridge/.venv`, provides `chatgpt-bridge`/`gemini-bridge`/`perplexity-bridge` binaries | OK |
-| jw-core, jw-tui, jw-sentry, jw-sessiond, jw-agentd, jw-adblock, jw-watcher, quota-core, firstmate, cocoindex, cognee, treehouse, no-mistakes, gnhf, m5tools-adjacent, voice-engine-swift, modern-resume | mixed | not individually audited this pass | see `~/CLAUDE.md` §3 project map; `~/.local/bin` binary-level audit in progress (#12) |
+| quota-core, firstmate, cocoindex, cognee, treehouse, no-mistakes, gnhf, m5tools-adjacent, voice-engine-swift, modern-resume | mixed | not individually audited this pass | see `~/CLAUDE.md` §3 project map; `~/.local/bin` binary-level audit in progress (#12) |
 
-Everything else in `~/.local/bin` besides mintmux/m5tools (jw, jw-sentry,
-jw-sessiond, no-mistakes, jw-code-intel, etc.) — audit in progress, will be
-folded in here once done (`local-bin-usage-audit.md`).
+Everything else in `~/.local/bin` besides mintmux/m5tools (no-mistakes, etc.) — audit in progress, will be
+verified or purged based on usage. (`local-bin-usage-audit.md`).
 
 `bootstrap-projects.sh` now also clones any `PROJECTS` entry missing from
 disk via `gh-axi repo clone jwalin-shah/<name>` before building — a fresh

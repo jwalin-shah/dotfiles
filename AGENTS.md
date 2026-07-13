@@ -93,8 +93,6 @@ from its own project and must be built separately.
 | `treehouse` | `~/projects/treehouse` | Go | Git worktree pool manager. |
 | `mintmux` / `mm-ctl` | `~/projects/mintmux` | Go | PTY multiplexer. |
 | `no-mistakes` | `~/projects/no-mistakes` | Go | Automated PR pipeline. |
-| `jw-sentry` | `~/projects/jw-sentry` | Rust | Darwin daemon — kqueue watcher. |
-| `jw-sessiond` | `~/projects/jw-sessiond` | Go | Darwin daemon — transcript watcher. |
 | `jw-agentd` | `~/projects/jw-agentd` | Go | Darwin daemon — JSON-RPC text cleanup. |
 | `jw-watcher` | `~/projects/jw-watcher` | C++ | macOS FSEvents watcher. |
 | `jw-adblock` | `~/projects/jw-adblock` | C++ | Hosts-block daemon. |

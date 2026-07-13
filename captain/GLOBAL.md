@@ -133,15 +133,12 @@ Every project lives under `~/projects/`. The project's own `AGENTS.md` is
 the canonical source for build, test, architecture, and quirks. Read it
 before working in that repo.
 
-### Core jw-* Ecosystem (10 repos)
+### Core jw-* Ecosystem (8 repos)
 
 | Project | Path | Purpose | Build |
 |---------|------|---------|-------|
 | jw-core | `~/projects/jw-core` | Orchestrator backend -- intent decompose, phase dispatch, SQLite state, gates, HTTP API | `make` or `go build -o jw .` |
 | jw-tui | `~/projects/jw-tui` | Bubble Tea TUI for briefing/monitoring/approving threads | `go build` |
-| jw-sentry | `~/projects/jw-sentry` | Darwin daemon -- kqueue watches events.jsonl, ONNX quality checks, macOS notifications | `cargo build` |
-| jw-sessiond | `~/projects/jw-sessiond` | Darwin daemon -- kqueue watches transcript files, emits normalized events | `go build` |
-| jw-agentd | `~/projects/jw-agentd` | Darwin Go daemon -- JSON-RPC text cleanup via MLX Python subprocess | `go build` |
 | jw-adblock | `~/projects/jw-adblock` | C++ daemon -- fetches StevenBlack hosts, injects into /etc/hosts, flushes DNS | C++ build |
 | jw-watcher | `~/projects/jw-watcher` | C++ daemon -- macOS FSEvents watcher, auto-runs formatters on changed files | C++ build |
 | quota-core | `~/projects/quota-core` | Go CLI -- API usage quota collection/validation/display | `go build` |
