@@ -301,7 +301,7 @@
       serviceConfig = {
         ProgramArguments = [
           "/bin/bash" "-c"
-          "source ${home}/.config/jw/models.env && exec ${uvBin}/cognee/bin/cognee-cli serve --host 127.0.0.1 --port 8000"
+          "source ${home}/.config/jw/models.env && exec ${uvBin}/cognee/bin/cognee-cli serve"
         ];
         KeepAlive = true;
         RunAtLoad = true;
@@ -309,6 +309,8 @@
         EnvironmentVariables = {
           HOME = home;
           PATH = defaultPATH;
+          HOST = "127.0.0.1";
+          PORT = "8000";
           CACHING = "true";
           COGNEE_SKIP_CONNECTION_TEST = "true";
           COGNEE_DATA_DIR = "${home}/.local/share/cognee";
