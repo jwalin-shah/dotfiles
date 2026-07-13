@@ -1,7 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-exec "$HOME/.local/bin/secret-cache" exec -- bash -lc '
+# secret-cache doesn't fetch TOKENROUTER_API_KEY (bug, unresolved - the key
+# is confirmed present in Infisical at /providers/tokenrouter in the dev
+# environment, but never lands in secret-cache's local cache on refresh).
+# Stopgap: pull it directly via the infisical CLI until that's fixed.
+export TOKENROUTER_API_KEY="$(infisical secrets get api_key --env=dev --path=/providers/tokenrouter --plain 2>/dev/null)"
+if [ -z "$TOKENROUTER_API_KEY" ]; then
+  echo "ct: failed to fetch TOKENROUTER_API_KEY from Infisical (/providers/tokenrouter, env=dev)" >&2
+  exit 1
+fi
+
+exec bash -lc '
   CLAUDE_CONFIG_DIR="$HOME/.claude-token" \
   ANTHROPIC_API_KEY="$TOKENROUTER_API_KEY" \
   ANTHROPIC_BASE_URL="https://api.tokenrouter.com" \
