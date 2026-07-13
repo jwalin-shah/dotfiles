@@ -522,3 +522,4 @@ report it to the captain before touching it.
 ---
 
 *Last updated: July 6, 2026 — removed retired tools (cg, ccp, face, fm CLI) and the deleted ~/.local/share/fm path after a live-system audit.*
+ 
