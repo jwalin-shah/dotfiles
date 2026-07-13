@@ -79,6 +79,7 @@ Every tool below is installed and available. Use the right tool for the job.
 
 | Tool | Command | Purpose | When to Use |
 |------|---------|---------|-------------|
+| tasks-axi | `tasks-axi` | Provider-agnostic AI task CLI | Decompose, prioritize, track tasks. |
 | tuxedo | `tuxedo` | todo.txt TUI | Captain's personal task list at `~/Notes/todo.txt`. |
 
 ### Browser and Desktop

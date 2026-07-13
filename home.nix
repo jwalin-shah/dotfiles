@@ -197,7 +197,7 @@ in
   home.activation.npmGlobalTools = config.lib.dag.entryAfter ["writeBoundary"] ''
     (
       export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:$PATH"
-      /opt/homebrew/bin/npm install -g gh-axi chrome-devtools-axi lavish-axi || true
+      /opt/homebrew/bin/npm install -g gh-axi chrome-devtools-axi lavish-axi tasks-axi || true
     )
   '';
 
