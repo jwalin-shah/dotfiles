@@ -291,15 +291,17 @@ in
   home.file."bin/jw-init".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/jw-init";
 
-  # Bridge worker adapters (load-bearing for bridge spawn pipeline)
+  # Bridge worker adapters - source lives in ~/projects/bridge/scripts/
+  # (versioned alongside the Go spawn code that calls them)
   home.file."bin/bridge-ca".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/bridge-ca";
+    config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-ca";
   home.file."bin/bridge-ct".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/bridge-ct";
+    config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-ct";
 
-  # Mintmux session backends (tmux only - orca/zellij/herdr not installed)
+  # Mintmux session backends - tmux only (orca/zellij/herdr not installed)
+  # source lives in ~/projects/bridge/scripts/ alongside the adapter scripts
   home.file."bin/backends/tmux.sh".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/backends/tmux.sh";
+    config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/tmux-backend.sh";
 
   # Research browser bridges (CDP automation for ChatGPT/Gemini/Perplexity)
   home.file."bin/chatgpt-bridge".source =
