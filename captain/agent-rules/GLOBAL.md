@@ -100,7 +100,6 @@ Each launcher sets `OPENCODE_CONFIG` to a profile overlay:
 | Command | Tool | Secrets |
 |---|---|---|
 | `cx` | Codex CLI | Codex/ChatGPT account |
-| `cu` | Cursor Agent CLI | Cursor account auth |
 | `agy` | Antigravity CLI | Own auth |
 
 `ccp` is not an active launcher.

@@ -64,7 +64,6 @@ Be direct, concrete, and opinionated. Surface confusion instead of hiding it.
 | `ko` | Kilo | ChatGPT Plus OAuth | Kilo via OpenAI provider |
 | `kt` | Kilo | TokenRouter | Kilo via TokenRouter |
 | `cx` | Codex CLI | Codex/ChatGPT account | |
-| `cu` | Cursor Agent CLI | Cursor account auth | |
 | `agy` | Antigravity CLI | Own auth | |
 
 OAuth account A needs `/login` once in `~/.claude-a`. OpenCode global
