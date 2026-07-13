@@ -84,10 +84,8 @@ check_content_match /Users/jwalinshah/.local/bin/rtldr "$repo/home/.local/bin/rt
 # Bridge worker adapters and session backends (load-bearing — bridge and mintmux fail without these)
 check_content_match /Users/jwalinshah/bin/bridge-ca "$repo/captain/bin/bridge-ca"
 check_content_match /Users/jwalinshah/bin/bridge-ct "$repo/captain/bin/bridge-ct"
-check_content_match /Users/jwalinshah/bin/backends/herdr.sh "$repo/captain/bin/backends/herdr.sh"
+# tmux backend only - orca/zellij/herdr not installed on this machine
 check_content_match /Users/jwalinshah/bin/backends/tmux.sh "$repo/captain/bin/backends/tmux.sh"
-check_content_match /Users/jwalinshah/bin/backends/orca.sh "$repo/captain/bin/backends/orca.sh"
-check_content_match /Users/jwalinshah/bin/backends/zellij.sh "$repo/captain/bin/backends/zellij.sh"
 
 # Research browser bridges
 check_content_match /Users/jwalinshah/bin/chatgpt-bridge "$repo/captain/bin/chatgpt-bridge"

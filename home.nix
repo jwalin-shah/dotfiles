@@ -297,15 +297,9 @@ in
   home.file."bin/bridge-ct".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/bridge-ct";
 
-  # Mintmux session backends (load-bearing for mintmux session creation)
-  home.file."bin/backends/herdr.sh".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/backends/herdr.sh";
+  # Mintmux session backends (tmux only - orca/zellij/herdr not installed)
   home.file."bin/backends/tmux.sh".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/backends/tmux.sh";
-  home.file."bin/backends/orca.sh".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/backends/orca.sh";
-  home.file."bin/backends/zellij.sh".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/backends/zellij.sh";
 
   # Research browser bridges (CDP automation for ChatGPT/Gemini/Perplexity)
   home.file."bin/chatgpt-bridge".source =
