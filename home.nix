@@ -87,6 +87,7 @@ in
       c = "claude";
       cx = "command cx";
       codex = "cx";
+      cur = "cursor";
       gha = "/opt/homebrew/bin/gh-axi";
       cda = "/opt/homebrew/bin/chrome-devtools-axi";
       lva = "/opt/homebrew/bin/lavish-axi";
