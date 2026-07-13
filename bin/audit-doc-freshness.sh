@@ -35,7 +35,6 @@ MD_LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 STALE_TOKENS = [
     "/Users/jwalinshah/projects/machine-scratch",
     "tool-guard",
-    "orca",
     "machine-bootstrap router",
 ]
 

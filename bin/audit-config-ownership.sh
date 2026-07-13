@@ -96,8 +96,13 @@ check_content_match /Users/jwalinshah/bin/perplexity-bridge "$repo/captain/bin/p
 check_content_match /Users/jwalinshah/bin/jw-cred-canary.sh "$repo/captain/bin/jw-cred-canary.sh"
 
 # uv-managed tools: check the key binaries exist (uv tool install runs on rb, these prove it worked)
-for uv_bin in ccc cocoindex cognee-cli tldr secret-cache; do
+for uv_bin in ccc cocoindex cognee-cli tldr; do
   [ -x "$HOME/.local/bin/$uv_bin" ] || echo "WARNING: uv tool binary missing: $uv_bin (run: uv tool install ...)"
+done
+
+# Built binaries: check that bootstrap-projects.sh Phase 0 ran
+for built_bin in secret-cache bridge mintmux; do
+  [ -x "$HOME/.local/bin/$built_bin" ] || echo "WARNING: built binary missing: $built_bin (run bootstrap-projects.sh)"
 done
 
 stale_hits="$(

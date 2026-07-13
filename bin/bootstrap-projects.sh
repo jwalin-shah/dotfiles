@@ -83,6 +83,15 @@ else
   dim "  → bridge — not found, skipping"
 fi
 
+if [ -d "$PROJECTS_DIR/quota-core" ]; then
+  dim "  → secret-cache — go build ./cmd/secret-cache"
+  (cd "$PROJECTS_DIR/quota-core" && go build -o "$HOME/.local/bin/secret-cache" ./cmd/secret-cache) \
+    && green "  ✓ secret-cache — built to ~/.local/bin/secret-cache" \
+    || red "  ✗ secret-cache — build failed"
+else
+  dim "  → secret-cache (quota-core) — not found, skipping"
+fi
+
 
 log "=== Phase 1: setup-matt-pocock-skills ==="
 for project in "${PROJECTS[@]}"; do

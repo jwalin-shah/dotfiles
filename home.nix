@@ -210,8 +210,7 @@ in
       uv tool install mlx-lm || true
       uv tool install cocoindex-code || true
       uv tool install cognee || true
-      uv tool install "llm-tldr[mcp]" || true
-      uv tool install secret-cache || true
+      uv tool install "llm-tldr" || true
     )
   '';
 
