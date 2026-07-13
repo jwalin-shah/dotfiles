@@ -28,12 +28,21 @@ gaps.outer.top = 0
 gaps.outer.right = 0
 
 # ── Auto-routing ──────────────────────────────────────────────
-on-window-detected = [
-    { if = 'test %{app-bundle-id} = com.mitchellh.ghostty',  run = 'move-node-to-workspace 1' },
-    { if = 'test %{app-bundle-id} = com.brave.Browser',      run = 'move-node-to-workspace 5' },
-    { if = 'test %{app-bundle-id} = com.apple.MobileSMS',    run = 'layout floating' },
-    { if = 'test %{window-title} ~= picture.in.picture',     run = 'layout floating' },
-]
+[[on-window-detected]]
+if.app-id = 'com.mitchellh.ghostty'
+run = 'move-node-to-workspace 1'
+
+[[on-window-detected]]
+if.app-id = 'com.brave.Browser'
+run = 'move-node-to-workspace 5'
+
+[[on-window-detected]]
+if.app-id = 'com.apple.MobileSMS'
+run = ['layout floating']
+
+[[on-window-detected]]
+if.window-title-regex-substring = 'picture.in.picture'
+run = ['layout floating']
 
 # ── Monitor assignment ────────────────────────────────────────
 [workspace-to-monitor-force-assignment]
