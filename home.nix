@@ -277,6 +277,34 @@ in
   home.file."bin/jw-init".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/jw-init";
 
+  # Bridge worker adapters (load-bearing for bridge spawn pipeline)
+  home.file."bin/bridge-ca".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/bridge-ca";
+  home.file."bin/bridge-ct".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/bridge-ct";
+
+  # Mintmux session backends (load-bearing for mintmux session creation)
+  home.file."bin/backends/herdr.sh".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/backends/herdr.sh";
+  home.file."bin/backends/tmux.sh".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/backends/tmux.sh";
+  home.file."bin/backends/orca.sh".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/backends/orca.sh";
+  home.file."bin/backends/zellij.sh".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/backends/zellij.sh";
+
+  # Research browser bridges (CDP automation for ChatGPT/Gemini/Perplexity)
+  home.file."bin/chatgpt-bridge".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/chatgpt-bridge";
+  home.file."bin/gemini-bridge".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/gemini-bridge";
+  home.file."bin/perplexity-bridge".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/perplexity-bridge";
+
+  # Credential canary (called by LaunchAgent com.jwalinshah.jw-cred-canary)
+  home.file."bin/jw-cred-canary.sh".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/jw-cred-canary.sh";
+
   # Global linter/formatter configs
   home.file.".config/lint/.prettierrc".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/lint/.prettierrc";

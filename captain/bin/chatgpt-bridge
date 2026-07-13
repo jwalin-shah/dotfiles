@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# ChatGPT Bridge — programmatic access to ChatGPT via CDP browser automation.
+# Uses the captain's Brave profile for authentication.
+exec ~/projects/research-bridge/.venv/bin/chatgpt-bridge "$@"

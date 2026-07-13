@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Gemini Bridge — programmatic access to Gemini via CDP browser automation.
+exec ~/projects/research-bridge/.venv/bin/gemini-bridge "$@"
