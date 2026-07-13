@@ -2,7 +2,7 @@
   "env": {
     "ENABLE_TOOL_SEARCH": "true"
   },
-  "model": "z-ai/glm-5.2",
+  "model": "opus",
   "hooks": {},
   "statusLine": {
     "type": "command",
