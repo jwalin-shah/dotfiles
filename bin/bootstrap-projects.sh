@@ -21,6 +21,13 @@ PROJECTS=(
   "$PROJECTS_DIR/voice-engine-swift"
 )
 
+# ── Helpers ──────────────────────────────────────────────────────
+green() { printf '\033[32m%s\033[0m\n' "$*"; }
+red()   { printf '\033[31m%s\033[0m\n' "$*"; }
+dim()   { printf '\033[2m%s\033[0m\n' "$*"; }
+
+log()   { printf '[%s] %s\n' "$(date +%H:%M:%S)" "$*"; }
+
 # ── Step -1: clone missing repos ──────────────────────────────────
 # Repos referenced above but not present on disk get cloned from
 # github.com/$GH_OWNER/<name> via gh-axi (per ~/CLAUDE.md tool policy:
@@ -35,13 +42,6 @@ for project in "${PROJECTS[@]}"; do
     && green "  ✓ $name — cloned" \
     || red "  ✗ $name — clone failed (does the repo exist under $GH_OWNER?)"
 done
-
-# ── Helpers ──────────────────────────────────────────────────────
-green() { printf '\033[32m%s\033[0m\n' "$*"; }
-red()   { printf '\033[31m%s\033[0m\n' "$*"; }
-dim()   { printf '\033[2m%s\033[0m\n' "$*"; }
-
-log()   { printf '[%s] %s\n' "$(date +%H:%M:%S)" "$*"; }
 
 skill_ready() {
   # Check if setup-matt-pocock-skills has been run on this project

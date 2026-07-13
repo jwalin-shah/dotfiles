@@ -21,7 +21,10 @@ Avoid raw `cat`, `ls`, `grep`, `find`, `git`, and `gh` from agent shell unless a
 
 - Do not use native write/delete tools from agent harnesses when shell policy is available.
 - Prefer `apply_patch` for source edits.
-- Use `fastedit edit` only for intentional model-assisted edits.
+- Use `fastedit edit` only for intentional model-assisted edits, if `fastedit`
+  is installed (not confirmed on PATH as of 2026-07-13 — verify with
+  `command -v fastedit` before relying on this; standard Edit/Write tools
+  are the fallback).
 - Touch only files required by the task.
 
 ---

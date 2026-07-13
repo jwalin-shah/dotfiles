@@ -477,16 +477,27 @@ attention is the scarcest resource on the machine.
 
 ## 12. Background Services
 
-18 LaunchAgents run on this machine. Manage them with `jw-status`:
+Manage LaunchAgents with `jw-status`:
 
 ```bash
 jw-status list        # List all services and their health
 jw-status validate    # Audit all services
 ```
 
-Key services: jw-sentry, jw-sessiond, jw-watch, mintmux, voice-engine,
-cognee-nightly, cocoindex, no-mistakes, tailscale, m5fand, m5logd,
-quota-keychain-sync, mlx-chat-server, llama-embed-server, coderank-embed-server.
+Key services, confirmed running via `launchctl list` and declared in
+`configuration.nix` as of 2026-07-13 (see `~/dotfiles/MACHINE.md` for the
+full audited manifest): mintmux, inbox-server, llama-embed-server,
+auto-save, m5logd, m5fand (root daemon), mlx-chat-server, cocoindex-daemon,
+coderank-embed-server, voice-engine, jw-cred-canary, cognee-api (currently
+showing a nonzero last-exit, worth checking). Also present but not
+nix-managed: tailscale (via `brew services`), no-mistakes (vendor-installed
+daemon).
+
+`jw-sentry`, `jw-sessiond`, and `quota-keychain-sync` were previously listed
+here but have no LaunchAgent anywhere on this machine as of 2026-07-13 --
+their binaries exist in `~/.local/bin` (source recoverable from GitHub) but
+are not deployed as services. If they're wanted, they need to be declared
+and started; if not, this note can be deleted once confirmed intentional.
 
 Do not restart a service unless you have a reason. If a service is unhealthy,
 report it to the captain before touching it.
