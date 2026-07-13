@@ -165,6 +165,13 @@ before working in that repo.
 
 ## 4. Global Conventions
 
+### Strict Documentation Policy (The "No Willy-Nilly" Rule)
+
+- **Zero Undocumented Bloat:** No agent is permitted to `brew install`, `pip install`, `npm install -g`, or download a Hugging Face model without explicitly documenting it.
+- If a new ML Model is downloaded, it **MUST** be immediately logged in `~/dotfiles/MODELS.md` alongside its purpose and the tool that uses it.
+- If a new system tool or dependency is installed, it **MUST** be captured in `~/dotfiles/MACHINE.md` and `configuration.nix`.
+- Undocumented tools or models found on this machine are considered rogue infrastructure and are subject to immediate deletion.
+
 ### Path Conventions
 
 ```
