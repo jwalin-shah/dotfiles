@@ -281,6 +281,15 @@ in
   home.file."bin/cocoindex-health.sh".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/cocoindex-health.sh";
 
+  home.file."bin/mlx-chat-daemon.sh".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/mlx-chat-daemon.sh";
+  home.file."bin/mlx-chat-health.sh".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/mlx-chat-health.sh";
+  home.file."bin/cognee-daemon.sh".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/cognee-daemon.sh";
+  home.file."bin/cognee-health.sh".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/cognee-health.sh";
+
   # Utility scripts
   home.file."bin/audit-config-ownership.sh".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/audit-config-ownership.sh";

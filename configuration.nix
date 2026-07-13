@@ -241,21 +241,34 @@
 
     # -- Local AI Stack --
     # mlx-chat: Gemma 4 4B chat server on :8080
+    # Wrapped in a deterministic shell for single-instance + startup validation
     "com.jwalinshah.mlx-chat-server" = {
       serviceConfig = {
-        ProgramArguments = [
-          "/bin/bash" "-c"
-          "source ${home}/.config/jw/models.env && exec ${uvBin}/mlx-lm/bin/mlx_lm.server --model \"$JW_CHAT_MODEL_REPO\" --host 127.0.0.1 --port 8080 --trust-remote-code"
-        ];
+        ProgramArguments = [ "${dotfilesBin}/mlx-chat-daemon.sh" ];
         KeepAlive = true;
         RunAtLoad = true;
-        ThrottleInterval = 10;
+        ThrottleInterval = 30;
+        WorkingDirectory = home;
         EnvironmentVariables = {
           HOME = home;
           PATH = defaultPATH;
         };
         StandardOutPath = "${home}/.local/share/jw/mlx-chat.log";
         StandardErrorPath = "${home}/.local/share/jw/mlx-chat.log";
+      };
+    };
+
+    # mlx-chat health check: pings server every 5min, cleans up orphans
+    "com.jwalinshah.mlx-chat-health" = {
+      serviceConfig = {
+        ProgramArguments = [ "${dotfilesBin}/mlx-chat-health.sh" ];
+        StartInterval = 300;
+        StandardOutPath = "${home}/.local/share/jw/mlx-chat-health.log";
+        StandardErrorPath = "${home}/.local/share/jw/mlx-chat-health.log";
+        EnvironmentVariables = {
+          HOME = home;
+          PATH = defaultPATH;
+        };
       };
     };
 
@@ -300,15 +313,14 @@
     };
 
     # cognee: knowledge graph API on :8000
+    # Wrapped in a deterministic shell for single-instance + startup validation
     "com.jwalinshah.cognee-api" = {
       serviceConfig = {
-        ProgramArguments = [
-          "/bin/bash" "-c"
-          "source ${home}/.config/jw/models.env && exec ${uvBin}/cognee/bin/cognee-cli serve"
-        ];
+        ProgramArguments = [ "${dotfilesBin}/cognee-daemon.sh" ];
         KeepAlive = true;
         RunAtLoad = true;
-        ThrottleInterval = 10;
+        ThrottleInterval = 30;
+        WorkingDirectory = home;
         EnvironmentVariables = {
           HOME = home;
           PATH = defaultPATH;
@@ -320,6 +332,20 @@
         };
         StandardOutPath = "${home}/.local/share/jw/cognee-api.log";
         StandardErrorPath = "${home}/.local/share/jw/cognee-api.log";
+      };
+    };
+
+    # cognee health check: pings API every 5min, cleans up orphans
+    "com.jwalinshah.cognee-health" = {
+      serviceConfig = {
+        ProgramArguments = [ "${dotfilesBin}/cognee-health.sh" ];
+        StartInterval = 300;
+        StandardOutPath = "${home}/.local/share/jw/cognee-health.log";
+        StandardErrorPath = "${home}/.local/share/jw/cognee-health.log";
+        EnvironmentVariables = {
+          HOME = home;
+          PATH = defaultPATH;
+        };
       };
     };
 
