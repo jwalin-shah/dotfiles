@@ -108,15 +108,17 @@ fi
 # these scans (e.g. a binary with no hardcoded paths) cannot crash the run.
 set +e
 
-# 1. Every tool in TOOL_REGISTRY.md marked ACTIVE must be on PATH
-echo "=== verifying TOOL_REGISTRY.md ACTIVE tools ==="
+# 1. Every tool in AGENTS.md's tool registry marked ACTIVE must be on PATH
+# (GLOBAL.md/TOOL_REGISTRY.md were merged into home/AGENTS.md 2026-07-13 -
+# it's the one file every agent harness actually auto-loads.)
+echo "=== verifying AGENTS.md tool registry ACTIVE tools ==="
 while IFS= read -r line; do
-  tool=$(echo "$line" | sed 's/^[[:space:]]*| \([a-zA-Z0-9_-]*\).*/\1/')
+  tool=$(echo "$line" | sed 's/^[[:space:]]*| `\([a-zA-Z0-9_-]*\).*/\1/')
   [ -z "$tool" ] && continue
-  command -v "$tool" >/dev/null 2>&1 || echo "WARNING: $tool is ACTIVE in TOOL_REGISTRY.md but not on PATH"
-done < <(grep '| ACTIVE' "$repo/captain/agent-rules/TOOL_REGISTRY.md" 2>/dev/null || true)
+  command -v "$tool" >/dev/null 2>&1 || echo "WARNING: $tool is ACTIVE in AGENTS.md but not on PATH"
+done < <(grep '| ACTIVE' "$repo/home/AGENTS.md" 2>/dev/null || true)
 
-# 2. ~/.agent-rules/ must exist
+# 2. ~/.agent-rules/ must exist (KNOWN_ISSUES.md still lives there)
 [ -e "$HOME/.agent-rules" ] || echo "WARNING: ~/.agent-rules/ does not exist"
 
 # 3. Every LaunchAgent binary referenced in configuration.nix must exist.
@@ -141,10 +143,10 @@ while IFS= read -r line; do
   curl -sf --max-time 3 "http://${addr}${path}" >/dev/null 2>&1 || echo "WARNING: service health check failed: $addr$path"
 done < <(grep -v '^#' "$HOME/.config/jw/services.conf" 2>/dev/null | grep '|')
 
-# 5. Verify agent-rules symlink chain is intact
-for f in "$HOME/.agent-rules/GLOBAL.md" "$HOME/.agent-rules/TOOL_REGISTRY.md" "$HOME/.agent-rules/KNOWN_ISSUES.md"; do
-  [ -f "$f" ] || echo "WARNING: agent rule not reachable: $f"
-done
+# 5. Verify agent-rules symlink chain is intact (GLOBAL.md/TOOL_REGISTRY.md
+# retired 2026-07-13, merged into home/AGENTS.md - only KNOWN_ISSUES.md
+# still lives here as a standalone file)
+[ -f "$HOME/.agent-rules/KNOWN_ISSUES.md" ] || echo "WARNING: agent rule not reachable: $HOME/.agent-rules/KNOWN_ISSUES.md"
 
 printf 'audit-config-ownership: ok\n'
 

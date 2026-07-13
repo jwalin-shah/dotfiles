@@ -126,6 +126,9 @@ in
   # Claude config dirs (3) -- same settings, symlinked
   home.file.".claude/settings.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/settings.json";
+  home.file.".claude/settings.local.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/settings.local.json";
+  home.file.".claude/settings.local.json".force = true;
   home.file.".claude/mcp.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/mcp.json";
   home.file.".claude/mcp.json".force = true;
@@ -135,6 +138,9 @@ in
   home.file.".claude-a/settings.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/settings.json";
   home.file.".claude-a/settings.json".force = true;
+  home.file.".claude-a/settings.local.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/settings.local.json";
+  home.file.".claude-a/settings.local.json".force = true;
   home.file.".claude-a/mcp.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude-a/mcp.json";
   home.file.".claude-a/mcp.json".force = true;
@@ -144,6 +150,9 @@ in
   home.file.".claude-token/settings.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/settings.json";
   home.file.".claude-token/settings.json".force = true;
+  home.file.".claude-token/settings.local.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/settings.local.json";
+  home.file.".claude-token/settings.local.json".force = true;
   home.file.".claude-token/mcp.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude-token/mcp.json";
   home.file.".claude-token/mcp.json".force = true;

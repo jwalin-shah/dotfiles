@@ -1,18 +1,7 @@
 # overall agent instructions
 
-Shared by all agents (Claude, OpenCode, Codex, Cursor, Gemini, Kilo) via
-symlink fan-out in `home.nix` — this is the one file every tool auto-loads
-on its own, so it's the actual enforcement point. Corrected 2026-07-13:
-this used to just tell agents to go read two more files
-(`~/.agent-rules/GLOBAL.md`, `~/.agent-rules/TOOL_REGISTRY.md`) as a manual
-step. Nothing auto-loads those, so nothing guaranteed they were ever read —
-confirmed by this file going unread for an entire session until directly
-asked about. Their content is merged in below instead.
-
-`~/CLAUDE.md` (machine constitution: hardware, approval gates, verification
-requirements, escalation rules) stays separate — it's genuinely Claude Code
-specific (auto-loaded by that harness's own CLAUDE.md discovery), not
-something the other five tools read.
+`~/CLAUDE.md` has the machine constitution: hardware, approval gates,
+verification requirements, escalation rules.
 
 ## Tool hierarchy
 
@@ -89,11 +78,6 @@ Read `~/.agent-rules/KNOWN_ISSUES.md` before any bash-heavy session.
 
 ## Tool registry — live status
 
-This is the actual harness-verification list: what's installed and on
-PATH right now, so an agent doesn't have to guess or rediscover it every
-session. Keep this section accurate — it's the thing other agents check
-against, so a wrong entry here is worse than no entry.
-
 Status key: **ACTIVE** = installed and on PATH, use by default. **REMOVED**
 = decommissioned, do not reference or suggest installing. **UNVERIFIED** =
 not found in public registries, use the base tool instead.
@@ -124,10 +108,6 @@ Blocked for agents (captain-only): `rm`, `sudo`, `security` (ask the
 captain), `export` (use `secret-cache exec -- <command>` instead), GNU
 coreutils aliases like `gcat`/`gls`/`ggrep`/`gfind` (bypass policy — the one
 allowed GNU tool is `gtimeout`).
-
-Always confirm before: destructive git ops (force-push, branch delete, PR
-close), paid or external compute runs, bulk writes to Drive/Linear/Notion
-or similar.
 
 ### Skills (`~/.agents/skills/`)
 
