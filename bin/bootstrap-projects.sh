@@ -92,6 +92,16 @@ else
   dim "  → secret-cache (quota-core) — not found, skipping"
 fi
 
+if [ -d "$HOME/dotfiles/tools/smc" ]; then
+  dim "  → smc — make"
+  (cd "$HOME/dotfiles/tools/smc" && make && cp smc "$HOME/.local/bin/smc") \
+    && green "  ✓ smc — built to ~/.local/bin/smc" \
+    || red "  ✗ smc — build failed"
+else
+  dim "  → smc — not found in dotfiles/tools, skipping"
+fi
+
+
 
 log "=== Phase 1: setup-matt-pocock-skills ==="
 for project in "${PROJECTS[@]}"; do

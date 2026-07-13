@@ -101,7 +101,7 @@ for uv_bin in ccc cocoindex cognee-cli tldr; do
 done
 
 # Built binaries: check that bootstrap-projects.sh Phase 0 ran
-for built_bin in secret-cache bridge mintmux; do
+for built_bin in secret-cache bridge mintmux smc; do
   [ -x "$HOME/.local/bin/$built_bin" ] || echo "WARNING: built binary missing: $built_bin (run bootstrap-projects.sh)"
 done
 
