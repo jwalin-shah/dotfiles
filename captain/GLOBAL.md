@@ -163,6 +163,26 @@ before working in that repo.
 
 ---
 
+## 3.5. Macro-Architecture Boundary Map
+
+This map mathematically defines the external dependencies (Edge Nodes) of the `bridge` orchestrator. It is the unforgeable baseline. If `bridge` code deviates from this list without authorization, the build fails.
+
+### Proven Sub-Process Executions (os.Exec)
+- `gh` (GitHub CLI) -> Used for remote PR/Issue state
+- `git` -> Used for Treehouse worktree pool management
+- `cocoindex` -> Used for semantic search pipeline
+- `python3` -> Used for fallback ML/Search scripts
+- `mm-ctl` -> Used for Mintmux PTY session multiplexing
+- `ctx7` -> Used for library context resolution
+- `pgrep` / `kill` -> Used for process management
+
+### Proven Network/IPC Boundaries
+- `localhost:8000` -> `cognee-api` (Memory/Knowledge Graph)
+- `~/.local/share/jw/quota.db` -> Synchronous LLM token quota tracking
+- `~/Library/Logs/voice-engine/audio/` -> Dictation transcript polling
+
+---
+
 ## 4. Global Conventions
 
 ### Strict Documentation Policy (The "No Willy-Nilly" Rule)
