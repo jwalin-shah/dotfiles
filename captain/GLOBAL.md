@@ -119,11 +119,11 @@ Every tool below is installed and available. Use the right tool for the job.
 
 | Service | Port | Model | Purpose |
 |---------|------|-------|---------|
-| MLX Chat | `:8080` | Gemma 4 4B, Qwen3.5 9B, Qwen2.5 1.5B, Qwen3 Embed 0.6B | Local inference, Cognee LLM backend |
+| MLX Chat | `:8080` | LiquidAI LFM2.5-8B-A1B | Local inference, Cognee LLM backend |
 | Llama Embed | `:8081` | Qwen3-Embedding-0.6B (GGUF Q8) | Embeddings for Cognee |
-| CodeRank Embed | `:8082` | CodeRankEmbed (GGUF Q8) | Code embeddings for Kilo |
-| Cognee | `:8000` | v1.2.2 — Gemma 4 4B + Qwen3 Embed | AI memory + knowledge graphs |
-| CocoIndex | — | 5,148 chunks, 252 files | Semantic code search |
+| CodeRank Embed | `:8082` | CodeRankEmbed (GGUF Q8) | Code embeddings for all Codebase vectorization |
+| Cognee | `:8000` | v1.2.2 — LFM 8B + Qwen3 Embed | AI memory + knowledge graphs |
+| CocoIndex | — | Daemon Watcher | Incremental semantic code search |
 
 ---
 
@@ -133,39 +133,33 @@ Every project lives under `~/projects/`. The project's own `AGENTS.md` is
 the canonical source for build, test, architecture, and quirks. Read it
 before working in that repo.
 
-### Core jw-* Ecosystem (8 repos)
+### Core Orchestrator (1 repo)
 
 | Project | Path | Purpose | Build |
 |---------|------|---------|-------|
-| jw-core | `~/projects/jw-core` | Orchestrator backend -- intent decompose, phase dispatch, SQLite state, gates, HTTP API | `make` or `go build -o jw .` |
-| jw-tui | `~/projects/jw-tui` | Bubble Tea TUI for briefing/monitoring/approving threads | `go build` |
-| jw-adblock | `~/projects/jw-adblock` | C++ daemon -- fetches StevenBlack hosts, injects into /etc/hosts, flushes DNS | C++ build |
-| jw-watcher | `~/projects/jw-watcher` | C++ daemon -- macOS FSEvents watcher, auto-runs formatters on changed files | C++ build |
+| bridge | `~/projects/bridge` | The ultimate orchestrator backend -- intent decompose, synchronous SQLite quota tracking, phase dispatch, agent worktrees | `go build` |
 
-### FirstMate Layer (1 repo)
+### Legacy Agent Layer (1 repo)
 
 | Project | Path | Purpose | Build |
 |---------|------|---------|-------|
-| firstmate | `~/projects/firstmate` | Agent orchestration system -- spawns crewmates in isolated worktrees, supervises via tmux, gates merges | `bin/fm-bootstrap.sh` |
+| firstmate | `~/projects/firstmate` | Legacy orchestration -- currently being deprecated in favor of bridge | `bin/fm-bootstrap.sh` |
 
-### Shared Infrastructure (5 repos)
+### Shared Infrastructure (3 repos)
 
 | Project | Path | Purpose |
 |---------|------|---------|
-| cocoindex | `~/projects/cocoindex` | Incremental indexing framework (Rust+Python) |
-| cognee | `~/projects/cognee` | AI memory platform -- ECL pipeline, knowledge graphs |
 | mintmux | `~/projects/mintmux` | Go PTY multiplexer -- Unix socket protocol, Lua scripting |
 | treehouse | `~/projects/treehouse` | Go CLI -- git worktree pool manager |
-| no-mistakes | `~/projects/no-mistakes` | Go CLI -- automated PR pipelines |
+| tensor-logic | `~/projects/tensor-logic` | Machine Learning orchestration and reasoning logic |
 
-### Tools and Utilities (6 repos)
+### Tools and Utilities (3 repos)
 
 | Project | Path | Purpose |
 |---------|------|---------|
-| gnhf | `~/projects/gnhf` | Node CLI -- runs coding agents in a loop, auto-commits each iteration |
-| m5tools | `~/projects/m5tools` | C+Go -- M-series hardware monitoring |
-| voice-engine-swift | `~/projects/voice-engine-swift` | macOS dictation menubar app -- CoreML, zero-latency |
-| modern-resume | `~/projects/modern-resume` | Typst resume templates + Python generator |
+| m5tools | `~/projects/m5tools` | C+Go -- M-series hardware monitoring daemons |
+| voice-engine-swift | `~/projects/voice-engine-swift` | macOS dictation menubar app -- CoreML, local vector memory |
+| btw-v1 | `~/projects/btw-v1` | Custom scripts / background workflows |
 
 ---
 
