@@ -170,6 +170,10 @@
     onActivation.autoUpdate = false;
     onActivation.extraFlags = [ "--force" ];
 
+    taps = [
+      "nikitabobko/tap"
+    ];
+
     brews = [
       "bat"
       "borders"
