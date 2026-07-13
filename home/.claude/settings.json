@@ -2,7 +2,7 @@
   "env": {
     "ENABLE_TOOL_SEARCH": "true"
   },
-  "model": "sonnet",
+  "model": "z-ai/glm-5.2",
   "hooks": {},
   "statusLine": {
     "type": "command",
