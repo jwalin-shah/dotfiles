@@ -19,12 +19,10 @@ Avoid raw `cat`, `ls`, `grep`, `find`, `git`, and `gh` from agent shell unless a
 
 ## Section 2: File Mutation
 
-- Do not use native write/delete tools from agent harnesses when shell policy is available.
-- Prefer `apply_patch` for source edits.
-- Use `fastedit edit` only for intentional model-assisted edits, if `fastedit`
-  is installed (not confirmed on PATH as of 2026-07-13 — verify with
-  `command -v fastedit` before relying on this; standard Edit/Write tools
-  are the fallback).
+- Native harness write/edit tools (Edit, Write, apply_patch, etc.) are
+  allowed and preferred — corrected 2026-07-13, this previously said the
+  opposite and referenced `apply_patch`/`fastedit` as the required path,
+  neither of which reflects actual practice.
 - Touch only files required by the task.
 
 ---

@@ -13,9 +13,8 @@ Vendor harness schemas: `ctx7 docs` — see `docs/vendor/agent-harnesses/llms.tx
 | Tool | Status | What it does | Agent-facing use |
 |---|---|---|---|
 | `llm-tldr` | ACTIVE | Structure/arch/search on local code | Before opening many files |
-| `fastedit` | ACTIVE | AST-aware file edits | `edit`/`rename` need `tldr references` (tldr-code dispatcher) |
 | `jq` / `yq` | ACTIVE | Structured data | Direct bash OK |
-| `du -s` / `du -sh` | ACTIVE | Parseable disk usage | Direct bash OK — not `dust` |
+| `du -s` / `du -sh` | ACTIVE | Parseable disk usage | Direct bash OK — not `dust`. Note: `dust` is on `~/CLAUDE.md`'s always-available system-utility list (it's installed and fine for the captain to use interactively); this line only restricts *agent-initiated* invocations, which should use `du` for stable parseable output instead. Not a real contradiction, just a different scope. |
 | `lavish-axi` | ACTIVE | Human review surface for HTML artifacts | When agent ships review artifacts |
 | `chrome-devtools-axi` | ACTIVE | Browser automation | UI testing / scraping |
 | `ctx7` | ACTIVE | Context7 library docs lookup + `find-docs` skill | Library docs / API references |
@@ -24,19 +23,21 @@ Vendor harness schemas: `ctx7 docs` — see `docs/vendor/agent-harnesses/llms.tx
 | `treehouse` | ACTIVE | Pool of reusable git worktrees | Parallel agents on one repo |
 | `githits` | ACTIVE | Indexed search/grep/read across open-source code (CLI, no MCP) | Real-world code examples, dependency source |
 | `inf` (inference.net) | ACTIVE | Catalyst gateway/tracing/evals/training | Observability + fine-tuning workflow |
-| `pioneer` (fastino) | ACTIVE | Pioneer datasets/training/inference | SLM fine-tuning, NER, GLiNER |
-| `bun` | INFRA | Runtime for Pioneer CLI | Don't call directly |
+| `pioneer` (fastino) | PLANNED (not on PATH, verified 2026-07-13) | Pioneer datasets/training/inference | SLM fine-tuning, NER, GLiNER |
+| `bun` | INFRA | Runtime for Pioneer CLI (also not on PATH pending `pioneer`) | Don't call directly |
 | `gtimeout` / `timeout` | ACTIVE | Bound long-running live smoke tests | Use only around tests/agent probes |
 | `githits-axi`, `coco-axi`, `cognee-axi` | UNVERIFIED | Not found in public registries | Use base tools |
 
 ## Skills installed (`~/.agents/skills/`)
 
-| Skill | Source | When it triggers |
-|---|---|---|
-| `find-docs` | `ctx7 setup --cli --opencode` (Context7) | Any library/framework/SDK/cloud-service docs question |
-| `tool-policy` | House skill, `skills/tool-policy/` | Tool policy edits, hook debugging, harness verify |
-| `pioneer-api` | House skill, symlinked from `skills/pioneer-api/` (content copied from Pioneer's official `guides/agent-skills.md`) | Pioneer dataset/training/eval/inference work |
-| `inference-net` | House skill, symlinked from `skills/inference-net/` | Catalyst gateway/tracing, HALO, `inf` CLI work |
+This table previously listed 4 skills (`find-docs`, `tool-policy`,
+`pioneer-api`, `inference-net`) that do not exist anywhere in
+`~/.agents/skills/`, and omitted all 30 real skills that do — corrected
+2026-07-13. 25/30 are nix-managed symlinks (current); 5 are real unmanaged
+local directories not declared in `home.nix` (a reproducibility gap):
+`computer-use`, `orchestration`, `gh-axi`, `githits`, `tldr`. Run
+`ls ~/.agents/skills/` for the live list rather than trusting a static table
+here — that's exactly the drift this correction is meant to stop recurring.
 
 ## Launchers
 
