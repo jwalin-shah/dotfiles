@@ -30,9 +30,9 @@ gaps.outer.right = 0
 # ── Auto-routing ──────────────────────────────────────────────
 on-window-detected = [
     { if = 'test %{app-bundle-id} = com.mitchellh.ghostty',  run = 'move-node-to-workspace 1' },
-    { if = 'test %{app-bundle-id} = com.apple.MobileSMS',    run = 'move-node-to-workspace 2' },
     { if = 'test %{app-bundle-id} = com.brave.Browser',      run = 'move-node-to-workspace 5' },
-    { if = 'test %{window-title} ~= picture.in.picture',     run = ['layout floating', 'move-node-to-workspace 4'] },
+    { if = 'test %{app-bundle-id} = com.apple.MobileSMS',    run = 'layout floating' },
+    { if = 'test %{window-title} ~= picture.in.picture',     run = 'layout floating' },
 ]
 
 # ── Monitor assignment ────────────────────────────────────────
