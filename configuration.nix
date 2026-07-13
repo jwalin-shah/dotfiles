@@ -396,19 +396,6 @@
       };
     };
 
-    # jw-cred-canary: credential expiry checker, 9am + 9pm
-    "com.jwalinshah.jw-cred-canary" = {
-      serviceConfig = {
-        ProgramArguments = [ "/bin/bash" "${home}/bin/jw-cred-canary.sh" ];
-        StartCalendarInterval = [
-          { Hour = 9; Minute = 0; }
-          { Hour = 21; Minute = 0; }
-        ];
-        StandardOutPath = "${home}/.local/share/jw/cred-canary.log";
-        StandardErrorPath = "${home}/.local/share/jw/cred-canary.log";
-      };
-    };
-
     # voice-engine: macOS dictation menubar app
     "com.jwalinshah.voice-engine" = {
       serviceConfig = {
