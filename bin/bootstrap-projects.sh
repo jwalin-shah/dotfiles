@@ -13,6 +13,7 @@ GH_OWNER="jwalin-shah"
 PROJECTS=(
   "$HOME/dotfiles"
   "$HOME/firstmate"
+  "$PROJECTS_DIR/bridge"           # hard dep: ~/bin/bridge-ca symlinks into this repo
   "$PROJECTS_DIR/mintmux"
   "$PROJECTS_DIR/m5tools"
   "$PROJECTS_DIR/treehouse"
@@ -73,8 +74,16 @@ if [ -d "$PROJECTS_DIR/m5tools" ]; then
 else
   dim "  → m5tools — not found, skipping"
 fi
+if [ -d "$PROJECTS_DIR/bridge" ]; then
+  dim "  → bridge — go build ./cmd/bridge"
+  (cd "$PROJECTS_DIR/bridge" && go build -o "$HOME/.local/bin/bridge" ./cmd/bridge) \
+    && green "  ✓ bridge — built to ~/.local/bin/bridge" \
+    || red "  ✗ bridge — build failed"
+else
+  dim "  → bridge — not found, skipping"
+fi
 
-# ── Step 1: setup-matt-pocock-skills ─────────────────────────────
+
 log "=== Phase 1: setup-matt-pocock-skills ==="
 for project in "${PROJECTS[@]}"; do
   name=$(basename "$project")
