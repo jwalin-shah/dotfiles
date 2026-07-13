@@ -31,6 +31,7 @@ in
   home.sessionVariables = {
     EDITOR = "nvim";
     NLTK_DATA = "${config.home.homeDirectory}/.local/share/nltk_data";
+    GOPATH = "${config.home.homeDirectory}/.local/share/go";
     PATH = "${config.home.homeDirectory}/.cargo/bin:${config.home.homeDirectory}/.local/bin:${config.home.homeDirectory}/bin:/opt/homebrew/bin:$PATH";
   };
 
