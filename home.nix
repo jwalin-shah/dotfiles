@@ -85,7 +85,6 @@ in
       cat = "bat";
       grep = "rg";
       find = "fd";
-      c = "claude";
       cx = "command cx";
       codex = "cx";
       cur = "cursor";
@@ -260,6 +259,8 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/kt-wrapper";
   home.file."bin/cx".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/cx-wrapper";
+  home.file."bin/com".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/com-wrapper";
   home.file."bin/jw-restart".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/jw-restart";
   home.file."bin/openwiki".source =
@@ -274,6 +275,11 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/brave-axi";
   home.file."bin/cursor-login".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/cursor-login";
+
+  home.file."bin/cocoindex-daemon.sh".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/cocoindex-daemon.sh";
+  home.file."bin/cocoindex-health.sh".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/cocoindex-health.sh";
 
   # Utility scripts
   home.file."bin/audit-config-ownership.sh".source =

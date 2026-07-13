@@ -235,7 +235,8 @@
     localBin = "${home}/.local/bin";
     uvBin = "${home}/.local/share/uv/tools";
     brewBin = "/opt/homebrew/bin";
-    defaultPATH = "${localBin}:${brewBin}:/usr/local/bin:/usr/bin:/bin";
+    dotfilesBin = "${home}/.dotfiles/bin";
+    defaultPATH = "${localBin}:${dotfilesBin}:${brewBin}:/usr/local/bin:/usr/bin:/bin";
   in {
 
     # -- Local AI Stack --
@@ -323,12 +324,13 @@
     };
 
     # cocoindex: incremental code index daemon (watch + auto-reindex)
+    # Wrapped in a deterministic shell for single-instance + startup validation
     "com.jwalinshah.cocoindex-daemon" = {
       serviceConfig = {
-        ProgramArguments = [ "${uvBin}/cocoindex-code/bin/ccc" "run-daemon" ];
+        ProgramArguments = [ "${dotfilesBin}/cocoindex-daemon.sh" ];
         KeepAlive = true;
         RunAtLoad = true;
-        ThrottleInterval = 10;
+        ThrottleInterval = 30;
         WorkingDirectory = home;
         EnvironmentVariables = {
           HOME = home;
@@ -336,6 +338,20 @@
         };
         StandardOutPath = "${home}/.local/share/cocoindex/daemon-stdout.log";
         StandardErrorPath = "${home}/.local/share/cocoindex/daemon-stderr.log";
+      };
+    };
+
+    # cocoindex health check: pings daemon every 5min, cleans up orphans
+    "com.jwalinshah.cocoindex-health" = {
+      serviceConfig = {
+        ProgramArguments = [ "${dotfilesBin}/cocoindex-health.sh" ];
+        StartInterval = 300;
+        StandardOutPath = "${home}/.local/share/cocoindex/health-stdout.log";
+        StandardErrorPath = "${home}/.local/share/cocoindex/health-stderr.log";
+        EnvironmentVariables = {
+          HOME = home;
+          PATH = defaultPATH;
+        };
       };
     };
 
