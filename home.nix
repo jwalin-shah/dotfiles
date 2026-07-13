@@ -77,7 +77,6 @@ in
       pull = "git pull";
       m = "git switch main";
       rb = "cd ~/dotfiles && ./rebuild.sh";
-      ls = "eza";
       ll = "eza -l";
       la = "eza -la";
       lt = "eza --tree";
