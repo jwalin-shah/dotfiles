@@ -5,6 +5,7 @@ ln -sfn "$DIR" ~/.dotfiles
 
 # Automatically pre-trust third-party Homebrew taps before Nix invokes homebrew-bundle
 brew trust felixkratz/formulae 2>/dev/null || true
+brew trust nikitabobko/tap 2>/dev/null || true
 
 sudo darwin-rebuild switch --flake ~/.dotfiles#mac
 "$DIR/bin/audit-config-ownership.sh"
