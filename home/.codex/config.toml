@@ -6,6 +6,7 @@ notify = [
     "/Users/jwalinshah/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient",
     "turn-ended",
 ]
+service_tier = "default"
 
 [projects."/Users/jwalinshah"]
 trust_level = "trusted"
@@ -61,9 +62,6 @@ enabled = true
 [plugins."visualize@openai-bundled"]
 enabled = true
 
-[plugins."browser@openai-bundled"]
-enabled = true
-
 [plugins."documents@openai-primary-runtime"]
 enabled = true
 
@@ -79,8 +77,11 @@ enabled = true
 [plugins."template-creator@openai-primary-runtime"]
 enabled = true
 
+[plugins."browser@openai-bundled"]
+enabled = true
+
 [marketplaces.openai-bundled]
-last_updated = "2026-07-14T19:13:26Z"
+last_updated = "2026-07-14T20:02:49Z"
 source_type = "local"
 source = "/Users/jwalinshah/.codex/.tmp/bundled-marketplaces/openai-bundled"
 
@@ -125,3 +126,4 @@ ENABLE_TOOL_SEARCH = "true"
 conversationDetailMode = "STEPS_COMMANDS"
 ambient-suggestions-enabled = false
 show-context-window-usage = true
+followUpQueueMode = "queue"
