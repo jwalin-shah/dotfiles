@@ -19,8 +19,6 @@
 	process = git-lfs filter-process
 	required = true
 	clean = git-lfs clean -- %f
-[core]
-	hooksPath = /Users/jwalinshah/.git-hooks
 [commit]
 	template = /Users/jwalinshah/.git-commit-template
 [credential "https://github.com"]
