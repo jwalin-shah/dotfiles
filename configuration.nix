@@ -279,7 +279,7 @@
           "${brewBin}/llama-server"
           "-m" "${home}/.cache/huggingface/hub/models--Qwen--Qwen3-Embedding-0.6B-GGUF/snapshots/main/Qwen3-Embedding-0.6B-Q8_0.gguf"
           "--embedding" "--host" "127.0.0.1" "--port" "8081"
-          "-c" "512" "-np" "1" "-b" "512" "-ub" "512" "-ngl" "99"
+          "-c" "2048" "-np" "1" "-b" "2048" "-ub" "2048" "-ngl" "99"
         ];
         KeepAlive = true;
         RunAtLoad = true;
@@ -300,6 +300,7 @@
           "-m" "${home}/.cache/huggingface/hub/models--handwoven8588--CodeRankEmbed-GGUF/snapshots/14be4104a35a5f4e32e6e225955ccf271fb5b956/CodeRankEmbed-Q8_0.gguf"
           "--embedding" "--host" "127.0.0.1" "--port" "8082"
           "-c" "2048" "-np" "1" "-b" "2048" "-ub" "2048" "-ngl" "99"
+          "--flash-attn" "on"
         ];
         KeepAlive = true;
         RunAtLoad = true;
