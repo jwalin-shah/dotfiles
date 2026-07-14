@@ -1,19 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# secret-cache doesn't fetch TOKENROUTER_API_KEY (bug, unresolved - the key
-# is confirmed present in Infisical at /providers/tokenrouter in the dev
-# environment, but never lands in secret-cache's local cache on refresh).
-# Stopgap: pull it directly via the infisical CLI until that's fixed.
-export TOKENROUTER_API_KEY="$(infisical secrets get api_key --env=dev --path=/providers/tokenrouter --plain 2>/dev/null)"
-if [ -z "$TOKENROUTER_API_KEY" ]; then
-  echo "ct: failed to fetch TOKENROUTER_API_KEY from Infisical (/providers/tokenrouter, env=dev)" >&2
+tokenrouter_api_key="$(security find-generic-password -a TOKENROUTER_API_KEY -s bridge-secrets -w)" || {
+  echo "ct: TOKENROUTER_API_KEY is missing from the bridge-secrets Keychain service; run 'bridge secrets refresh'" >&2
+  exit 1
+}
+if [ -z "$tokenrouter_api_key" ]; then
+  echo "ct: TOKENROUTER_API_KEY is empty in the bridge-secrets Keychain service; run 'bridge secrets refresh'" >&2
   exit 1
 fi
 
-exec bash -lc '
+exec env \
   CLAUDE_CONFIG_DIR="$HOME/.claude-token" \
-  ANTHROPIC_API_KEY="$TOKENROUTER_API_KEY" \
+  ANTHROPIC_API_KEY="$tokenrouter_api_key" \
   ANTHROPIC_BASE_URL="https://api.tokenrouter.com" \
   ANTHROPIC_DEFAULT_OPUS_MODEL="deepseek/deepseek-v4-pro" \
   ANTHROPIC_DEFAULT_OPUS_MODEL_SUPPORTED_CAPABILITIES="effort,xhigh_effort,max_effort" \
@@ -25,5 +24,4 @@ exec bash -lc '
   ANTHROPIC_DEFAULT_FABLE_MODEL_SUPPORTED_CAPABILITIES="effort,xhigh_effort,max_effort" \
   ANTHROPIC_CUSTOM_MODEL_OPTION="z-ai/glm-5.2" \
   ANTHROPIC_CUSTOM_MODEL_OPTION_SUPPORTED_CAPABILITIES="effort,xhigh_effort,max_effort" \
-  exec /opt/homebrew/bin/claude --dangerously-skip-permissions "$@"
-' bash "$@"
+  /opt/homebrew/bin/claude --dangerously-skip-permissions "$@"

@@ -43,7 +43,7 @@ These apply to EVERY change in this repo:
 3. **The Markdown tier.** Start with a prompt. Only add code when the prompt breaks.
 4. **Width over depth.** Thin wrappers covering the spectrum. No deep framework.
 5. **Secrets in env/keychain, never in files.** No hardcoded keys. No .env files.
-   Use `secret-cache` backed by macOS Keychain.
+   Use the Bridge secret adapter backed by macOS Keychain.
 6. **One source of truth.** Dotfiles owns the machine. No competing Nix configs.
 7. **verify before keep.** For every file: does it exist? Is it referenced? Is it
    still needed? If any answer is no, delete it.
@@ -66,7 +66,7 @@ Full talk: `docs/theo-browne-ai-psychosis.md`
 ```
 ~/bin/claude → Nix → claude-wrapper → npx @anthropic-ai/claude-code
 ~/bin/ca     → Nix → ca-wrapper      → npx + OAuth config
-~/bin/ct     → Nix → ct-wrapper      → secret-cache exec → npx + TokenRouter
+~/bin/ct     → Nix → ct-wrapper      → Bridge Keychain → Claude Code + TokenRouter
 ~/bin/agy    → Nix → agy-wrapper     → /opt/homebrew/bin/agy
 ~/bin/cx     → Nix → cx-wrapper      → /opt/homebrew/bin/codex
 ~/bin/cu     → Nix → cu-wrapper      → Cursor.app

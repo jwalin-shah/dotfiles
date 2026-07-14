@@ -52,10 +52,10 @@ Be direct, concrete, and opinionated. Surface confusion instead of hiding it.
 
 ## Section 6: Secret And Provider Policy
 
-- Provider keys come from the local secret adapter through `secret-cache exec -- <command>`.
+- Provider keys come from the Bridge secret adapter through macOS Keychain.
 - `TOKENROUTER_API_KEY` is the only TokenRouter key name.
 - Do not export provider keys globally or write them into shell startup files.
-- Launchers should not call Infisical directly except for explicit refresh flows.
+- Launchers read Keychain directly; only `bridge secrets refresh` calls Infisical.
 - If a required provider key is missing, report the missing canonical env var and the launcher that needs it.
 
 ---
@@ -69,7 +69,7 @@ Use these short names instead of bare `claude`, `opencode`, `codex`, `cursor-age
 | Command | Route | Notes |
 |---|---|---|
 | `c` | Account A OAuth | Primary Claude launcher; no gateway key |
-| `ct` | TokenRouter gateway | Uses `TOKENROUTER_API_KEY` through `secret-cache exec` |
+| `ct` | TokenRouter gateway | Reads `TOKENROUTER_API_KEY` from the `bridge-secrets` Keychain service |
 | `ca` | Account A via `claude-launch` | Compatibility alias; prefer `c` |
 
 OAuth account A needs `/login` once in `~/.claude-a`.

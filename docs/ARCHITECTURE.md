@@ -135,7 +135,7 @@ configure the correct environment.
 
 ```
 ~/bin/c    -> Claude Code (OAuth account A)
-~/bin/ct   -> secret-cache exec -> Claude Code (TokenRouter key)
+~/bin/ct   -> bridge-secrets Keychain -> Claude Code (TokenRouter key)
 ~/bin/ca   -> claude-launch -> Claude Code (compatibility OAuth)
 
 ~/.local/bin/oo -> OpenCode (ChatGPT Plus OAuth, no secret-cache)
