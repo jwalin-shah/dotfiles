@@ -220,6 +220,7 @@
     casks = [
       "aerospace"
       "brave-browser"
+      "chatgpt-classic"
       "cursor"
       "ghostty"
       "karabiner-elements"
