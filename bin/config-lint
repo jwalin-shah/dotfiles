@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# config-lint — validates that documented configuration matches reality.
+# Every launcher in AGENTS.md must exist on disk. Every launcher on disk
+# must be documented in AGENTS.md. No dead entries.
+set -euo pipefail
+
+HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)
+AGENTS_MD="$HERE/../home/AGENTS.md"
+BIN_DIR="$HOME/bin"
+fails=0
+ok()   { printf 'ok - %s\n' "$1"; }
+bad()  { printf 'not ok - %s\n' "$1" >&2; fails=$((fails + 1)); }
+
+# Extract launcher commands from the Launchers table in AGENTS.md.
+documented=$(sed -n '/^## Launchers/,/^## /p' "$AGENTS_MD" | \
+    grep -oE '^\| `[a-z]+` \|' | sed 's/^| `//;s/` |$//')
+
+# Check every documented launcher exists on disk.
+for cmd in $documented; do
+    if [ ! -x "$BIN_DIR/$cmd" ]; then
+        bad "launcher '$cmd' listed in AGENTS.md but $BIN_DIR/$cmd does not exist or is not executable"
+    else
+        ok "launcher '$cmd' exists and is executable"
+    fi
+done
+
+# Check every launcher in ~/bin is documented.
+# Skip: backup files, directories, bridge adapter scripts, utility/automation scripts.
+# These are NOT launchers — they don't exec an LLM tool.
+for bin in "$BIN_DIR"/*; do
+    [ -x "$bin" ] || [ -d "$bin" ] && continue  # skip non-executable files and dirs
+    [ -f "$bin" ] || continue
+    name=$(basename "$bin")
+
+    # Skip patterns (non-launcher categories).
+    case "$name" in
+        *.backup)         continue ;;  # backup files
+        *-bridge|*-backup|*-axi) continue ;;  # bridge wrappers, backups, automation wrappers
+        audit-*)          continue ;;  # audit scripts
+        brave-*)          continue ;;  # browser automation
+        chatgpt-bridge|gemini-bridge|perplexity-bridge) continue ;;  # research bridges
+        claude|com|ctx7)  continue ;;  # bare command wrappers
+        cursor-login|jw-*|openwiki|auto-save.sh) continue ;;  # utility scripts
+        backends|test-adapter|config-lint) continue ;;  # infrastructure
+    esac
+
+    # Check if this name appears in the documented list.
+    found=0
+    for d in $documented; do
+        [ "$name" = "$d" ] && found=1 && break
+    done
+    [ "$found" -eq 1 ] && continue
+
+    bad "launcher '$name' exists in $BIN_DIR but is not documented in AGENTS.md Launchers table"
+done
+
+if [ "$fails" -eq 0 ]; then
+    echo "config-lint: all checks passed"
+else
+    echo "config-lint: $fails failure(s)" >&2
+    exit 1
+fi

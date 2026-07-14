@@ -43,32 +43,35 @@ Be direct, concrete, and opinionated. Surface confusion instead of hiding it.
 
 ## Secret and provider policy
 
-- Provider keys come from the local secret adapter through
-  `secret-cache exec -- <command>`.
+- Provider keys come from the Bridge secret adapter (`internal/secrets/` in bridge):
+  `infisical export` → macOS Keychain → worker env. Never touch disk.
 - `TOKENROUTER_API_KEY` is the only TokenRouter key name.
 - Do not export provider keys globally or write them into shell startup files.
-- Launchers should not call Infisical directly except for explicit refresh flows.
-- If a required provider key is missing, report the missing canonical env
-  var and the launcher that needs it.
+- Launchers read secrets from Keychain directly (`security find-generic-password -w`).
+- `bridge secrets refresh` to reload from Infisical.
+- If a required provider key is missing, fail hard — never silently skip.
+- `secret-cache` is decommissioned. Bridge secrets replaces it.
 
 ## Launchers
 
-| Command | Tool | Auth | Notes |
+Every entry is verified — a launcher listed here that doesn't exist on disk is a
+config error. `config-lint` enforces this.
+
+| Command | Tool | Auth | Routing (task → model) |
 |---|---|---|---|
-| `c` | Claude Code | Account A OAuth | Primary launcher; no gateway key |
-| `ct` | Claude Code | TokenRouter (`TOKENROUTER_API_KEY` via `secret-cache exec`) | |
-| `ca` | Claude Code | Account A via `claude-launch` | Compatibility alias; prefer `c` |
-| `oo` | OpenCode | ChatGPT Plus OAuth | `openai/gpt-5.5`, profile `oo.json` |
-| `ot` | OpenCode | TokenRouter | `deepseek/deepseek-v4-flash`, profile `ot.json` |
-| `op` | OpenCode | Pioneer API key | profile `op.json` |
-| `ko` | Kilo | ChatGPT Plus OAuth | Kilo via OpenAI provider |
-| `kt` | Kilo | TokenRouter | Kilo via TokenRouter |
-| `cx` | Codex CLI | Codex/ChatGPT account | |
+| `ca` | Claude Code | Account A OAuth | Heavy: Opus 4.8. Light: Haiku 4.5. |
+| `ct` | Claude Code | TokenRouter | Heavy: deepseek-v4-pro. Medium: deepseek-v4-flash. Light: kimi-k2.7-code. |
+| `cx` | Codex CLI | Codex/ChatGPT account | OpenAI models via ChatGPT Plus. |
+| `oo` | OpenCode | ChatGPT Plus OAuth | gpt-5.5 for heavy work (profile `oo.json`). |
+| `ot` | OpenCode | TokenRouter | deepseek-v4-flash for routine work (profile `ot.json`). |
+| `ko` | Kilo | ChatGPT Plus OAuth | Kilo via OpenAI provider. |
+| `kt` | Kilo | TokenRouter | Kilo via TokenRouter. |
+| `cu` | Cursor Agent | Own auth | Cursor's built-in agent. |
 | `agy` | Antigravity CLI | Own auth | |
 
 OAuth account A needs `/login` once in `~/.claude-a`. OpenCode global
 config: `~/.config/opencode/opencode.json`; each launcher sets
-`OPENCODE_CONFIG` to a profile overlay. `ccp` is not an active launcher.
+`OPENCODE_CONFIG` to a profile overlay.
 
 Deprecated aliases: `githits-axi` -> `githits`, `coco-axi` -> `cocoindex-code`,
 `cognee-axi` -> `cognee-cli`, `context7`/`c7` -> `ctx7`.
@@ -104,7 +107,7 @@ not found in public registries, use the base tool instead.
 | `githits-axi`, `coco-axi`, `cognee-axi` | UNVERIFIED | Not found in public registries | Use the deprecated-alias mapping above instead |
 
 Blocked for agents (captain-only): `rm`, `sudo`, `security` (ask the
-captain), `export` (use `secret-cache exec -- <command>` instead), GNU
+captain), `export` (use bridge secrets adapter instead), GNU
 coreutils aliases like `gcat`/`gls`/`ggrep`/`gfind` (bypass policy — the one
 allowed GNU tool is `gtimeout`).
 
