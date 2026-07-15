@@ -351,10 +351,12 @@
 
     # ── AI Stack (unified daemon-wrapper) ────────────────────────────
     # mlx-chat: Qwen3.5 9B on :8080 (model from models.env)
+    # Use python binary directly (not the script) so exec -a works for ps naming.
     "com.jwalinshah.mlx-chat-daemon" = {
       serviceConfig = {
         ProgramArguments = [
           "${dotfilesBin}/daemon-wrapper"
+          "${uvBin}/mlx-lm/bin/python"
           "${uvBin}/mlx-lm/bin/mlx_lm.server"
           "--model" "$JW_CHAT_MODEL_REPO"
           "--host" "127.0.0.1" "--port" "8080"
@@ -431,10 +433,12 @@
     };
 
     # cocoindex: incremental code index daemon (watch + auto-reindex)
+    # Use python binary directly so exec -a works for ps naming.
     "com.jwalinshah.cocoindex-daemon" = {
       serviceConfig = {
         ProgramArguments = [
           "${dotfilesBin}/daemon-wrapper"
+          "${uvBin}/cocoindex-code/bin/python"
           "${uvBin}/cocoindex-code/bin/ccc"
           "run-daemon"
         ];
