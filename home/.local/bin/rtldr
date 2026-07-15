@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # rtldr - unified code intelligence CLI
 # search: fans out to ccc (code) + cognee (session memory) simultaneously
-# structural: delegates to tldr-code
+# structural: delegates to tldr (llm-tldr v1.5.2)
 set -euo pipefail
 
 CMD="${1:-help}"
@@ -107,7 +107,7 @@ async def run():
 asyncio.run(run())
 PYEOF
     echo ""
-    echo "── tldr-code ────────────────────────────────────────"
+    echo "── tldr ───────────────────────────────────────────"
     tldr --version 2>/dev/null && echo "tldr: ok" || echo "tldr: not found"
     echo ""
     echo "── mcp wiring ───────────────────────────────────────"
@@ -116,13 +116,13 @@ PYEOF
     ;;
   help|--help|-h)
     cat <<'EOF'
-rtldr - unified code intelligence (ccc + cognee + tldr-code)
+rtldr - unified code intelligence (ccc + cognee + tldr)
 
   search <query>        code search (ccc) + session memory (cognee) combined
   recall <query>        session memory only (cognee)
   remember <text>       store in session memory (cognee)
 
-Structural (tldr-code):
+Structural (tldr / llm-tldr v1.5.2):
   context <entry>       ranked call-graph context for entry point
   trace <fn>            blast radius: who calls this function
   calls [path]          full call graph

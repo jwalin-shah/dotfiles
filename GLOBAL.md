@@ -72,7 +72,6 @@ Every tool below is installed and available. Use the right tool for the job.
 
 | Tool | Command | Purpose | When to Use |
 |------|---------|---------|-------------|
-| no-mistakes | `no-mistakes` | Automated PR pipeline (test, lint, review, CI) | Every ship task on no-mistakes projects. |
 | gh-axi | `gh-axi` | GitHub AI helper | All GitHub operations: PRs, issues, reviews, merges. |
 
 ### Task Management
@@ -117,13 +116,17 @@ Every tool below is installed and available. Use the right tool for the job.
 
 ### Local AI Stack (always running)
 
-| Service | Port | Model | Purpose |
-|---------|------|-------|---------|
-| MLX Chat | `:8080` | LiquidAI LFM2.5-8B-A1B | Local inference, Cognee LLM backend |
-| Llama Embed | `:8081` | Qwen3-Embedding-0.6B (GGUF Q8) | Embeddings for Cognee |
-| CodeRank Embed | `:8082` | CodeRankEmbed (GGUF Q8) | Code embeddings for all Codebase vectorization |
-| Cognee | `:8000` | v1.2.2 — LFM 8B + Qwen3 Embed | AI memory + knowledge graphs |
-| CocoIndex | — | Daemon Watcher | Incremental semantic code search |
+Models are configured in a single file: `~/.config/jw/models.env`. Edit only that
+file to switch models — every LaunchAgent and tool sources it. GLOBAL.md does NOT
+duplicate model names; it documents the architecture and purpose.
+
+| Service | Port | Config Source | Purpose |
+|---------|------|---------------|---------|
+| MLX Chat | `:8080` | `JW_CHAT_MODEL` in `models.env` | Local inference, Cognee LLM backend |
+| Llama Embed | `:8081` | `JW_EMBED_MODEL` in `models.env` | Embeddings for Cognee |
+| CodeRank Embed | `:8082` | `configuration.nix` | Code embeddings for CocoIndex vectorization |
+| Cognee | `:8000` | uv tool `cognee` | AI memory + knowledge graphs |
+| CocoIndex | — | uv tool `cocoindex` | Incremental semantic code search |
 
 ---
 
@@ -137,29 +140,35 @@ before working in that repo.
 
 | Project | Path | Purpose | Build |
 |---------|------|---------|-------|
-| bridge | `~/projects/bridge` | The ultimate orchestrator backend -- intent decompose, synchronous SQLite quota tracking, phase dispatch, agent worktrees | `go build` |
+| bridge | `~/projects/bridge` | Agent orchestrator -- brain dump → ticket → spawn → verify → release | `go build` |
 
-### Legacy Agent Layer (1 repo)
-
-| Project | Path | Purpose | Build |
-|---------|------|---------|-------|
-| firstmate | `~/projects/firstmate` | Legacy orchestration -- currently being deprecated in favor of bridge | `bin/fm-bootstrap.sh` |
-
-### Shared Infrastructure (3 repos)
+### Infrastructure (3 repos)
 
 | Project | Path | Purpose |
 |---------|------|---------|
 | mintmux | `~/projects/mintmux` | Go PTY multiplexer -- Unix socket protocol, Lua scripting |
-| treehouse | `~/projects/treehouse` | Go CLI -- git worktree pool manager |
-| tensor-logic | `~/projects/tensor-logic` | Machine Learning orchestration and reasoning logic |
+| treehouse | `~/projects/treehouse` | Go CLI -- git worktree pool manager for agent isolation |
+| tensor-logic | `~/projects/tensor-logic` | Tensor logic proof system for program verification, part of Bridge's verification stack |
 
 ### Tools and Utilities (3 repos)
 
 | Project | Path | Purpose |
 |---------|------|---------|
-| m5tools | `~/projects/m5tools` | C+Go -- M-series hardware monitoring daemons |
+| m5tools | `~/projects/m5tools` | C+Go -- M-series hardware monitoring daemons (m5fand, m5logd, m5mon) |
 | voice-engine-swift | `~/projects/voice-engine-swift` | macOS dictation menubar app -- CoreML, local vector memory |
-| btw-v1 | `~/projects/btw-v1` | Custom scripts / background workflows |
+| btw-v1 | `~/projects/btw-v1` | LiveLM — current-world fact retrieval via BTW Knowledge Graph |
+
+### Data and Tracking (1 repo)
+
+| Project | Path | Purpose |
+|---------|------|---------|
+| portfolio | `~/projects/portfolio` | Cross-project control plane -- decisions, research, machine capability contracts |
+
+### Not on disk (on GitHub, cloneable)
+
+firstmate (legacy orchestration, deprecated in favor of bridge) and jw-core
+(orchestrator backend). Their binaries in `~/.local/bin/` survive independent
+of the source repo. Clone with `gh-axi repo clone jwalin-shah/<name>`.
 
 ---
 
@@ -253,7 +262,6 @@ type depends on the task shape.
 | Lint/formatter passes | Lint command exit code 0 |
 | Diff is reviewable | `git diff main...branch` or PR URL |
 | PR is opened (if remote) | Full `https://github.com/...` PR URL |
-| CI is green (if no-mistakes) | CI status check |
 | Captain approved merge (unless yolo) | Explicit "merge it" or equivalent |
 
 ### Scout Task (investigation)
@@ -358,7 +366,7 @@ When you hit a gate:
 
 Example: "Captain, ready to merge `jw-core#142` (fix SQLite busy timeout).
 This is gate 1 (PR merge). The change is a one-line timeout increase,
-no-mistakes CI is green, risk is low. Merge?"
+CI is green, risk is low. Merge?"
 
 ---
 
@@ -494,32 +502,32 @@ attention is the scarcest resource on the machine.
 
 ## 12. Background Services
 
-Manage LaunchAgents with `jw-status`:
+All LaunchAgents are declared in `configuration.nix` under `launchd.user.agents`
+(plus `launchd.daemons` for the root-owned m5fand). That file is the canonical
+source of what runs. This section documents the architecture, not an inventory.
+
+Manage them with:
 
 ```bash
 jw-status list        # List all services and their health
 jw-status validate    # Audit all services
 ```
 
-Key services, confirmed running via `launchctl list` and declared in
-`configuration.nix` as of 2026-07-13 (see `~/dotfiles/MACHINE.md` for the
-full audited manifest): mintmux, inbox-server, llama-embed-server,
-auto-save, m5logd, m5fand (root daemon), mlx-chat-server, cocoindex-daemon,
-coderank-embed-server, voice-engine, jw-cred-canary, cognee-api (currently
-showing a nonzero last-exit, worth checking). Also present but not
-nix-managed: tailscale (via `brew services`), no-mistakes (vendor-installed
-daemon).
+Services with architecture notes:
 
-`jw-sentry`, and `jw-sessiond` were previously listed
-here but have no LaunchAgent anywhere on this machine as of 2026-07-13 --
-their binaries exist in `~/.local/bin` (source recoverable from GitHub) but
-are not deployed as services. If they're wanted, they need to be declared
-and started; if not, this note can be deleted once confirmed intentional.
+- **AI stack (always on):** mlx-chat-server (:8080), llama-embed-server (:8081),
+  coderank-embed-server (:8082), cognee-api (:8000), cocoindex-daemon
+- **Hardware monitoring:** m5logd (user), m5fand (root daemon)
+- **Infrastructure:** mintmux (PTY multiplexer), inbox-server (:9849),
+  voice-engine (dictation), auto-save (editor buffer flush)
+- **Health checks:** cocoindex-health, cognee-health, mlx-chat-health,
+  jw-heal — each pings its service on a timer
+- **Non-Nix:** tailscale (via `brew services`)
 
 Do not restart a service unless you have a reason. If a service is unhealthy,
 report it to the captain before touching it.
 
 ---
 
-*Last updated: July 6, 2026 — removed retired tools (cg, ccp, face, fm CLI) and the deleted ~/.local/share/fm path after a live-system audit.*
+*Last updated: July 14, 2026 — moved to dotfiles root; ~/CLAUDE.md symlink created; removed ghost service claims (jw-sentry, jw-sessiond, quota-keychain-sync); cu → cua renaming.*
  

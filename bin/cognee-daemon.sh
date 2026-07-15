@@ -92,4 +92,7 @@ echo $$ > "$PIDFILE"
 log_event "daemon_spawning" "exec: cognee-cli serve on :8000"
 
 # Source env file for provider config, then exec cognee-cli serve
-source "$ENV_FILE" && exec "$COGNEE_BIN" serve
+# Source env file for provider config, then start the Cognee API server.
+# Cognee 1.3.0: cognee-cli serve is a cloud connector, NOT a server.
+# Use uvicorn directly to start the FastAPI app on :8000.
+source "$ENV_FILE" && exec "$COGNEE_PYTHON" -m uvicorn cognee.api.client:app --host "${HOST:-127.0.0.1}" --port "${PORT:-8000}"

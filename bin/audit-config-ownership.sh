@@ -72,7 +72,7 @@ check_content_match /Users/jwalinshah/bin/audit-doc-freshness.sh "$repo/bin/audi
 check_content_match /Users/jwalinshah/bin/openwiki "$repo/captain/bin/openwiki"
 check_content_match /Users/jwalinshah/bin/jw-restart "$repo/captain/bin/jw-restart"
 check_content_match /Users/jwalinshah/bin/ca "$repo/captain/bin/ca-wrapper"
-check_content_match /Users/jwalinshah/bin/cu "$repo/captain/bin/cu-wrapper"
+check_content_match /Users/jwalinshah/bin/cua "$repo/captain/bin/cua-wrapper"
 check_content_match /Users/jwalinshah/bin/oo "$repo/captain/bin/oo-wrapper"
 check_content_match /Users/jwalinshah/bin/ot "$repo/captain/bin/ot-wrapper"
 check_content_match /Users/jwalinshah/bin/ko "$repo/captain/bin/ko-wrapper"
@@ -87,13 +87,7 @@ check_content_match /Users/jwalinshah/bin/bridge-ct "/Users/jwalinshah/projects/
 # tmux backend - source lives in bridge repo alongside the adapters
 check_content_match /Users/jwalinshah/bin/backends/tmux.sh "/Users/jwalinshah/projects/bridge/scripts/tmux-backend.sh"
 
-# Research browser bridges
-check_content_match /Users/jwalinshah/bin/chatgpt-bridge "$repo/captain/bin/chatgpt-bridge"
-check_content_match /Users/jwalinshah/bin/gemini-bridge "$repo/captain/bin/gemini-bridge"
-check_content_match /Users/jwalinshah/bin/perplexity-bridge "$repo/captain/bin/perplexity-bridge"
 
-# Credential canary (called by com.jwalinshah.jw-cred-canary LaunchAgent)
-check_content_match /Users/jwalinshah/bin/jw-cred-canary.sh "$repo/captain/bin/jw-cred-canary.sh"
 
 # uv-managed tools: check the key binaries exist (uv tool install runs on rb, these prove it worked)
 for uv_bin in ccc cocoindex cognee-cli tldr; do
@@ -101,7 +95,7 @@ for uv_bin in ccc cocoindex cognee-cli tldr; do
 done
 
 # Built binaries: check that bootstrap-projects.sh Phase 0 ran
-for built_bin in secret-cache bridge mintmux smc; do
+for built_bin in bridge mintmux smc; do
   [ -x "$HOME/.local/bin/$built_bin" ] || echo "WARNING: built binary missing: $built_bin (run bootstrap-projects.sh)"
 done
 

@@ -330,6 +330,7 @@
           PORT = "8000";
           CACHING = "true";
           COGNEE_SKIP_CONNECTION_TEST = "true";
+          ENABLE_BACKEND_ACCESS_CONTROL = "false";
           COGNEE_DATA_DIR = "${home}/.local/share/cognee";
         };
         StandardOutPath = "${home}/.local/share/jw/cognee-api.log";
@@ -380,6 +381,26 @@
           HOME = home;
           PATH = defaultPATH;
         };
+      };
+    };
+
+    # tldr daemon: watches ~/projects for file changes, auto-refreshes
+    # the call-graph index (~/projects/.tldr/cache/).
+    # Pattern follows cocoindex-daemon — KeepAlive, RunAtLoad, deterministic
+    # shell wrapper for single-instance enforcement.
+    "com.jwalinshah.tldr-daemon" = {
+      serviceConfig = {
+        ProgramArguments = [ "${dotfilesBin}/tldr-daemon.sh" ];
+        KeepAlive = true;
+        RunAtLoad = true;
+        ThrottleInterval = 30;
+        WorkingDirectory = home;
+        EnvironmentVariables = {
+          HOME = home;
+          PATH = defaultPATH;
+        };
+        StandardOutPath = "${home}/.local/share/jw/tldr-daemon.log";
+        StandardErrorPath = "${home}/.local/share/jw/tldr-daemon.log";
       };
     };
 
@@ -477,23 +498,6 @@
         };
         StandardOutPath = "${home}/.local/share/jw/inbox-server.log";
         StandardErrorPath = "${home}/.local/share/jw/inbox-server.log";
-      };
-    };
-
-    # voice-paste: pastes voice transcription into focused app.
-    # WatchPaths-triggered: only wakes when /tmp/ve-paste-ready is written.
-    # Built from ~/projects/voice-engine-swift (swift build -c release).
-    "com.jwalinshah.voice-paste" = {
-      serviceConfig = {
-        ProgramArguments = [ "${localBin}/voice-paste" ];
-        WatchPaths = [ "/tmp/ve-paste-ready" ];
-        RunAtLoad = false;
-        EnvironmentVariables = {
-          HOME = home;
-          PATH = defaultPATH;
-        };
-        StandardOutPath = "${home}/.local/share/jw/voice-paste.log";
-        StandardErrorPath = "${home}/.local/share/jw/voice-paste.log";
       };
     };
   };

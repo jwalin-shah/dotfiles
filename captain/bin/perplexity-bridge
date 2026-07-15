@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-# Perplexity Bridge — programmatic access to Perplexity via CDP browser automation.
-exec ~/projects/research-bridge/.venv/bin/perplexity-bridge "$@"

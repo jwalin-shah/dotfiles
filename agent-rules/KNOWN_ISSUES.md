@@ -12,24 +12,24 @@
 - Agents load ~/.agent-rules/ for behavioral contracts.
 - Per-account Claude OAuth requires `/login` in `~/.claude-a` once.
 
-## fastedit (needs tldr-code Rust binary for `references`)
+## fastedit (REMOVED 2026-07-14)
 
-`fastedit edit` calls `tldr references`, which the Python `llm-tldr` 1.5.2 does not provide.
-Install the Rust `tldr-code` binary for this. Until then, use normal patch/edit tools.
+`fastedit` is decommissioned per CLAUDE.md — not on PATH, not coming back.
+Both `fastedit` and its dependency `tldr-code` (Go binaries) have been removed.
+`llm-tldr` v1.5.2 (via uv) handles all code analysis. Use standard Edit/Write.
 
 ## coreutils / gtimeout
 
 Homebrew `coreutils` is installed for `gtimeout`. Do NOT add GNU binutils to agent PATH —
 `gcat`, `gls`, `ggrep`, `gfind` would bypass native tool expectations.
 
-## cursor-agent (cu) — use official curl installer, NOT Homebrew
+## cursor-agent (cua) — use official curl installer, NOT Homebrew
 
 Brew's cask sets `com.apple.quarantine` on unsigned native modules, Gatekeeper removes them.
 Use: `curl https://cursor.com/install -fsS | bash`
 
 ## Shell bypasses (not fixed, accept the risk)
 
-- `bun -e` with `fs.writeFileSync` bypasses file-write policy via script interpreter.
 - `tee << 'EOF'` can write arbitrary files without being caught by any deny rule.
 - Pipeline pager deny catches `| head`/`| tail` but not `| /usr/bin/head` or `| ghead`.
 

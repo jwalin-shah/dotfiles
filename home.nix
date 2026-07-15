@@ -163,7 +163,12 @@ in
 
   # Other agent configs
   home.file.".agent-rules".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/agent-rules";
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/agent-rules";
+
+  # Machine constitution — the single ~/CLAUDE.md that every doc references
+  home.file."CLAUDE.md".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/GLOBAL.md";
+
   home.file.".codex/config.toml".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.codex/config.toml";
   home.file.".codex/hooks.json".source =
@@ -198,7 +203,10 @@ in
   home.activation.npmGlobalTools = config.lib.dag.entryAfter ["writeBoundary"] ''
     (
       export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:$PATH"
-      /opt/homebrew/bin/npm install -g gh-axi chrome-devtools-axi lavish-axi tasks-axi || true
+      # Launcher dependencies — wrappers in ~/bin/ exec these directly
+      /opt/homebrew/bin/npm install -g @anthropic-ai/claude-code @openai/codex @kilocode/cli command-code || true
+      # Agent toolchain — used across all projects by agents and Bridge context assembly
+      /opt/homebrew/bin/npm install -g gh-axi githits ctx7 chrome-devtools-axi lavish-axi tasks-axi @inference/cli gnhf || true
     )
   '';
 
@@ -209,9 +217,11 @@ in
     (
       export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:$PATH"
       uv tool install mlx-lm || true
+      uv tool install cocoindex || true
       uv tool install cocoindex-code || true
       uv tool install cognee || true
       uv tool install "llm-tldr" || true
+      uv tool install z3-solver || true
     )
   '';
 
@@ -247,8 +257,8 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/ca-wrapper";
   home.file."bin/agy".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/agy-wrapper";
-  home.file."bin/cu".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/cu-wrapper";
+  home.file."bin/cua".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/cua-wrapper";
   home.file."bin/oo".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/oo-wrapper";
   home.file."bin/ot".source =
@@ -317,18 +327,6 @@ in
   home.file."bin/backends/tmux.sh".source =
     config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/tmux-backend.sh";
 
-  # Research browser bridges (CDP automation for ChatGPT/Gemini/Perplexity)
-  home.file."bin/chatgpt-bridge".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/chatgpt-bridge";
-  home.file."bin/gemini-bridge".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/gemini-bridge";
-  home.file."bin/perplexity-bridge".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/perplexity-bridge";
-
-  # Credential canary (called by LaunchAgent com.jwalinshah.jw-cred-canary)
-  home.file."bin/jw-cred-canary.sh".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/jw-cred-canary.sh";
-
   # Global linter/formatter configs
   home.file.".config/lint/.prettierrc".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/lint/.prettierrc";
@@ -351,6 +349,10 @@ in
   home.file.".local/bin/rtldr".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.local/bin/rtldr";
 
+  # Ghostty terminal config
+  home.file.".config/ghostty/config".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/ghostty/config";
+
   # Window manager + keyboard
   home.file.".aerospace.toml".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/aerospace/aerospace.toml";
@@ -359,10 +361,7 @@ in
   imports = [
     ({ config, ... }: {
       home.file = let
-        # no-mistakes generates and refreshes its own user-level skill during
-        # `no-mistakes init`; Home Manager must not race that updater.
-        skills = builtins.filter (name: name != "no-mistakes")
-          (builtins.attrNames (builtins.readDir ./skills));
+        skills = builtins.attrNames (builtins.readDir ./skills);
       in builtins.listToAttrs (map (name: {
         name = ".agents/skills/${name}";
         value = { source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/skills/${name}"; };

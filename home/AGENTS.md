@@ -66,7 +66,7 @@ config error. `config-lint` enforces this.
 | `ot` | OpenCode | TokenRouter | deepseek-v4-flash for routine work (profile `ot.json`). |
 | `ko` | Kilo | ChatGPT Plus OAuth | Kilo via OpenAI provider. |
 | `kt` | Kilo | TokenRouter | Kilo via TokenRouter. |
-| `cu` | Cursor Agent | Own auth | Cursor's built-in agent. |
+| `cua` | Cursor Agent | Own auth | Cursor's built-in agent. |
 | `agy` | Antigravity CLI | Own auth | |
 
 OAuth account A needs `/login` once in `~/.claude-a`. OpenCode global
