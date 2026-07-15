@@ -189,6 +189,10 @@
           "spotify:*"
           "discord:*"
         ];
+        PopupsBlockedForUrls = [
+          # Add any domains here to block all popups/new tabs, e.g.:
+          # "https://[*.]somebadsite.com"
+        ];
       };
     };
   };
