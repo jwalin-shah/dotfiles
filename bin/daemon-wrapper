@@ -151,7 +151,13 @@ if [ -n "${DAEMON_ENV_FILE:-}" ] && [ -f "$DAEMON_ENV_FILE" ]; then
     if [ "${DAEMON_EXPAND_ENV:-0}" = "1" ]; then
         EXPANDED=()
         for arg in "$@"; do
-            EXPANDED+=("$(eval echo "$arg")")
+            # Only eval-expand args that contain $ (env var refs).
+            # Args without $ are passed literally — protects JSON strings
+            # like chat-template-args from quote-stripping.
+            case "$arg" in
+                *\$*) EXPANDED+=("$(eval echo "$arg")") ;;
+                *)     EXPANDED+=("$arg") ;;
+            esac
         done
         set -- "${EXPANDED[@]}"
     fi
