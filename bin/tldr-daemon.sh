@@ -9,7 +9,7 @@ set -euo pipefail
 
 NAME="tldr-daemon"
 LOCKDIR="/tmp/${NAME}.lockdir"
-TLDR_BIN="$HOME/.local/share/uv/tools/llm-tldr/bin/tldr"
+TLDR_BIN="$HOME/.local/share/uv/tools/llm-tldr/bin/llm-tldr"
 WATCH_DIR="$HOME/projects"
 
 # ── Event log (structured, JSONL, for trace refinement) ────────────

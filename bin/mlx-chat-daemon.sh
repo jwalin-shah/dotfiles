@@ -72,4 +72,4 @@ echo "[$NAME] PID $$ — starting mlx_lm.server on port $PORT..." >&2
 echo $$ > "$PIDFILE"
 log_event "daemon_spawning" "exec: mlx_lm.server on :$PORT"
 source "$MODELS_ENV" && \
-    exec "$MLX_SERVER" --model "$JW_CHAT_MODEL_REPO" --host 127.0.0.1 --port "$PORT" --trust-remote-code
+    exec "$MLX_SERVER" --model "$JW_CHAT_MODEL_REPO" --host 127.0.0.1 --port "$PORT" --trust-remote-code --chat-template-args '{"enable_thinking":false}'

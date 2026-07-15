@@ -225,7 +225,7 @@
       "ghostty"
       "karabiner-elements"
       "lulu"
-      "monitorcontrol"
+      "lunar"
       "raycast"
     ];
   };
