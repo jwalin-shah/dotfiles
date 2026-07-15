@@ -181,6 +181,7 @@
           "hkgfoiooedgoejojocmhlaklaeopbecg;https://clients2.google.com/service/update2/crx"
           "keycebghjcehjfofhccebellnndmhead;https://clients2.google.com/service/update2/crx"
           "dbepggeogbaibhgnhhndojpepiihcmeb;https://clients2.google.com/service/update2/crx"
+          "gppongmhjkpfnbhagpmjfkannfbllamg;https://clients2.google.com/service/update2/crx"
         ];
         URLBlocklist = [
           "zoommtg:*"
