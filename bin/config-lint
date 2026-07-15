@@ -55,6 +55,59 @@ for bin in "$BIN_DIR"/*; do
 done
 
 if [ "$fails" -eq 0 ]; then
+    echo "config-lint: launcher checks passed"
+else
+    echo "config-lint: $fails launcher failure(s)" >&2
+    exit 1
+fi
+
+# ── Daemon contract enforcement ──────────────────────────────────────
+# Every LaunchAgent in configuration.nix that uses daemon-wrapper must
+# satisfy the daemon contract invariants.
+CONFIG_NIX="$HERE/../configuration.nix"
+[ -f "$CONFIG_NIX" ] || { echo "config-lint: cannot find configuration.nix at $CONFIG_NIX" >&2; exit 1; }
+
+# Check 1: No old wrapper scripts referenced
+echo "=== daemon contract: no old wrappers ==="
+for old_wrapper in cognee-daemon.sh cocoindex-daemon.sh tldr-daemon.sh mlx-chat-daemon.sh; do
+    if grep -q "$old_wrapper" "$CONFIG_NIX"; then
+        bad "daemon contract: $old_wrapper found in configuration.nix — use daemon-wrapper instead"
+    else
+        ok "daemon contract: $old_wrapper not used in configuration.nix"
+    fi
+done
+
+# Check 2: daemon-wrapper references have required env vars
+echo "=== daemon contract: required env vars ==="
+REQUIRED_VARS="DAEMON_NAME DAEMON_PORT DAEMON_DISPLAY_NAME DAEMON_TYPE DAEMON_HEALTH_URL"
+# Find all daemon-wrapper blocks and check env vars are set
+DAEMON_COUNT=$(grep -c 'daemon-wrapper' "$CONFIG_NIX" || echo 0)
+# Exclude comment lines
+COMMENT_COUNT=$(grep -c '^[[:space:]]*#.*daemon-wrapper' "$CONFIG_NIX" || echo 0)
+DAEMON_COUNT=$((DAEMON_COUNT - COMMENT_COUNT))
+echo "  daemon-wrapper references: $DAEMON_COUNT"
+
+# Extract the sections between daemon-wrapper and the next closing of EnvironmentVariables
+# This is approximate — a full parser would be better, but this catches obvious misses.
+for var in $REQUIRED_VARS; do
+    var_lines=$(grep -c "$var" "$CONFIG_NIX" || echo 0)
+    if [ "$var_lines" -ge "$DAEMON_COUNT" ]; then
+        ok "daemon contract: $var present ($var_lines occurrences for $DAEMON_COUNT daemon-wrapper refs)"
+    else
+        bad "daemon contract: $var appears $var_lines times but $DAEMON_COUNT daemon-wrapper references — some service may be missing it"
+    fi
+done
+
+# Check 3: KeepAlive.SuccessfulExit used, not bare KeepAlive (for daemon-wrapper services)
+echo "=== daemon contract: KeepAlive.SuccessfulExit ==="
+# Find lines after daemon-wrapper that have KeepAlive
+if grep -A15 'daemon-wrapper' "$CONFIG_NIX" | grep -q 'KeepAlive = true'; then
+    bad "daemon contract: bare KeepAlive = true found near daemon-wrapper — use KeepAlive.SuccessfulExit = false"
+else
+    ok "daemon contract: no bare KeepAlive near daemon-wrapper"
+fi
+
+if [ "$fails" -eq 0 ]; then
     echo "config-lint: all checks passed"
 else
     echo "config-lint: $fails failure(s)" >&2
