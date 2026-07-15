@@ -172,11 +172,16 @@
         skip-verify-locked = true;
         skip-verify-remote = true;
       };
+      "com.apple.PowerChime" = {
+        ChimeOnAllHardware = false;
+      };
       "com.brave.Browser" = {
         AppleEnableSwipeNavigateWithScrolls = false;
       };
     };
   };
+
+  system.startup.chime = false;
 
   # Homebrew via nix-homebrew
   nix-homebrew = {
