@@ -1,0 +1,234 @@
+#!/usr/bin/env bash
+# ── Unified daemon supervisor ─────────────────────────────────────────
+# One wrapper for all macOS LaunchAgent Python services. Configured
+# entirely via environment variables (set per-agent in configuration.nix).
+#
+# Daemon contract v2:
+#   - Single-instance via flock (kernel-released on crash, no EXIT trap)
+#   - Crash-loop detection (>=3 starts in 2min while active → exit 0)
+#   - Named in ps via exec -a (e.g. "mlx-chat:8080")
+#   - Lifecycle event logging (JSONL, read by jw-heal)
+#   - Handles both foreground tools (exec) and daemonizing tools (child+block)
+#
+# Required env vars:
+#   DAEMON_NAME          Short name for logging (e.g. "cognee-api")
+#   DAEMON_PORT          Port number for health checks
+#   DAEMON_DISPLAY_NAME  What ps shows (e.g. "cognee-api:8000")
+#   DAEMON_HEALTH_URL    URL path or "pid-only" for process check
+#   DAEMON_TYPE          "foreground" (exec -a) | "child-block" (run + verify + wait)
+#
+# Optional env vars:
+#   DAEMON_ENV_FILE      Env file to source before launch
+#   DAEMON_VALIDATION_CMD Command to run as startup validation (optional)
+#   DAEMON_HEALTH_CMD    Command to run as health check (for child-block)
+#   DAEMON_WORKING_DIR   cd here before launch
+#
+# Positional args ($@): the command to launch (binary + args).
+#   For foreground:   exec -a "$DAEMON_DISPLAY_NAME" "$@"
+#   For child-block:  "$@" & verify, then block until SIGTERM
+#
+# Invariants checked at runtime:
+#   DAEMON-SINGLE-001: flock on LOCK_FD, kernel-released
+#   DAEMON-CRASH-LOOP-001: >=3 starts in 2min window → exit 0
+#   DAEMON-FOREGROUND-001: child-block mode for daemonizing tools
+#   DAEMON-NAME-PS-001: exec -a sets argv[0] for ps visibility
+set -euo pipefail
+
+# ── Resolve env vars with defaults ────────────────────────────────────
+: "${DAEMON_NAME:?DAEMON_NAME required}"
+: "${DAEMON_PORT:?DAEMON_PORT required}"
+: "${DAEMON_DISPLAY_NAME:?DAEMON_DISPLAY_NAME required}"
+: "${DAEMON_HEALTH_URL:?DAEMON_HEALTH_URL required}"
+: "${DAEMON_TYPE:?DAEMON_TYPE required}"
+
+HOME="${HOME:-$(eval echo ~$(whoami))}"
+JW_DATA_DIR="${JW_DATA_DIR:-$HOME/.local/share/jw}"
+STATE_FILE="$JW_DATA_DIR/${DAEMON_NAME}-state.json"
+LOCK_FILE="$JW_DATA_DIR/${DAEMON_NAME}.lock"
+LIFECYCLE_LOG="$JW_DATA_DIR/${DAEMON_NAME}-lifecycle.jsonl"
+
+mkdir -p "$JW_DATA_DIR"
+
+# ── Helpers ──────────────────────────────────────────────────────────
+
+GEN_ID="$(date +%s)-$$"
+
+log_event() {
+    local event="$1" detail="${2:-}" timestamp
+    timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S%z")
+    printf '{"gen_id":"%s","service":"%s","event":"%s","timestamp":"%s","pid":%d,"detail":"%s"}\n' \
+        "$GEN_ID" "$DAEMON_NAME" "$event" "$timestamp" "$$" "$detail" >> "$LIFECYCLE_LOG"
+}
+
+now_epoch() { date +%s; }
+
+# ── Crash-loop detection ─────────────────────────────────────────────
+# State file: {"starts": [epoch, ...], "active": bool}
+# If >=3 starts within 2 minutes while previous instance was "active"
+# (didn't shut down clean), this is a crash loop → exit 0 (stop).
+
+read_state() {
+    if [ -f "$STATE_FILE" ]; then
+        python3 -c "
+import json
+try:
+    d=json.load(open('$STATE_FILE'))
+    print(json.dumps(d))
+except: print('{}')
+" 2>/dev/null || echo '{}'
+    else
+        echo '{}'
+    fi
+}
+
+check_crash_loop() {
+    local state now cutoff count
+    state=$(read_state)
+    now=$(now_epoch)
+    cutoff=$((now - 120))  # 2 minute window
+
+    count=$(echo "$state" | python3 -c "
+import json,sys
+d=json.loads(sys.stdin.read())
+starts=[t for t in d.get('starts',[]) if t > $cutoff]
+d['starts'] = starts + [$now]
+d['active'] = True
+json.dump(d, open('$STATE_FILE','w'))
+print(len(starts))
+")
+    echo "$count"
+}
+
+clear_crash_state() {
+    printf '{"starts":[],"active":false}' > "$STATE_FILE"
+    log_event "crash_state_cleared" "clean shutdown"
+}
+
+# ── Phase 1: Single-instance via flock ───────────────────────────────
+# Open lock FD; flock is kernel-released on process death (no EXIT trap).
+# macOS lacks `flock` CLI, so use Python's fcntl.
+
+exec {LOCK_FD}>"$LOCK_FILE"
+
+if ! python3 -c "
+import fcntl, sys
+fcntl.flock($LOCK_FD, fcntl.LOCK_EX | fcntl.LOCK_NB)
+" 2>/dev/null; then
+    log_event "lock_deferred" "another instance holds $LOCK_FILE"
+    echo "[$DAEMON_NAME] already running (flock held). Exiting." >&2
+    exit 0  # SuccessfulExit — launchd won't restart
+fi
+
+log_event "lock_acquired" "GEN_ID=$GEN_ID"
+
+# ── Phase 2: Crash-loop detection ────────────────────────────────────
+CRASH_COUNT=$(check_crash_loop)
+if [ "$CRASH_COUNT" -ge 3 ]; then
+    log_event "crash_loop_detected" "$CRASH_COUNT starts in 2min window"
+    echo "[$DAEMON_NAME] CRASH LOOP DETECTED: $CRASH_COUNT starts in 2 minutes. Giving up." >&2
+    exit 0  # SuccessfulExit — launchd stops restarting
+fi
+
+# ── Phase 3: Startup validation ──────────────────────────────────────
+if [ -n "${DAEMON_VALIDATION_CMD:-}" ]; then
+    log_event "validation_started" "$DAEMON_VALIDATION_CMD"
+    echo "[$DAEMON_NAME] validating: $DAEMON_VALIDATION_CMD" >&2
+    if ! eval "$DAEMON_VALIDATION_CMD" 2>&1; then
+        log_event "validation_failed" "startup validation returned non-zero"
+        echo "[$DAEMON_NAME] STARTUP VALIDATION FAILED" >&2
+        exit 1
+    fi
+    log_event "validation_passed" "startup validation OK"
+fi
+
+# ── Phase 4: Source env file if configured ───────────────────────────
+# Also expand $VAR references in remaining args so nix config can
+# reference vars from models.env (e.g. $JW_CHAT_MODEL_REPO).
+# Safe because args come from nix, not user input.
+if [ -n "${DAEMON_ENV_FILE:-}" ] && [ -f "$DAEMON_ENV_FILE" ]; then
+    # shellcheck source=/dev/null
+    source "$DAEMON_ENV_FILE"
+    if [ "${DAEMON_EXPAND_ENV:-0}" = "1" ]; then
+        EXPANDED=()
+        for arg in "$@"; do
+            EXPANDED+=("$(eval echo "$arg")")
+        done
+        set -- "${EXPANDED[@]}"
+    fi
+fi
+
+# ── Phase 5: cd if working dir configured ────────────────────────────
+if [ -n "${DAEMON_WORKING_DIR:-}" ]; then
+    cd "$DAEMON_WORKING_DIR"
+fi
+
+# ── Phase 6: Launch ──────────────────────────────────────────────────
+case "$DAEMON_TYPE" in
+    foreground)
+        # Tool stays foreground (uvicorn, mlx_lm.server, ccc run-daemon).
+        # exec -a renames argv[0] for ps visibility.
+        # flock FD is inherited — kernel releases it on death.
+        log_event "daemon_spawning" "foreground exec -a $DAEMON_DISPLAY_NAME: $*"
+        echo "[$DAEMON_NAME] launching foreground: $DAEMON_DISPLAY_NAME" >&2
+        exec -a "$DAEMON_DISPLAY_NAME" "$@"
+        # unreachable
+        ;;
+
+    child-block)
+        # Tool daemonizes internally. Run as child, verify it started,
+        # then block until SIGTERM. Periodically health-check.
+        log_event "daemon_spawning" "child-block: $*"
+        echo "[$DAEMON_NAME] launching child: $DAEMON_DISPLAY_NAME" >&2
+
+        "$@"
+        SPAWN_EXIT=$?
+
+        if [ "$SPAWN_EXIT" -ne 0 ]; then
+            log_event "daemon_spawn_failed" "exit code $SPAWN_EXIT"
+            echo "[$DAEMON_NAME] FATAL: launch failed (exit $SPAWN_EXIT)" >&2
+            exit 1
+        fi
+
+        # Give the daemon time to fork and bind
+        sleep 1
+
+        # Verify the daemon is actually running
+        if [ -n "${DAEMON_HEALTH_CMD:-}" ]; then
+            if ! eval "$DAEMON_HEALTH_CMD" 2>/dev/null; then
+                log_event "daemon_verify_failed" "health check failed after spawn"
+                echo "[$DAEMON_NAME] FATAL: launched but health check failed" >&2
+                exit 1
+            fi
+        fi
+
+        log_event "daemon_running" "child daemon verified, blocking until SIGTERM"
+
+        # Block forever. launchd sends SIGTERM to stop.
+        # Periodically health-check the daemon.
+        cleanup() {
+            log_event "signal_received" "stopping daemon"
+            echo "[$DAEMON_NAME] received signal, shutting down..." >&2
+            clear_crash_state
+            log_event "lock_released" "clean shutdown complete"
+            exit 0
+        }
+        trap cleanup SIGTERM SIGINT SIGHUP
+
+        while true; do
+            sleep 60
+            if [ -n "${DAEMON_HEALTH_CMD:-}" ]; then
+                if ! eval "$DAEMON_HEALTH_CMD" 2>/dev/null; then
+                    log_event "daemon_died" "health check failed, exiting for restart"
+                    echo "[$DAEMON_NAME] daemon died — exiting for restart" >&2
+                    exit 1
+                fi
+            fi
+        done
+        ;;
+
+    *)
+        log_event "invalid_type" "DAEMON_TYPE must be 'foreground' or 'child-block', got '$DAEMON_TYPE'"
+        echo "[$DAEMON_NAME] FATAL: invalid DAEMON_TYPE='$DAEMON_TYPE'" >&2
+        exit 1
+        ;;
+esac

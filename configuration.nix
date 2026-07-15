@@ -177,6 +177,10 @@
       };
       "com.brave.Browser" = {
         AppleEnableSwipeNavigateWithScrolls = false;
+        ExtensionInstallForcelist = [
+          "hkgfoiooedgoejojocmhlaklaeopbecg;https://clients2.google.com/service/update2/crx"
+          "keycebghjcehjfofhccebellnndmhead;https://clients2.google.com/service/update2/crx"
+        ];
       };
     };
   };
@@ -245,10 +249,12 @@
       "yq"
       "zig"
       "zoxide"
+      "yazi"
     ];
 
     casks = [
       "aerospace"
+      "alt-tab"
       "brave-browser"
       "chatgpt-classic"
       "cursor"
@@ -328,20 +334,63 @@
       };
     };
 
-    # cognee: knowledge graph API on :8000
-    # Wrapped in a deterministic shell for single-instance + startup validation
-    "com.jwalinshah.cognee-api" = {
+    # ── AI Stack (unified daemon-wrapper) ────────────────────────────
+    # mlx-chat: Qwen3.5 9B on :8080 (model from models.env)
+    "com.jwalinshah.mlx-chat-daemon" = {
       serviceConfig = {
-        ProgramArguments = [ "${dotfilesBin}/cognee-daemon.sh" ];
-        KeepAlive = true;
+        ProgramArguments = [
+          "${dotfilesBin}/daemon-wrapper"
+          "${uvBin}/mlx-lm/bin/mlx_lm.server"
+          "--model" "$JW_CHAT_MODEL_REPO"
+          "--host" "127.0.0.1" "--port" "8080"
+          "--trust-remote-code"
+          "--chat-template-args" "{\"enable_thinking\":false}"
+        ];
+        KeepAlive.SuccessfulExit = false;
         RunAtLoad = true;
         ThrottleInterval = 30;
         WorkingDirectory = home;
         EnvironmentVariables = {
           HOME = home;
           PATH = defaultPATH;
-          HOST = "127.0.0.1";
-          PORT = "8000";
+          DAEMON_NAME = "mlx-chat";
+          DAEMON_PORT = "8080";
+          DAEMON_DISPLAY_NAME = "mlx-chat:8080";
+          DAEMON_TYPE = "foreground";
+          DAEMON_HEALTH_URL = "/v1/models";
+          DAEMON_ENV_FILE = "${home}/.config/jw/models.env";
+          DAEMON_EXPAND_ENV = "1";
+          DAEMON_VALIDATION_CMD = "${uvBin}/mlx-lm/bin/python -c 'import mlx_lm; print(\"OK\")'";
+        };
+        StandardOutPath = "${home}/.local/share/jw/mlx-chat.log";
+        StandardErrorPath = "${home}/.local/share/jw/mlx-chat.log";
+      };
+    };
+
+    # cognee: knowledge graph API on :8000
+    "com.jwalinshah.cognee-api" = {
+      serviceConfig = {
+        ProgramArguments = [
+          "${dotfilesBin}/daemon-wrapper"
+          "${uvBin}/cognee/bin/python"
+          "-m" "uvicorn" "cognee.api.client:app"
+          "--host" "127.0.0.1" "--port" "8000"
+        ];
+        KeepAlive.SuccessfulExit = false;
+        RunAtLoad = true;
+        ThrottleInterval = 30;
+        WorkingDirectory = home;
+        EnvironmentVariables = {
+          HOME = home;
+          PATH = defaultPATH;
+          DAEMON_NAME = "cognee-api";
+          DAEMON_PORT = "8000";
+          DAEMON_DISPLAY_NAME = "cognee-api:8000";
+          DAEMON_TYPE = "foreground";
+          DAEMON_HEALTH_URL = "/health";
+          DAEMON_ENV_FILE = "${home}/.config/jw/models.env";
+          DAEMON_VALIDATION_CMD = "${uvBin}/cognee/bin/python -c 'import cognee; print(\"OK\")'";
+          # Cognee runtime env
           CACHING = "true";
           COGNEE_SKIP_CONNECTION_TEST = "true";
           ENABLE_BACKEND_ACCESS_CONTROL = "false";
@@ -367,17 +416,27 @@
     };
 
     # cocoindex: incremental code index daemon (watch + auto-reindex)
-    # Wrapped in a deterministic shell for single-instance + startup validation
     "com.jwalinshah.cocoindex-daemon" = {
       serviceConfig = {
-        ProgramArguments = [ "${dotfilesBin}/cocoindex-daemon.sh" ];
-        KeepAlive = true;
+        ProgramArguments = [
+          "${dotfilesBin}/daemon-wrapper"
+          "${uvBin}/cocoindex-code/bin/ccc"
+          "run-daemon"
+        ];
+        KeepAlive.SuccessfulExit = false;
         RunAtLoad = true;
         ThrottleInterval = 30;
         WorkingDirectory = "${home}/projects";
         EnvironmentVariables = {
           HOME = home;
           PATH = defaultPATH;
+          PYTHONPATH = "${home}/.cocoindex_code/extensions:${uvBin}/cocoindex-code/lib/python3.13/site-packages";
+          DAEMON_NAME = "cocoindex-daemon";
+          DAEMON_PORT = "0";
+          DAEMON_DISPLAY_NAME = "ccc-daemon";
+          DAEMON_TYPE = "foreground";
+          DAEMON_HEALTH_URL = "pid-only";
+          DAEMON_VALIDATION_CMD = "${uvBin}/cocoindex-code/bin/python -c '__import__(\"tldr_chunker\", fromlist=[\"chunk\"]); print(\"OK\")'";
         };
         StandardOutPath = "${home}/.local/share/cocoindex/daemon-stdout.log";
         StandardErrorPath = "${home}/.local/share/cocoindex/daemon-stderr.log";
@@ -398,20 +457,29 @@
       };
     };
 
-    # tldr daemon: watches ~/projects for file changes, auto-refreshes
-    # the call-graph index (~/projects/.tldr/cache/).
-    # Pattern follows cocoindex-daemon — KeepAlive, RunAtLoad, deterministic
-    # shell wrapper for single-instance enforcement.
+    # tldr daemon: watches ~/projects, auto-refreshes call-graph index.
+    # child-block mode: llm-tldr daemonizes internally, wrapper runs as
+    # child, verifies, then blocks until SIGTERM.
     "com.jwalinshah.tldr-daemon" = {
       serviceConfig = {
-        ProgramArguments = [ "${dotfilesBin}/tldr-daemon.sh" ];
-        KeepAlive = true;
+        ProgramArguments = [
+          "${dotfilesBin}/daemon-wrapper"
+          "${uvBin}/llm-tldr/bin/llm-tldr"
+          "daemon" "start" "--project" "${home}/projects"
+        ];
+        KeepAlive.SuccessfulExit = false;
         RunAtLoad = true;
         ThrottleInterval = 30;
         WorkingDirectory = home;
         EnvironmentVariables = {
           HOME = home;
           PATH = defaultPATH;
+          DAEMON_NAME = "tldr-daemon";
+          DAEMON_PORT = "0";
+          DAEMON_DISPLAY_NAME = "tldr-daemon";
+          DAEMON_TYPE = "child-block";
+          DAEMON_HEALTH_URL = "pid-only";
+          DAEMON_HEALTH_CMD = "${uvBin}/llm-tldr/bin/llm-tldr daemon status --project ${home}/projects";
         };
         StandardOutPath = "${home}/.local/share/jw/tldr-daemon.log";
         StandardErrorPath = "${home}/.local/share/jw/tldr-daemon.log";

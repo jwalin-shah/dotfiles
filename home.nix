@@ -286,17 +286,14 @@ in
   home.file."bin/cursor-login".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/tools/cursor-login";
 
-  home.file."bin/cocoindex-daemon.sh".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/cocoindex-daemon.sh";
+  home.file."bin/daemon-wrapper".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/daemon-wrapper";
+
   home.file."bin/cocoindex-health.sh".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/cocoindex-health.sh";
 
-  home.file."bin/mlx-chat-daemon.sh".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/mlx-chat-daemon.sh";
   home.file."bin/mlx-chat-health.sh".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/mlx-chat-health.sh";
-  home.file."bin/cognee-daemon.sh".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/cognee-daemon.sh";
   home.file."bin/cognee-health.sh".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/cognee-health.sh";
 
