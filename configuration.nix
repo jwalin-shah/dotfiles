@@ -344,7 +344,7 @@
         KeepAlive = true;
         RunAtLoad = true;
         ThrottleInterval = 30;
-        WorkingDirectory = home;
+        WorkingDirectory = "${home}/projects";
         EnvironmentVariables = {
           HOME = home;
           PATH = defaultPATH;

@@ -230,7 +230,7 @@ in
       export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:$PATH"
       ${dotfiles}/bin/merge-runtime-configs.py ${dotfiles}/home/.gemini/antigravity-cli/settings.json $HOME/.gemini/antigravity-cli/settings.json || true
       ${dotfiles}/bin/merge-runtime-configs.py ${dotfiles}/home/.cursor/cli-config.json $HOME/.cursor/cli-config.json || true
-      ${dotfiles}/bin/merge-runtime-configs.py ${dotfiles}/captain/config/opencode.json $HOME/.config/opencode/opencode.json || true
+      ${dotfiles}/bin/merge-runtime-configs.py ${dotfiles}/config/opencode/opencode.json $HOME/.config/opencode/opencode.json || true
       ${dotfiles}/bin/merge-runtime-configs.py ${dotfiles}/home/.config/kilo/kilo.jsonc $HOME/.config/kilo/kilo.jsonc || true
     )
   '';
@@ -244,47 +244,47 @@ in
   home.file.".config/opencode/AGENTS.md".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
 
-  # OpenCode config (from captain/config/)
+  # Models config — single source of truth for LLM model selection
   home.file.".config/jw/models.env".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/config/models.env";
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/jw/models.env";
 
   # ~/bin launcher wrappers
   home.file."bin/ct".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/ct-wrapper";
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/ct-wrapper";
   home.file."bin/claude".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/claude-wrapper";
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/claude-wrapper";
   home.file."bin/ca".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/ca-wrapper";
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/ca-wrapper";
   home.file."bin/agy".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/agy-wrapper";
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/agy-wrapper";
   home.file."bin/cua".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/cua-wrapper";
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/cua-wrapper";
   home.file."bin/oo".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/oo-wrapper";
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/oo-wrapper";
   home.file."bin/ot".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/ot-wrapper";
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/ot-wrapper";
   home.file."bin/ko".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/ko-wrapper";
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/ko-wrapper";
   home.file."bin/kt".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/kt-wrapper";
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/kt-wrapper";
   home.file."bin/cx".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/cx-wrapper";
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/cx-wrapper";
   home.file."bin/com".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/com-wrapper";
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/com-wrapper";
   home.file."bin/jw-restart".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/jw-restart";
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/jw-restart";
   home.file."bin/openwiki".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/openwiki";
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/openwiki";
 
   # Personal tool wrappers (only useful ones — dead wrappers removed)
   home.file."bin/ctx7".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/ctx7";
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/tools/ctx7";
   home.file."bin/brave-automation".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/brave-automation";
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/tools/brave-automation";
   home.file."bin/brave-axi".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/brave-axi";
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/tools/brave-axi";
   home.file."bin/cursor-login".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/captain/bin/tools/cursor-login";
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/tools/cursor-login";
 
   home.file."bin/cocoindex-daemon.sh".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/cocoindex-daemon.sh";
