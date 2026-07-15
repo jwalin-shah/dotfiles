@@ -59,7 +59,7 @@ if ! mkdir "$LOCKDIR" 2>/dev/null; then
     if [ -n "$LOCKER_PID" ] && kill -0 "$LOCKER_PID" 2>/dev/null; then
         log_event "lock_deferred" "holder PID=$LOCKER_PID (gen=$LOCKER_GEN_ID) still alive"
         echo "[$NAME] already running (PID $LOCKER_PID, gen=$LOCKER_GEN_ID). Exiting." >&2
-        exit 0
+        exit 75
     fi
 
     # Locker is dead — reclaim the lock

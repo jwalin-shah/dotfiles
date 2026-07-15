@@ -240,25 +240,6 @@
     defaultPATH = "${localBin}:${dotfilesBin}:${brewBin}:/usr/local/bin:/usr/bin:/bin";
   in {
 
-    # -- Local AI Stack --
-    # mlx-chat: Gemma 4 4B chat server on :8080
-    # Wrapped in a deterministic shell for single-instance + startup validation
-    "com.jwalinshah.mlx-chat-server" = {
-      serviceConfig = {
-        ProgramArguments = [ "${dotfilesBin}/mlx-chat-daemon.sh" ];
-        KeepAlive = true;
-        RunAtLoad = true;
-        ThrottleInterval = 30;
-        WorkingDirectory = home;
-        EnvironmentVariables = {
-          HOME = home;
-          PATH = defaultPATH;
-        };
-        StandardOutPath = "${home}/.local/share/jw/mlx-chat.log";
-        StandardErrorPath = "${home}/.local/share/jw/mlx-chat.log";
-      };
-    };
-
     # mlx-chat health check: pings server every 5min, cleans up orphans
     "com.jwalinshah.mlx-chat-health" = {
       serviceConfig = {
@@ -454,6 +435,7 @@
         ProgramArguments = [ "${localBin}/m5logd" ];
         KeepAlive = true;
         RunAtLoad = true;
+        ThrottleInterval = 30;
         EnvironmentVariables = {
           HOME = home;
           PATH = "${localBin}:/usr/local/bin:/usr/bin:/bin";
@@ -476,28 +458,6 @@
         };
         StandardOutPath = "/tmp/voice-engine.log";
         StandardErrorPath = "/tmp/voice-engine.log";
-      };
-    };
-
-    # inbox: Personal data API server (iMessage, Gmail, Calendar, Tasks, ...)
-    # Loads env from ~/.config/inbox/env.
-    # All traffic stays on 127.0.0.1:9849 - completely local and private.
-    "com.jwalinshah.inbox-server" = {
-      serviceConfig = {
-        ProgramArguments = [
-          "/bin/bash" "-c"
-          "source ${home}/.config/inbox/env && exec ${brewBin}/uv run --directory ${home}/projects/inbox python inbox_server.py"
-        ];
-        KeepAlive = true;
-        RunAtLoad = true;
-        ThrottleInterval = 10;
-        WorkingDirectory = "${home}/projects/inbox";
-        EnvironmentVariables = {
-          HOME = home;
-          PATH = "${brewBin}:${defaultPATH}";
-        };
-        StandardOutPath = "${home}/.local/share/jw/inbox-server.log";
-        StandardErrorPath = "${home}/.local/share/jw/inbox-server.log";
       };
     };
   };

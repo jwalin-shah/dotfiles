@@ -321,6 +321,20 @@ in
     config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-ca";
   home.file."bin/bridge-ct".source =
     config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-ct";
+  home.file."bin/bridge-cua".source =
+    config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-cua";
+  home.file."bin/bridge-agy".source =
+    config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-agy";
+  home.file."bin/bridge-oo".source =
+    config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-oo";
+  home.file."bin/bridge-ot".source =
+    config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-ot";
+  home.file."bin/bridge-ko".source =
+    config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-ko";
+  home.file."bin/bridge-kt".source =
+    config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-kt";
+  home.file."bin/bridge-cx".source =
+    config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-cx";
 
   # Mintmux session backends - tmux only (orca/zellij/herdr not installed)
   # source lives in ~/projects/bridge/scripts/ alongside the adapter scripts
