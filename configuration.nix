@@ -226,7 +226,9 @@
       "karabiner-elements"
       "lulu"
       "lunar"
+      "maccy"
       "raycast"
+      "shottr"
     ];
   };
 

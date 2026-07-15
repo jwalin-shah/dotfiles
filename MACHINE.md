@@ -110,7 +110,7 @@ Services by category (2026-07-14):
 | cursor | OK, symlinked (runtime file correctly excluded) |
 | ghostty | **FIXED 2026-07-14** — symlinked into dotfiles + home.nix entry. |
 | brave-browser | intentionally unmanaged (runtime state, not config) |
-| raycast, lulu, lunar | low priority, not found in standard locations this pass |
+| raycast, lulu, lunar, maccy, shottr | low priority, not found in standard locations this pass |
 
 ## Claude Code settings/permissions
 
