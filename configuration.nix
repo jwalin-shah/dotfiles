@@ -180,6 +180,13 @@
         ExtensionInstallForcelist = [
           "hkgfoiooedgoejojocmhlaklaeopbecg;https://clients2.google.com/service/update2/crx"
           "keycebghjcehjfofhccebellnndmhead;https://clients2.google.com/service/update2/crx"
+          "dbepggeogbaibhgnhhndojpepiihcmeb;https://clients2.google.com/service/update2/crx"
+        ];
+        URLBlocklist = [
+          "zoommtg:*"
+          "slack:*"
+          "spotify:*"
+          "discord:*"
         ];
       };
     };
@@ -206,6 +213,7 @@
 
     taps = [
       "nikitabobko/tap"
+      "felixkratz/formulae"
     ];
 
     brews = [
@@ -250,6 +258,7 @@
       "zig"
       "zoxide"
       "yazi"
+      "sketchybar"
     ];
 
     casks = [
@@ -260,6 +269,7 @@
       "cursor"
       "flux-app"
       "ghostty"
+      "homerow"
       "karabiner-elements"
       "lulu"
       "lunar"

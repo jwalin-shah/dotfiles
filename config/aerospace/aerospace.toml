@@ -72,7 +72,7 @@ run = ['layout floating']
     alt-shift-f = 'move-node-to-workspace 4'
     alt-shift-g = 'move-node-to-workspace 5'
 
-    alt-tab = 'workspace-back-and-forth'
+    alt-grave = 'workspace-back-and-forth'
     alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
 
     # ── Focus (vim directions) ──────────────────────────────
