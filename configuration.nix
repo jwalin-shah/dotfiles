@@ -83,6 +83,7 @@
       _FXSortFoldersFirstOnDesktop = true;          # Folders before files on desktop too
       FXDefaultSearchScope = "SCcf";                # Search current folder, not whole Mac
       FXRemoveOldTrashItems = true;                 # Auto-empty trash after 30 days
+      CalculateAllSizes = true;                     # Show folder sizes in list view (even unopened)
       QuitMenuItem = true;                          # Cmd-Q quits Finder
       ShowExternalHardDrivesOnDesktop = false;
       ShowHardDrivesOnDesktop = false;
