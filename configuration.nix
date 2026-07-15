@@ -222,6 +222,7 @@
       "brave-browser"
       "chatgpt-classic"
       "cursor"
+      "flux-app"
       "ghostty"
       "karabiner-elements"
       "lulu"
