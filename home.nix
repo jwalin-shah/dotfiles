@@ -367,11 +367,13 @@ in
   home.file.".config/ghostty/config".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/ghostty/config";
 
-  # Window manager + keyboard
+  # Window manager + keyboard + launchers
   home.file.".aerospace.toml".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/aerospace/aerospace.toml";
   home.file.".config/karabiner/karabiner.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/karabiner/karabiner.json";
+  home.file.".config/raycast/scripts".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/raycast/scripts";
   imports = [
     ({ config, ... }: {
       home.file = let

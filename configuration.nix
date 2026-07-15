@@ -143,7 +143,7 @@
     };
     screensaver = {
       askForPassword = true;
-      askForPasswordDelay = 5;
+      askForPasswordDelay = 0;
     };
     SoftwareUpdate.AutomaticallyInstallMacOSUpdates = false;  # Manual updates only
     spaces.spans-displays = false;                  # Each display has its own Spaces
@@ -152,6 +152,30 @@
       SHOWFULLNAME = true;                          # Show name + password field
     };
     hitoolbox.AppleFnUsageType = "Do Nothing";      # Fn key does nothing (reclaim it)
+
+    CustomUserPreferences = {
+      "com.apple.LaunchServices" = {
+        LSQuarantine = false;
+      };
+      "com.apple.finder" = {
+        QLEnableTextSelection = true;
+      };
+      "com.apple.desktopservices" = {
+        DSDontWriteNetworkStores = true;
+        DSDontWriteUSBStores = true;
+      };
+      "com.apple.print.PrintingPrefs" = {
+        "Quit When Finished" = true;
+      };
+      "com.apple.frameworks.diskimages" = {
+        skip-verify = true;
+        skip-verify-locked = true;
+        skip-verify-remote = true;
+      };
+      "com.brave.Browser" = {
+        AppleEnableSwipeNavigateWithScrolls = false;
+      };
+    };
   };
 
   # Homebrew via nix-homebrew
