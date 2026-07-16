@@ -42,15 +42,12 @@ RAG / search.
 
 | Attribute | Value |
 |---|---|
-| **Path** | `~/.cognee_transcripts/` |
 | **Files** | 30 Markdown (`.md`) files + 3 summary files |
 | **Total size** | ~1.7 MB |
 | **Format** | Markdown with conversation text |
 | **Format notes** | Plain text summaries of Claude sessions |
 
 **Ingestion:**
-- ✅ Added to cognee `cognee_transcripts` dataset (30 entries)
-- Tool: `cognee.add()` (via Phase 3, Iteration 3)
 
 **Suitable for:** ✅ RAG (conversational text)
 
@@ -84,7 +81,6 @@ calls, and user prompts. Metadata lives in sibling `<uuid>/` directories.
 
 **Ingestion status:** ⬜ **Not yet indexed into cocoindex**
 - These are per-project session files managed by Claude Code's own persistence
-- Suitable for cocoindex (code-adjacent content) rather than cognee
 - ~36 machine-scratch sessions alone are 354 MB
 
 **Suitable for:** ✅ Code context (cocoindex), ⬜ Maybe RAG
@@ -101,7 +97,6 @@ calls, and user prompts. Metadata lives in sibling `<uuid>/` directories.
 | **Format** | JSONL — `{display, sessionId, timestamp, ...}` |
 
 **Ingestion:**
-- ✅ Added to cognee `claude_history` dataset
 
 **Suitable for:** ✅ RAG (session summaries)
 
@@ -117,7 +112,6 @@ calls, and user prompts. Metadata lives in sibling `<uuid>/` directories.
 | **Format** | JSONL — `{display, sessionId, timestamp, ...}` |
 
 **Ingestion:**
-- ✅ Added to cognee `claude_history` dataset
 
 **Suitable for:** ✅ RAG (session summaries)
 
@@ -133,7 +127,6 @@ calls, and user prompts. Metadata lives in sibling `<uuid>/` directories.
 | **Format** | JSONL — `{display, sessionId, timestamp, ...}` |
 
 **Ingestion:**
-- ✅ Added to cognee `claude_history` dataset (minimal — only 2 entries)
 
 **Suitable for:** ✅ RAG (session summaries)
 
@@ -149,7 +142,6 @@ calls, and user prompts. Metadata lives in sibling `<uuid>/` directories.
 | **Format** | JSONL — `{display, sessionId, timestamp, ...}` |
 
 **Ingestion:**
-- ✅ Added to cognee `claude_history` dataset
 
 **Suitable for:** ✅ RAG (session summaries)
 
@@ -173,7 +165,7 @@ calls, and user prompts. Metadata lives in sibling `<uuid>/` directories.
 
 **Format:** `{trace_id, span_id, parent_span_id, name, kind, start_time, end_time, status, resource, scope, attributes}`
 
-**NOT suitable for cognee RAG.** These are structured telemetry spans, not
+These are structured telemetry spans, not
 conversational text. Suitable for:
 - **inference.net Catalyst** trace analysis
 - Custom span analysis scripts
@@ -188,7 +180,6 @@ conversational text. Suitable for:
 **Format:** `{messages: [{role, content}, ...], project, file, turn_count, source}`
 
 **Ingestion:**
-- ✅ Added to cognee `vault_transcripts` dataset (4,233 entries)
 - Tool: `bin/ingest-all.py` with `--dataset vault_transcripts`
 
 **Suitable for:** ✅ RAG (conversational text)
@@ -216,7 +207,7 @@ conversational text. Suitable for:
 
 ### `bin/ingest-all.py` — Generalized JSONL Ingester
 
-Auto-detects data format and ingests into cognee:
+Auto-detects data format and ingests:
 
 ```
 python3 bin/ingest-all.py [--dataset NAME] FILE [FILE ...]
@@ -250,5 +241,4 @@ Reads from `~/.claude-token/history.jsonl`, `~/.claude-pioneer/history.jsonl`,
 |---|---|---|
 | **Cognify blocked** | Knowledge graph build from ingested data fails | Qwen3.5 `instructor` incompatibility |
 | **GPU OOM** | Entity extraction fails under concurrent requests | M5 Pro memory ceiling reached |
-| **cognee 1.x item-per-pipeline** | ~2 seconds per ingested item → 4K entries = ~2 hours | Architectural — slow but reliable |
 | **Trace spans unsuitable for RAG** | ~650K trace lines skipped | Not a bug — different analysis tool needed |

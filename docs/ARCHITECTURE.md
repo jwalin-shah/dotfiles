@@ -67,10 +67,8 @@ understanding the system as a whole.
 | **Launch** | `nohup uv tool run --from mlx-lm mlx_lm.server --model <path> --host 127.0.0.1 --port 8080` |
 | **API** | OpenAI-compatible (`/v1/chat/completions`, `/v1/completions`) |
 | **Max tokens** | 8192 |
-| **Autostart** | Via `~/bin/start-cognee-mcp` |
 | **Log** | `/tmp/mlx-inference.log` |
 
-**Used by:** cognee MCP (LLM for entity extraction + query), any local OpenAI-compatible client.
 
 ### 2. MLX Embedding Server (`:8081`)
 
@@ -81,10 +79,8 @@ understanding the system as a whole.
 | **Launch** | `mlx-embed-server --port 8081` (via `bin/mlx-embed-server`) |
 | **API** | `/v1/embeddings` (OpenAI-compatible) |
 | **Dimensions** | 1024 |
-| **Autostart** | Via `~/bin/start-cognee-mcp` |
 | **Log** | `/tmp/mlx-embed-server.log` |
 
-**Used by:** cognee MCP (embedding provider for doc ingestion and search).
 
 ### 3. Cognee MCP Server (`:7779`)
 
@@ -96,14 +92,11 @@ understanding the system as a whole.
 | **Backend** | Ladybug DB (SQLite graph database) |
 | **Provider** | `openai_compatible` (MLX embedding on :8081) |
 | **LLM** | `openai/mlx-community/Qwen3.5-9B-OptiQ-4bit` (litellm routing) |
-| **Launch** | `uv run --directory ~/projects/cognee/cognee-mcp python src/server.py` |
-| **Log** | `/tmp/cognee-mcp.log` |
 
 **Ingested datasets:**
 
 | Dataset | Source | Entries | Status |
 |---|---|---|---|
-| `cognee_transcripts` | ~/.cognee_transcripts/ (30 .md files) | 30 | ✅ |
 | `claude_history` | 4 history.jsonl files | 2,176 | ✅ |
 | `vault_transcripts` | ~/data/vault/claude-transcripts-hf.jsonl | 4,233 | ✅ |
 | `vault_corpus` | ~/data-exports/_datasets/corpus.jsonl | 8,580 | 🔄 |
@@ -160,16 +153,26 @@ Secret management:
 
 ### RAG Pipeline
 
-```
-Data Source → ingest-all.py / cognee.add() → Ladybug DB → cognee MCP query
-                                                                ↓
-Data Source → cocoindex.index() → Vector Index → cocoindex MCP query
+```text
+Data Source → import_all.py (Code/Docs) → Ladybug DB Graph (Dual Embeddings)
+Data Source → ingest_all.py (Transcripts) → Ladybug DB Graph (Qwen Only)
 ```
 
-cognee handles **conversation/session data** for Q&A about past work.
-cocoindex handles **code context** for active project retrieval.
+### The Unified LadybugDB Architecture
 
-### MLX Model Pipeline
+1. **`import_all.py` (Code & Docs)**
+   - **Domain:** Pure Code, Documentation, & Call Graphs.
+   - **Embedders:** Uses BOTH `Qwen3-Embedding` (:8081) and `CodeRankEmbed` (:8082).
+   - **Mechanism:** It incrementally chunks files via AST boundaries. For new chunks, it fetches both 1024-dim semantic (Qwen) and 768-dim structural (CodeRank) vectors, storing both directly on the same `Chunk` node in LadybugDB.
+
+2. **`ingest_all.py` (Transcripts)**
+   - **Domain:** Knowledge Graph, Transcripts, & Architecture Decisions.
+   - **Embedder:** `Qwen3-Embedding` (:8081) — optimized for semantic human meaning.
+   - **Mechanism:** Builds a persistent graph tying chat transcripts to code chunks. (GLiNER entity extraction has been stripped to maintain speed and efficiency).
+
+3. **TLDR (`llm-tldr daemon`)**
+   - **Domain:** AST Caching.
+   - **Mechanism:** Watches the filesystem and instantly parses call-graphs. `import_all.py` queries this warm cache (`tldr calls`) during Phase 3 to draw cross-repo `CALLS_FUNC` Cypher edges instantly.
 
 ```
 start-cognee-mcp

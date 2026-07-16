@@ -221,7 +221,7 @@ in
       uv tool install mlx-lm || true
       uv tool install cocoindex || true
       uv tool install cocoindex-code || true
-      uv tool install cognee || true
+
       uv tool install "llm-tldr" || true
       uv tool install z3-solver || true
     )
@@ -282,8 +282,7 @@ in
 
   home.file."bin/mlx-chat-health.sh".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/mlx-chat-health.sh";
-  home.file."bin/cognee-health.sh".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/cognee-health.sh";
+
 
   # Utility scripts
   home.file."bin/audit-config-ownership.sh".source =
@@ -354,12 +353,21 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/raycast/scripts";
   imports = [
     ({ config, ... }: {
+      # Skills are declared once in ./skills and projected into every harness
+      # that reads a skills directory. force = true because these paths held
+      # hand-made symlinks predating the repo move to ~/projects/dotfiles.
       home.file = let
         skills = builtins.attrNames (builtins.readDir ./skills);
-      in builtins.listToAttrs (map (name: {
-        name = ".agents/skills/${name}";
-        value = { source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/skills/${name}"; };
-      }) skills);
+        skillDirs = [ ".agents" ".claude" ".claude-a" ".claude-token" ];
+        link = dir: name: {
+          name = "${dir}/skills/${name}";
+          value = {
+            source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/skills/${name}";
+            force = true;
+          };
+        };
+      in builtins.listToAttrs
+        (builtins.concatMap (dir: map (link dir) skills) skillDirs);
     })
   ];
 }

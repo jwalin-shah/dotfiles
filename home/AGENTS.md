@@ -92,7 +92,6 @@ not found in public registries, use the base tool instead.
 | `lavish-axi` | ACTIVE | Human review surface for HTML artifacts | When agent ships review artifacts |
 | `chrome-devtools-axi` | ACTIVE | Browser automation | UI testing / scraping |
 | `ctx7` | ACTIVE | Context7 library docs lookup | Library docs / API references |
-| `cognee-cli` | ACTIVE | Graph-based session memory | Cross-session memory |
 | `cocoindex-code` / `ccc` | ACTIVE | Incremental code indexing | Build code indexes |
 | `treehouse` | ACTIVE | Pool of reusable git worktrees | Parallel agents on one repo |
 | `githits` | ACTIVE | Indexed search/grep/read across open-source code | Real-world code examples, dependency source |
@@ -104,7 +103,6 @@ not found in public registries, use the base tool instead.
 | `fastedit` | REMOVED | ~~AST-aware file edits~~ | Use standard Edit/Write instead |
 | `pioneer` (fastino) | REMOVED | ~~SLM fine-tuning, NER, GLiNER~~ | Not on PATH, not coming back — corrected 2026-07-13 |
 | `bun` | REMOVED | ~~Runtime for Pioneer CLI~~ | Only existed to support `pioneer`, same status |
-| `githits-axi`, `coco-axi`, `cognee-axi` | UNVERIFIED | Not found in public registries | Use the deprecated-alias mapping above instead |
 
 Blocked for agents (captain-only): `rm`, `sudo`, `security` (ask the
 captain), `export` (use bridge secrets adapter instead), GNU

@@ -44,7 +44,7 @@ All 12 declared 2026-07-14. Survives fresh machine.
 ## Python (uv-managed via home.nix)
 
 All 6 Python tools are declared in `home.nix` via `uvTools` — mlx-lm,
-cocoindex, cocoindex-code, cognee, llm-tldr, z3-solver. No global pip
+cocoindex, cocoindex-code, llm-tldr, z3-solver. No global pip
 packages remain. The old `pip-to-uv-migration.md` plan is closed:
 the migration was already done when this was written — the plan itself
 was the stale artifact.
@@ -65,7 +65,6 @@ confirmed via `gh-axi repo list jwalin-shah`.
 | btw-v1 | yes | needs its own `uv` venv (see Python section) | OPEN |
 | jw-desk | yes | scaffold only — 2 commits, no implementation yet, NOT obsolete, NOT superseded by research-bridge (unrelated project, confirmed 2026-07-13) | early-stage, no action needed |
 | research-bridge | yes | `uv`/pip venv at `~/projects/research-bridge/.venv`, provides `chatgpt-bridge`/`gemini-bridge`/`perplexity-bridge` binaries | OK |
-| firstmate, cocoindex, cognee, treehouse, gnhf, m5tools-adjacent, voice-engine-swift, modern-resume | mixed | not individually audited this pass | see project map; `~/.local/bin` binary-level audit in progress (#12) |
 
 Everything else in `~/.local/bin` besides mintmux/m5tools — audit in progress, will be
 verified or purged based on usage. (`local-bin-usage-audit.md`).
@@ -94,7 +93,6 @@ the service inventory — `configuration.nix` is the canonical source.
 
 Services by category (2026-07-14):
 
-- **FIXED 2026-07-15**: `cognee-api` healthy (PID running, exit status 0, /health returns 200).
 - **FIXED 2026-07-14**: voice-paste plist + binaries removed. voice-engine-swift kept.
 - **FIXED 2026-07-14**: `com.jwalin.adblock.plist` — removed, binary already gone.
 - **FIXED 2026-07-14**: `~/CLAUDE.md` now exists (→ `~/.dotfiles/GLOBAL.md`).
@@ -126,5 +124,4 @@ Base `settings.json` identical and clean across `~/.claude`, `~/.claude-a`,
 - **DONE 2026-07-14**: TOOL_REGISTRY.md corrected.
 - **DONE 2026-07-14**: Ghostty config symlinked into dotfiles.
 - **DONE 2026-07-14**: Deny-list/local settings added to all Claude config dirs.
-- **DONE 2026-07-14**: Cognee crash loop fixed (uvicorn server + disable auth).
 - **DONE 2026-07-14**: Lean 4.32.0 + Lake 5.0.0 installed via elan; bridge proofs build clean (12 jobs).

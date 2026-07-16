@@ -128,7 +128,6 @@ the captain's explicit approval, recorded so it is auditable.
 - For no-mistakes `ask-user` findings: the response is recorded in the run database
 
 **Where evidence lives:**
-- Chat decisions: firstmate chat history (cognee-indexed for recall)
 - Pipeline decisions: `no-mistakes` run database (`NM_HOME` sqlite)
 - Merge decisions: GitHub PR audit log
 
@@ -726,10 +725,7 @@ captain is approving on faith. With it, the captain is approving on evidence.
 - **No cross-task proof index.** Each task's proof lives in its own silo (PR,
   report, run record). There is no way to ask "show me all proof for the last
   10 tasks." The backlog's Done section with PR URLs is the closest thing.
-- **Manifest is not in cognee.** The captain's principle is "if it's not in
-  cognee, it didn't happen." Today, pipeline run records are in SQLite, not
-  cognee. Ingesting completed run manifests into cognee would make them
-  recallable via `mcp__cognee__recall`.
+
 
 ### Next steps (not part of this contract -- implementation decisions):
 1. Add `no-mistakes axi manifest --run <id>` that assembles the proof bundle
@@ -738,4 +734,3 @@ captain is approving on faith. With it, the captain is approving on evidence.
    the report is under N characters or contains no file paths.
 3. Build `jw-status validate` as a command that checks every service in
    ARCHITECTURE.md's service table.
-4. Ingest completed run manifests into cognee for recall.

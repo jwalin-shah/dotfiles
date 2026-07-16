@@ -371,69 +371,9 @@
       };
     };
 
-    # cognee: knowledge graph API on :8000
-    "com.jwalinshah.cognee-api" = {
-      serviceConfig = {
-        ProgramArguments = [
-          "${dotfilesBin}/daemon-wrapper"
-          "${uvBin}/cognee/bin/python"
-          "-m" "uvicorn" "cognee.api.client:app"
-          "--host" "127.0.0.1" "--port" "8000"
-        ];
-        KeepAlive.SuccessfulExit = false;
-        RunAtLoad = true;
-        ThrottleInterval = 30;
-        WorkingDirectory = home;
-        EnvironmentVariables = {
-          HOME = home;
-          PATH = defaultPATH;
-          DAEMON_NAME = "cognee-api";
-          DAEMON_PORT = "8000";
-          DAEMON_DISPLAY_NAME = "cognee-api:8000";
-          DAEMON_TYPE = "foreground";
-          DAEMON_HEALTH_URL = "/health";
-          DAEMON_ENV_FILE = "${home}/.config/jw/models.env";
-          DAEMON_VALIDATION_CMD = "${uvBin}/cognee/bin/python -c 'import cognee; print(\"OK\")'";
-          # Cognee runtime env
-          CACHING = "true";
-          COGNEE_SKIP_CONNECTION_TEST = "true";
-          ENABLE_BACKEND_ACCESS_CONTROL = "false";
-          COGNEE_DATA_DIR = "${home}/.local/share/cognee";
-        };
-        StandardOutPath = "${home}/.local/share/jw/cognee-api.log";
-        StandardErrorPath = "${home}/.local/share/jw/cognee-api.log";
-      };
-    };
 
-    # cocoindex: incremental code index daemon (watch + auto-reindex)
-    # Use python binary directly so exec -a works for ps naming.
-    "com.jwalinshah.cocoindex-daemon" = {
-      serviceConfig = {
-        ProgramArguments = [
-          "${dotfilesBin}/daemon-wrapper"
-          "${uvBin}/cocoindex-code/bin/python"
-          "${uvBin}/cocoindex-code/bin/ccc"
-          "run-daemon"
-        ];
-        KeepAlive.SuccessfulExit = false;
-        RunAtLoad = true;
-        ThrottleInterval = 30;
-        WorkingDirectory = "${home}/projects";
-        EnvironmentVariables = {
-          HOME = home;
-          PATH = defaultPATH;
-          PYTHONPATH = "${home}/.cocoindex_code/extensions:${uvBin}/cocoindex-code/lib/python3.13/site-packages";
-          DAEMON_NAME = "cocoindex-daemon";
-          DAEMON_PORT = "0";
-          DAEMON_DISPLAY_NAME = "ccc-daemon";
-          DAEMON_TYPE = "foreground";
-          DAEMON_HEALTH_URL = "pid-only";
-          DAEMON_VALIDATION_CMD = "${uvBin}/cocoindex-code/bin/python -c '__import__(\"tldr_chunker\", fromlist=[\"chunk\"]); print(\"OK\")'";
-        };
-        StandardOutPath = "${home}/.local/share/cocoindex/daemon-stdout.log";
-        StandardErrorPath = "${home}/.local/share/cocoindex/daemon-stderr.log";
-      };
-    };
+
+
 
     # tldr daemon: watches ~/projects, auto-refreshes call-graph index.
     # child-block mode: llm-tldr daemonizes internally, wrapper runs as
