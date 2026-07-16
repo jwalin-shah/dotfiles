@@ -10,4 +10,6 @@ brew trust nikitabobko/tap 2>/dev/null || true
 sudo darwin-rebuild switch --flake ~/.dotfiles#mac
 "$DIR/bin/audit-config-ownership.sh"
 "$DIR/bin/audit-hook-ownership.sh"
-exec "$DIR/bin/audit-doc-freshness.sh"
+"$DIR/bin/audit-doc-freshness.sh"
+echo "--- Running full machine verification ---"
+exec bridge verify-machine
