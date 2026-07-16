@@ -65,7 +65,7 @@ confirmed via `gh-axi repo list jwalin-shah`.
 | btw-v1 | yes | needs its own `uv` venv (see Python section) | OPEN |
 | jw-desk | yes | scaffold only — 2 commits, no implementation yet, NOT obsolete, NOT superseded by research-bridge (unrelated project, confirmed 2026-07-13) | early-stage, no action needed |
 | research-bridge | yes | `uv`/pip venv at `~/projects/research-bridge/.venv`, provides `chatgpt-bridge`/`gemini-bridge`/`perplexity-bridge` binaries | OK |
-| firstmate, cocoindex, cognee, treehouse, gnhf, m5tools-adjacent, voice-engine-swift, modern-resume | mixed | not individually audited this pass | see `~/CLAUDE.md` §3 project map; `~/.local/bin` binary-level audit in progress (#12) |
+| firstmate, cocoindex, cognee, treehouse, gnhf, m5tools-adjacent, voice-engine-swift, modern-resume | mixed | not individually audited this pass | see project map; `~/.local/bin` binary-level audit in progress (#12) |
 
 Everything else in `~/.local/bin` besides mintmux/m5tools — audit in progress, will be
 verified or purged based on usage. (`local-bin-usage-audit.md`).
@@ -94,12 +94,10 @@ the service inventory — `configuration.nix` is the canonical source.
 
 Services by category (2026-07-14):
 
-- OPEN: `cognee-api` shows nonzero last-exit (2) — check for crash loop.
+- **FIXED 2026-07-15**: `cognee-api` healthy (PID running, exit status 0, /health returns 200).
 - **FIXED 2026-07-14**: voice-paste plist + binaries removed. voice-engine-swift kept.
 - **FIXED 2026-07-14**: `com.jwalin.adblock.plist` — removed, binary already gone.
 - **FIXED 2026-07-14**: `~/CLAUDE.md` now exists (→ `~/.dotfiles/GLOBAL.md`).
-  `jw-sentry`, `jw-sessiond`, `quota-keychain-sync` confirmed absent —
-  no plists anywhere. GLOBAL.md §12 corrected.
 
 ## App configs
 

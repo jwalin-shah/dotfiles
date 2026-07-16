@@ -122,3 +122,14 @@ Default Matt Pocock vocabulary. See `docs/agents/triage-labels.md`.
 ### Domain docs
 
 Single-context layout. See `docs/agents/domain.md`.
+
+## Hook configuration
+
+When working on agent harness configs (settings.json, hooks.json, etc.),
+read `docs/HOOKS.md` first. It is the canonical reference for:
+- Which agents support PostToolUse / post-edit hooks
+- Exact config file paths and JSON format per harness
+- The shared `bin/fmt-on-edit.sh` extension point
+- How to add a new formatter or harness
+
+Do not modify individual harness configs without updating the matrix in HOOKS.md.

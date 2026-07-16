@@ -78,7 +78,7 @@ in
       push = "git push";
       pull = "git pull";
       m = "git switch main";
-      rb = "cd ~/dotfiles && ./rebuild.sh";
+      rb = "cd ~/projects/dotfiles && ./rebuild.sh";
       ll = "eza -l";
       la = "eza -la";
       lt = "eza --tree";
@@ -204,9 +204,11 @@ in
     (
       export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:$PATH"
       # Launcher dependencies — wrappers in ~/bin/ exec these directly
-      /opt/homebrew/bin/npm install -g @anthropic-ai/claude-code @openai/codex @kilocode/cli command-code || true
+      /opt/homebrew/bin/npm install -g @anthropic-ai/claude-code @openai/codex command-code || true
       # Agent toolchain — used across all projects by agents and Bridge context assembly
       /opt/homebrew/bin/npm install -g gh-axi githits ctx7 chrome-devtools-axi lavish-axi tasks-axi @inference/cli gnhf || true
+      # Linting, formatting, and type-checking — used by Bridge verification gates and agent toolchains
+      /opt/homebrew/bin/npm install -g eslint prettier pyright typescript pnpm || true
     )
   '';
 
@@ -230,19 +232,12 @@ in
       export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:$PATH"
       ${dotfiles}/bin/merge-runtime-configs.py ${dotfiles}/home/.gemini/antigravity-cli/settings.json $HOME/.gemini/antigravity-cli/settings.json || true
       ${dotfiles}/bin/merge-runtime-configs.py ${dotfiles}/home/.cursor/cli-config.json $HOME/.cursor/cli-config.json || true
-      ${dotfiles}/bin/merge-runtime-configs.py ${dotfiles}/config/opencode/opencode.json $HOME/.config/opencode/opencode.json || true
-      ${dotfiles}/bin/merge-runtime-configs.py ${dotfiles}/home/.config/kilo/kilo.jsonc $HOME/.config/kilo/kilo.jsonc || true
+
     )
   '';
 
-  home.file.".config/kilo/AGENTS.md".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
   home.file.".config/claude/mcp.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/claude/mcp.json";
-  home.file.".config/opencode/mcp.json".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/opencode/mcp.json";
-  home.file.".config/opencode/AGENTS.md".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
 
   # Models config — single source of truth for LLM model selection
   home.file.".config/jw/models.env".source =
@@ -259,14 +254,7 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/agy-wrapper";
   home.file."bin/cua".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/cua-wrapper";
-  home.file."bin/oo".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/oo-wrapper";
-  home.file."bin/ot".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/ot-wrapper";
-  home.file."bin/ko".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/ko-wrapper";
-  home.file."bin/kt".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/kt-wrapper";
+
   home.file."bin/cx".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/cx-wrapper";
   home.file."bin/com".source =
@@ -322,14 +310,7 @@ in
     config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-cua";
   home.file."bin/bridge-agy".source =
     config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-agy";
-  home.file."bin/bridge-oo".source =
-    config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-oo";
-  home.file."bin/bridge-ot".source =
-    config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-ot";
-  home.file."bin/bridge-ko".source =
-    config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-ko";
-  home.file."bin/bridge-kt".source =
-    config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-kt";
+
   home.file."bin/bridge-cx".source =
     config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-cx";
 

@@ -156,5 +156,6 @@
   "attribution": {
     "attributeCommitsToAgent": true,
     "attributePRsToAgent": true
-  }
+  },
+  "approved_commands": []
 }

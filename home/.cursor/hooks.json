@@ -1,4 +1,16 @@
 {
-  "hooks": {},
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/jwalinshah/projects/dotfiles/bin/fmt-on-edit.sh"
+          }
+        ]
+      }
+    ]
+  },
   "version": 1
 }

@@ -94,6 +94,30 @@ else
 fi
 
 
+log "=== Phase 0.5: install pre-commit hooks ==="
+PRE_COMMIT_CONTENT='#!/bin/sh
+# Pre-commit: block unformatted Go
+unformatted=$(gofmt -l . 2>/dev/null)
+if [ -n "$unformatted" ]; then
+  echo "error: unformatted Go files (run: gofmt -w .):"
+  echo "$unformatted" | sed "s/^/  /"
+  exit 1
+fi'
+
+for project in "${PROJECTS[@]}"; do
+  name=$(basename "$project")
+  [ -d "$project" ] || continue
+  hook="$project/.git/hooks/pre-commit"
+  # Only install for Go projects
+  [ -f "$project/go.mod" ] || continue
+  if [ -f "$hook" ]; then
+    green "  ✓ $name — pre-commit hook already present"
+    continue
+  fi
+  printf '%s\n' "$PRE_COMMIT_CONTENT" > "$hook"
+  chmod +x "$hook"
+  green "  ✓ $name — pre-commit hook installed"
+done
 
 log "=== Phase 1: setup-matt-pocock-skills ==="
 for project in "${PROJECTS[@]}"; do

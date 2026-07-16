@@ -1,3 +1,9 @@
 {
-  "hooks": {}
+  "hooks": {
+    "post-edit": [
+      {
+        "command": "/Users/jwalinshah/projects/dotfiles/bin/fmt-on-edit.sh"
+      }
+    ]
+  }
 }

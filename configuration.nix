@@ -295,20 +295,6 @@
     defaultPATH = "${localBin}:${dotfilesBin}:${brewBin}:/usr/local/bin:/usr/bin:/bin";
   in {
 
-    # mlx-chat health check: pings server every 5min, cleans up orphans
-    "com.jwalinshah.mlx-chat-health" = {
-      serviceConfig = {
-        ProgramArguments = [ "${dotfilesBin}/mlx-chat-health.sh" ];
-        StartInterval = 300;
-        StandardOutPath = "${home}/.local/share/jw/mlx-chat-health.log";
-        StandardErrorPath = "${home}/.local/share/jw/mlx-chat-health.log";
-        EnvironmentVariables = {
-          HOME = home;
-          PATH = defaultPATH;
-        };
-      };
-    };
-
     # llama-embed: Qwen3-Embedding 0.6B on :8081 (1024-dim)
     "com.jwalinshah.llama-embed-server" = {
       serviceConfig = {
@@ -419,20 +405,6 @@
       };
     };
 
-    # cognee health check: pings API every 5min, cleans up orphans
-    "com.jwalinshah.cognee-health" = {
-      serviceConfig = {
-        ProgramArguments = [ "${dotfilesBin}/cognee-health.sh" ];
-        StartInterval = 300;
-        StandardOutPath = "${home}/.local/share/jw/cognee-health.log";
-        StandardErrorPath = "${home}/.local/share/jw/cognee-health.log";
-        EnvironmentVariables = {
-          HOME = home;
-          PATH = defaultPATH;
-        };
-      };
-    };
-
     # cocoindex: incremental code index daemon (watch + auto-reindex)
     # Use python binary directly so exec -a works for ps naming.
     "com.jwalinshah.cocoindex-daemon" = {
@@ -460,20 +432,6 @@
         };
         StandardOutPath = "${home}/.local/share/cocoindex/daemon-stdout.log";
         StandardErrorPath = "${home}/.local/share/cocoindex/daemon-stderr.log";
-      };
-    };
-
-    # cocoindex health check: pings daemon every 5min, cleans up orphans
-    "com.jwalinshah.cocoindex-health" = {
-      serviceConfig = {
-        ProgramArguments = [ "${dotfilesBin}/cocoindex-health.sh" ];
-        StartInterval = 300;
-        StandardOutPath = "${home}/.local/share/cocoindex/health-stdout.log";
-        StandardErrorPath = "${home}/.local/share/cocoindex/health-stderr.log";
-        EnvironmentVariables = {
-          HOME = home;
-          PATH = defaultPATH;
-        };
       };
     };
 

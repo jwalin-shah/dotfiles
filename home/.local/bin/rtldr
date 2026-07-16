@@ -112,7 +112,7 @@ PYEOF
     echo ""
     echo "── mcp wiring ───────────────────────────────────────"
     python3 -c "import json,pathlib; d=json.loads(pathlib.Path('$HOME/.config/claude/mcp.json').read_text()); print('servers:', ', '.join(d['mcpServers'].keys()))"
-    echo "symlinked to: ~/.claude ~/.claude-a ~/.claude-token ~/.claude-pioneer ~/.claude-cerebras ~/.cursor"
+    echo "symlinked to: ~/.claude ~/.claude-a ~/.claude-token ~/.cursor"
     ;;
   help|--help|-h)
     cat <<'EOF'
