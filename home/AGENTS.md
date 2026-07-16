@@ -54,18 +54,20 @@ Be direct, concrete, and opinionated. Surface confusion instead of hiding it.
 
 ## Launchers
 
-Every entry is verified — a launcher listed here that doesn't exist on disk is a
-config error. `config-lint` enforces this.
+A launcher listed here that doesn't exist on disk is a config error. As of
+2026-07-16 four are broken (`oo`, `ot`, `ko`, `kt`) - `config-lint` did not
+catch them, so treat this table as unverified until that gate actually runs.
+`bridge verify-machine`'s config-consistency gate does detect them.
 
 | Command | Tool | Auth | Routing (task → model) |
 |---|---|---|---|
 | `ca` | Claude Code | Account A OAuth | Heavy: Opus 4.8. Light: Haiku 4.5. |
 | `ct` | Claude Code | TokenRouter | Heavy: deepseek-v4-pro. Medium: deepseek-v4-flash. Light: kimi-k2.7-code. |
 | `cx` | Codex CLI | Codex/ChatGPT account | OpenAI models via ChatGPT Plus. |
-| `oo` | OpenCode | ChatGPT Plus OAuth | gpt-5.5 for heavy work (profile `oo.json`). |
-| `ot` | OpenCode | TokenRouter | deepseek-v4-flash for routine work (profile `ot.json`). |
-| `ko` | Kilo | ChatGPT Plus OAuth | Kilo via OpenAI provider. |
-| `kt` | Kilo | TokenRouter | Kilo via TokenRouter. |
+| ~~`oo`~~ | OpenCode | -- | MISSING 2026-07-16: wrapper not on disk. `opencode` binary exists. |
+| ~~`ot`~~ | OpenCode | -- | MISSING 2026-07-16: wrapper not on disk. `opencode` binary exists. |
+| ~~`ko`~~ | Kilo | -- | MISSING 2026-07-16: wrapper not on disk. `kilo` binary exists. |
+| ~~`kt`~~ | Kilo | -- | MISSING 2026-07-16: wrapper not on disk. `kilo` binary exists. |
 | `cua` | Cursor Agent | Own auth | Cursor's built-in agent. |
 | `agy` | Antigravity CLI | Own auth | |
 

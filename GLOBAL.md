@@ -41,8 +41,8 @@ Every tool below is installed and available. Use the right tool for the job.
 | Claude (TokenRouter) | `ct` | TokenRouter proxy — DeepSeek V4, Kimi, Grok, MiniMax | Cost-sensitive or multi-model tasks. |
 | Codex | `codex`, `cx` | OpenAI CLI | When a task specifically benefits from OpenAI models. |
 | Agy (Gemini) | `agy` | Google Antigravity CLI — Gemini models | Google-specific workloads or model comparison. |
-| Kilo | `kilo`, `ko`, `kt` | AI coding agent with TUI | Alternative agent with LanceDB indexing. `ko` for OpenAI, `kt` for TokenRouter. |
-| OpenCode | `ot` | OpenCode via TokenRouter | Alternative coding agent for diversity. |
+| Kilo | `kilo` | AI coding agent with TUI. The `ko`/`kt` wrappers are MISSING as of 2026-07-16; only the `kilo` binary exists. | Call `kilo` directly, or restore the wrappers. |
+| ~~OpenCode~~ | ~~`ot`~~ | MISSING as of 2026-07-16. The `opencode` binary is installed (Homebrew) but the `oo`/`ot` wrappers are not on disk. | Call `opencode` directly, or restore the wrappers. |
 | Cursor Agent | `cursor-agent` | Cursor Agent CLI | When cursor-specific features are needed. |
 
 ### Code Intelligence
@@ -63,7 +63,7 @@ Every tool below is installed and available. Use the right tool for the job.
 
 | Tool | Command | Purpose | When to Use |
 |------|---------|---------|-------------|
-| FirstMate | `jw-*.sh` (in `~/bin`) | Agent fleet manager | Spawning/supervising crewmate agents: `jw-spawn.sh`, `jw-send.sh`, `jw-teardown.sh`. Thread decisions go through `jw` (below). |
+| ~~FirstMate~~ | ~~`jw-*.sh`~~ | MISSING as of 2026-07-16: `jw-spawn.sh`, `jw-send.sh` and `jw-teardown.sh` are not in `~/bin` or anywhere on PATH. Spawning lives in bridge (`bridge spawn`, `internal/worktree`). | Use `bridge spawn`. |
 | jw | `jw` | Orchestrator backend | Thread lifecycle: `jw brief`, `jw status`, `jw approve`, `jw reap`. |
 | mintmux | `mm-ctl` | PTY multiplexer (tmux replacement) | Session management for agent worktrees. |
 | ~~treehouse~~ | -- | RETIRED. Replaced by bridge's `internal/worktree` (pure Go `git worktree` add/remove + flock). The binary is not installed and nothing execs it. | Do not install or reference. |
@@ -105,7 +105,7 @@ Every tool below is installed and available. Use the right tool for the job.
 
 | Tool | Command | Purpose | When to Use |
 |------|---------|---------|-------------|
-| jw-squeeze | `JW_SQUEEZE=1` + any claude launcher | PreToolUse hook + wrapper: large Bash outputs enter the transcript pre-compressed; full raw output spilled to `$TMPDIR/jw-squeeze/` with the path in the marker | Long unattended sessions and gnhf loops. Registered in all three Claude config dirs (`~/.claude`, `~/.claude-a`, `~/.claude-token`). Details: `~/machine-scratch/docs/orbit-setup.md` § Context Compression. |
+| ~~jw-squeeze~~ | -- | MISSING as of 2026-07-16. No `jw-squeeze*` file exists in `~/bin`, `~/.local/bin`, or the dotfiles repo, and no jw-squeeze hook is registered in any Claude config dir. The only hook actually registered is `bin/fmt-on-edit.sh` (PostToolUse). The claim that it is "registered in all three Claude config dirs" was false. | Nothing to invoke. |
 
 ### System Utilities (always available)
 
