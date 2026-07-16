@@ -93,7 +93,7 @@ not found in public registries, use the base tool instead.
 | `chrome-devtools-axi` | ACTIVE | Browser automation | UI testing / scraping |
 | `ctx7` | ACTIVE | Context7 library docs lookup | Library docs / API references |
 | `cocoindex-code` / `ccc` | ACTIVE | Incremental code indexing | Build code indexes |
-| `treehouse` | ACTIVE | Pool of reusable git worktrees | Parallel agents on one repo |
+| `treehouse` | REMOVED | ~~Pool of reusable git worktrees~~ | Bridge's `internal/worktree` replaced it (pure Go `git worktree` + flock). Not installed, nothing execs it. |
 | `githits` | ACTIVE | Indexed search/grep/read across open-source code | Real-world code examples, dependency source |
 | `inf` (inference.net) | ACTIVE | Catalyst gateway/tracing/evals/training | Observability + fine-tuning workflow |
 | `gtimeout` / `timeout` | ACTIVE | Bound long-running live smoke tests | Use only around tests/agent probes |
@@ -101,7 +101,7 @@ not found in public registries, use the base tool instead.
 | `chrome-devtools-axi` | ACTIVE | Browser automation, alias `cda` | |
 | `lavish-axi` | ACTIVE | Review surfaces, alias `lva` | |
 | `fastedit` | REMOVED | ~~AST-aware file edits~~ | Use standard Edit/Write instead |
-| `pioneer` (fastino) | REMOVED | ~~SLM fine-tuning, NER, GLiNER~~ | Not on PATH, not coming back — corrected 2026-07-13 |
+| `pioneer` (fastino) | ACTIVE (quota only) | Prepaid credit pool, billed per model | Quota source only, fetched over HTTPS by bridge `internal/quota/pioneer.go`. No CLI, no SLM/NER/GLiNER tooling, no `bun`. Nothing to install - do not treat the live fetcher as rogue infra. |
 | `bun` | REMOVED | ~~Runtime for Pioneer CLI~~ | Only existed to support `pioneer`, same status |
 
 Blocked for agents (captain-only): `rm`, `sudo`, `security` (ask the

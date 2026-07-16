@@ -66,7 +66,7 @@ Every tool below is installed and available. Use the right tool for the job.
 | FirstMate | `jw-*.sh` (in `~/bin`) | Agent fleet manager | Spawning/supervising crewmate agents: `jw-spawn.sh`, `jw-send.sh`, `jw-teardown.sh`. Thread decisions go through `jw` (below). |
 | jw | `jw` | Orchestrator backend | Thread lifecycle: `jw brief`, `jw status`, `jw approve`, `jw reap`. |
 | mintmux | `mm-ctl` | PTY multiplexer (tmux replacement) | Session management for agent worktrees. |
-| treehouse | `treehouse` | Git worktree pool manager | Acquiring/releasing isolated worktrees. |
+| ~~treehouse~~ | -- | RETIRED. Replaced by bridge's `internal/worktree` (pure Go `git worktree` add/remove + flock). The binary is not installed and nothing execs it. | Do not install or reference. |
 
 ### Quality and CI
 
@@ -147,7 +147,7 @@ before working in that repo.
 | Project | Path | Purpose |
 |---------|------|---------|
 | mintmux | `~/projects/mintmux` | Go PTY multiplexer -- Unix socket protocol, Lua scripting |
-| treehouse | `~/projects/treehouse` | Go CLI -- git worktree pool manager for agent isolation |
+| treehouse | `~/projects/treehouse` | Go CLI -- git worktree pool manager. RETIRED: bridge replaced it with `internal/worktree`. Source remains on disk; the binary is not installed and nothing depends on it. |
 | tensor-logic | `~/projects/tensor-logic` | Tensor logic proof system for program verification, part of Bridge's verification stack |
 
 ### Tools and Utilities (3 repos)
@@ -187,8 +187,10 @@ This map mathematically defines the external dependencies (Edge Nodes) of the `b
 
 ### Proven Network/IPC Boundaries
 - `localhost:8000` -> `cognee-api` (Memory/Knowledge Graph)
-- `~/.local/share/jw/quota.db` -> Synchronous LLM token quota tracking
 - `~/Library/Logs/voice-engine/audio/` -> Dictation transcript polling
+
+Provider quota is fetched live over HTTPS by `internal/quota` (13 fetchers) and
+cached in the macOS Keychain via `internal/secrets`. There is no quota database.
 
 ---
 
@@ -197,8 +199,8 @@ This map mathematically defines the external dependencies (Edge Nodes) of the `b
 ### Strict Documentation Policy (The "No Willy-Nilly" Rule)
 
 - **Zero Undocumented Bloat:** No agent is permitted to `brew install`, `pip install`, `npm install -g`, or download a Hugging Face model without explicitly documenting it.
-- If a new ML Model is downloaded, it **MUST** be immediately logged in `~/dotfiles/MODELS.md` alongside its purpose and the tool that uses it.
-- If a new system tool or dependency is installed, it **MUST** be captured in `~/dotfiles/MACHINE.md` and `configuration.nix`.
+- If a new ML Model is downloaded, it **MUST** be immediately logged in `~/.dotfiles/MODELS.md` alongside its purpose and the tool that uses it.
+- If a new system tool or dependency is installed, it **MUST** be captured in `~/.dotfiles/MACHINE.md` and `configuration.nix`.
 - Undocumented tools or models found on this machine are considered rogue infrastructure and are subject to immediate deletion.
 
 ### Path Conventions
