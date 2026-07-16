@@ -247,6 +247,7 @@
       "node"
       "opencode"
       "openjdk@21"
+      "openjdk"
       "ruff"
       "python@3.14"
       "rustup"
@@ -539,7 +540,7 @@
       };
     };
 
-    "com.jw.heal" = {
+    "com.jwalinshah.jw-heal" = {
       serviceConfig = {
         ProgramArguments = [ "${localBin}/jw-heal" ];
         RunAtLoad = true;
