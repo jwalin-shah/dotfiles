@@ -422,34 +422,9 @@
 
     # ── AI Stack (continued) ──────────────────────────────────────────
 
-    # cognee-api: AI memory + knowledge graph on :8000
-    "com.jwalinshah.cognee-api" = {
-      serviceConfig = {
-        ProgramArguments = [
-          "${dotfilesBin}/daemon-wrapper"
-          "${uvBin}/cognee/bin/python"
-          "-m" "uvicorn" "cognee.api.client:app"
-          "--host" "127.0.0.1" "--port" "8000"
-        ];
-        KeepAlive.SuccessfulExit = false;
-        RunAtLoad = true;
-        ThrottleInterval = 30;
-        WorkingDirectory = home;
-        EnvironmentVariables = {
-          HOME = home;
-          PATH = defaultPATH;
-          DAEMON_NAME = "cognee-api";
-          DAEMON_PORT = "8000";
-          DAEMON_DISPLAY_NAME = "cognee-api:8000";
-          DAEMON_TYPE = "foreground";
-          DAEMON_HEALTH_URL = "/health";
-          DAEMON_ENV_FILE = "${home}/.config/jw/models.env";
-          DAEMON_VALIDATION_CMD = "${uvBin}/cognee/bin/python -c 'import cognee; print(\"OK\")'";
-        };
-        StandardOutPath = "${home}/.local/share/jw/cognee-api.log";
-        StandardErrorPath = "${home}/.local/share/jw/cognee-api.log";
-      };
-    };
+    # cognee-api: REMOVED 2026-07-17 — replaced by bridge Ladybug DB (290MB, 172K edges)
+    # Was crash-looping since July 2 with missing Auth0 device client ID.
+    # The uv tool and LaunchAgent config are both removed.
 
     # cocoindex-daemon: incremental semantic code search
     "com.jwalinshah.cocoindex-daemon" = {
