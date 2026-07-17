@@ -358,7 +358,7 @@ in
       # hand-made symlinks predating the repo move to ~/projects/dotfiles.
       home.file = let
         skills = builtins.attrNames (builtins.readDir ./skills);
-        skillDirs = [ ".agents" ".claude" ".claude-a" ".claude-token" ".gemini/antigravity-cli" ];
+        skillDirs = [ ".agents" ".claude" ".claude-a" ".claude-token" ".gemini/antigravity-cli" ".codex" ];
         link = dir: name: {
           name = "${dir}/skills/${name}";
           value = {
