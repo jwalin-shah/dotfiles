@@ -447,7 +447,7 @@
           DAEMON_DISPLAY_NAME = "cocoindex:daemon";
           DAEMON_TYPE = "foreground";
           DAEMON_HEALTH_URL = "pid-only";
-          DAEMON_VALIDATION_CMD = "PYTHONPATH=${home}/.cocoindex_code/extensions:${uvBin}/cocoindex-code/lib/python3.13/site-packages ${uvBin}/cocoindex-code/bin/python -c 'import tldr_chunker; print(\"OK\")'";
+          # ponytail: no validation import — tldr_chunker extension doesn't exist yet
         };
         StandardOutPath = "${home}/.local/share/jw/cocoindex-daemon.log";
         StandardErrorPath = "${home}/.local/share/jw/cocoindex-daemon.log";
