@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Fetch TokenRouter API Key from Bridge Secrets Keychain
+tokenrouter_api_key="$(security find-generic-password -a TOKENROUTER_API_KEY -s bridge-secrets -w)" || {
+  echo "ap: TOKENROUTER_API_KEY is missing from the bridge-secrets Keychain service; run 'bridge secrets refresh'" >&2
+  exit 1
+}
+
+if [ -z "$tokenrouter_api_key" ]; then
+  echo "ap: TOKENROUTER_API_KEY is empty in the bridge-secrets Keychain service; run 'bridge secrets refresh'" >&2
+  exit 1
+fi
+
+# Activate virtual environment
+source "$HOME/projects/ApplyPilot/venv/bin/activate"
+
+# Inject secrets securely in-memory and execute applypilot
+exec env \
+  LLM_API_KEY="$tokenrouter_api_key" \
+  LLM_URL="https://api.tokenrouter.com/v1" \
+  LLM_MODEL="deepseek/deepseek-v4-flash" \
+  applypilot "$@"
