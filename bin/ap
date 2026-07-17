@@ -19,5 +19,6 @@ source "$HOME/projects/ApplyPilot/venv/bin/activate"
 exec env \
   LLM_API_KEY="$tokenrouter_api_key" \
   LLM_URL="https://api.tokenrouter.com/v1" \
-  LLM_MODEL="deepseek/deepseek-v4-flash" \
+	  LLM_MODEL="deepseek/deepseek-v4-flash" \
+	  CHROME_PATH="/Applications/Brave Browser.app/Contents/MacOS/Brave Browser" \
   applypilot "$@"
