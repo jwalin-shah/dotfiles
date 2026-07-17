@@ -22,6 +22,6 @@ exec env \
   ANTHROPIC_DEFAULT_HAIKU_MODEL_SUPPORTED_CAPABILITIES="effort,xhigh_effort" \
   ANTHROPIC_DEFAULT_FABLE_MODEL="MiniMax-M3" \
   ANTHROPIC_DEFAULT_FABLE_MODEL_SUPPORTED_CAPABILITIES="effort,xhigh_effort,max_effort" \
-  ANTHROPIC_CUSTOM_MODEL_OPTION="z-ai/glm-5.2" \
+  ANTHROPIC_CUSTOM_MODEL_OPTION="z-ai/glm-5.2-free" \
   ANTHROPIC_CUSTOM_MODEL_OPTION_SUPPORTED_CAPABILITIES="effort,xhigh_effort,max_effort" \
   /opt/homebrew/bin/claude --dangerously-skip-permissions "$@"
