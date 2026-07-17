@@ -265,6 +265,9 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/openwiki";
 
   # Personal tool wrappers (only useful ones — dead wrappers removed)
+  home.file."bin/ap".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/ap";
+
   home.file."bin/ctx7".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/tools/ctx7";
   home.file."bin/brave-automation".source =

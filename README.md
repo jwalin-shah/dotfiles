@@ -17,7 +17,7 @@ Running the switch builds:
 - Terminal (WezTerm config)
 - Agent configs (Claude, Codex, opencode all share one AGENTS.md)
 - AXI helpers (GitHub, browser, and rich review wrappers exposed through shell aliases)
-- Launcher scripts in `captain/bin/` (`ct`, `openwiki`, all agent wrappers)
+- Launcher scripts in `bin/` (`ct`, `openwiki`, all agent wrappers)
 
 ## Prerequisites
 
@@ -128,7 +128,7 @@ If you don't use it, just remove it from `brews` in your copy.
 - `rebuild.sh` - re-applies the config after the first switch.
   Run this every time you make a change.
 - `home/` - the actual config files that get symlinked into place (Neovim, WezTerm, herdr, Claude settings, the shared `AGENTS.md`).
-- `captain/bin/` - launcher scripts that are symlinked into `~/bin/` by `home.nix`.
+- `bin/` - launcher scripts that are symlinked into `~/bin/` by `home.nix`.
 
 ## How the symlinks work
 

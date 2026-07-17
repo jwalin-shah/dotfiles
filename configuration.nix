@@ -299,16 +299,24 @@
     "com.jwalinshah.llama-embed-server" = {
       serviceConfig = {
         ProgramArguments = [
+          "${dotfilesBin}/daemon-wrapper"
           "${brewBin}/llama-server"
           "-m" "${home}/.cache/huggingface/hub/models--Qwen--Qwen3-Embedding-0.6B-GGUF/snapshots/main/Qwen3-Embedding-0.6B-Q8_0.gguf"
           "--embedding" "--host" "127.0.0.1" "--port" "8081"
           "-c" "2048" "-np" "1" "-b" "2048" "-ub" "2048" "-ngl" "99"
         ];
-        KeepAlive = true;
+        KeepAlive.SuccessfulExit = false;
         RunAtLoad = true;
         ThrottleInterval = 10;
+        WorkingDirectory = home;
         EnvironmentVariables = {
-          PATH = "${brewBin}:/usr/local/bin:/usr/bin:/bin";
+          HOME = home;
+          PATH = defaultPATH;
+          DAEMON_NAME = "llama-embed";
+          DAEMON_PORT = "8081";
+          DAEMON_DISPLAY_NAME = "llama-embed:8081";
+          DAEMON_TYPE = "foreground";
+          DAEMON_HEALTH_URL = "/health";
         };
         StandardOutPath = "${home}/.local/share/jw/llama-embed.log";
         StandardErrorPath = "${home}/.local/share/jw/llama-embed.log";
@@ -319,17 +327,25 @@
     "com.jwalinshah.coderank-embed-server" = {
       serviceConfig = {
         ProgramArguments = [
+          "${dotfilesBin}/daemon-wrapper"
           "${brewBin}/llama-server"
           "-m" "${home}/.cache/huggingface/hub/models--handwoven8588--CodeRankEmbed-GGUF/snapshots/14be4104a35a5f4e32e6e225955ccf271fb5b956/CodeRankEmbed-Q8_0.gguf"
           "--embedding" "--host" "127.0.0.1" "--port" "8082"
           "-c" "2048" "-np" "1" "-b" "2048" "-ub" "2048" "-ngl" "99"
           "--flash-attn" "on"
         ];
-        KeepAlive = true;
+        KeepAlive.SuccessfulExit = false;
         RunAtLoad = true;
         ThrottleInterval = 10;
+        WorkingDirectory = home;
         EnvironmentVariables = {
-          PATH = "${brewBin}:/usr/local/bin:/usr/bin:/bin";
+          HOME = home;
+          PATH = defaultPATH;
+          DAEMON_NAME = "coderank-embed";
+          DAEMON_PORT = "8082";
+          DAEMON_DISPLAY_NAME = "coderank-embed:8082";
+          DAEMON_TYPE = "foreground";
+          DAEMON_HEALTH_URL = "/health";
         };
         StandardOutPath = "${home}/.local/share/jw/coderank-embed.log";
         StandardErrorPath = "${home}/.local/share/jw/coderank-embed.log";
@@ -404,47 +420,169 @@
       };
     };
 
+    # ── AI Stack (continued) ──────────────────────────────────────────
+
+    # cognee-api: AI memory + knowledge graph on :8000
+    "com.jwalinshah.cognee-api" = {
+      serviceConfig = {
+        ProgramArguments = [
+          "${dotfilesBin}/daemon-wrapper"
+          "${uvBin}/cognee/bin/python"
+          "-m" "uvicorn" "cognee.api.client:app"
+          "--host" "127.0.0.1" "--port" "8000"
+        ];
+        KeepAlive.SuccessfulExit = false;
+        RunAtLoad = true;
+        ThrottleInterval = 30;
+        WorkingDirectory = home;
+        EnvironmentVariables = {
+          HOME = home;
+          PATH = defaultPATH;
+          DAEMON_NAME = "cognee-api";
+          DAEMON_PORT = "8000";
+          DAEMON_DISPLAY_NAME = "cognee-api:8000";
+          DAEMON_TYPE = "foreground";
+          DAEMON_HEALTH_URL = "/health";
+          DAEMON_ENV_FILE = "${home}/.config/jw/models.env";
+          DAEMON_VALIDATION_CMD = "${uvBin}/cognee/bin/python -c 'import cognee; print(\"OK\")'";
+        };
+        StandardOutPath = "${home}/.local/share/jw/cognee-api.log";
+        StandardErrorPath = "${home}/.local/share/jw/cognee-api.log";
+      };
+    };
+
+    # cocoindex-daemon: incremental semantic code search
+    "com.jwalinshah.cocoindex-daemon" = {
+      serviceConfig = {
+        ProgramArguments = [
+          "${dotfilesBin}/daemon-wrapper"
+          "${uvBin}/cocoindex-code/bin/ccc"
+          "run-daemon"
+        ];
+        KeepAlive.SuccessfulExit = false;
+        RunAtLoad = true;
+        ThrottleInterval = 30;
+        WorkingDirectory = home;
+        EnvironmentVariables = {
+          HOME = home;
+          PATH = defaultPATH;
+          PYTHONPATH = "${home}/.cocoindex_code/extensions:${uvBin}/cocoindex-code/lib/python3.13/site-packages";
+          DAEMON_NAME = "cocoindex-daemon";
+          DAEMON_PORT = "0";
+          DAEMON_DISPLAY_NAME = "cocoindex:daemon";
+          DAEMON_TYPE = "foreground";
+          DAEMON_HEALTH_URL = "pid-only";
+          DAEMON_VALIDATION_CMD = "PYTHONPATH=${home}/.cocoindex_code/extensions:${uvBin}/cocoindex-code/lib/python3.13/site-packages ${uvBin}/cocoindex-code/bin/python -c 'import tldr_chunker; print(\"OK\")'";
+        };
+        StandardOutPath = "${home}/.local/share/jw/cocoindex-daemon.log";
+        StandardErrorPath = "${home}/.local/share/jw/cocoindex-daemon.log";
+      };
+    };
+
     # -- Session Infrastructure --
-    # mintmux: PTY multiplexer
+    # mintmux: PTY multiplexer (daemonizes internally, child-block mode)
     "com.jwalinshah.mintmux" = {
       serviceConfig = {
-        ProgramArguments = [ "${localBin}/mintmux" ];
-        KeepAlive = true;
+        ProgramArguments = [
+          "${dotfilesBin}/daemon-wrapper"
+          "${localBin}/mintmux"
+        ];
+        KeepAlive.SuccessfulExit = false;
         RunAtLoad = true;
+        ThrottleInterval = 5;
+        ExitTimeOut = 10;
+        WorkingDirectory = home;
         EnvironmentVariables = {
+          HOME = home;
           PATH = defaultPATH;
+          DAEMON_NAME = "mintmux";
+          DAEMON_PORT = "0";
+          DAEMON_DISPLAY_NAME = "mintmux";
+          DAEMON_TYPE = "child-block";
+          DAEMON_HEALTH_URL = "pid-only";
+          DAEMON_HEALTH_CMD = "test -S ${home}/.cache/mintmux/mintmux-$(id -u).sock";
         };
         StandardOutPath = "${home}/.cache/mintmux/launchd-stdout.log";
         StandardErrorPath = "${home}/.cache/mintmux/launchd-stderr.log";
-        ThrottleInterval = 5;
-        ExitTimeOut = 10;
       };
     };
 
 
     # -- Monitoring & Health --
     # auto-save: commit + push uncommitted changes every 5 min (never lose work)
+    # ponytail: child-block on a periodic (StartInterval) task keeps a blocker
+    # process alive between runs — not ideal but provides flock single-instance.
     "com.jwalinshah.auto-save" = {
       serviceConfig = {
-        ProgramArguments = [ "/bin/bash" "${home}/bin/auto-save.sh" ];
+        ProgramArguments = [
+          "${dotfilesBin}/daemon-wrapper"
+          "/bin/bash" "${home}/bin/auto-save.sh"
+        ];
         RunAtLoad = true;
         StartInterval = 300;
+        WorkingDirectory = home;
         EnvironmentVariables = {
           HOME = home;
           PATH = defaultPATH;
+          DAEMON_NAME = "auto-save";
+          DAEMON_PORT = "0";
+          DAEMON_DISPLAY_NAME = "auto-save";
+          DAEMON_TYPE = "child-block";
+          DAEMON_HEALTH_URL = "pid-only";
+          DAEMON_HEALTH_CMD = "/bin/true";
         };
         StandardOutPath = "${home}/.local/share/jw/auto-save.log";
         StandardErrorPath = "${home}/.local/share/jw/auto-save.log";
       };
     };
 
+    # jw-heal: periodic health-check sweeper (every 5 min)
+    # ponytail: same child-block-on-periodic concern as auto-save above.
     "com.jwalinshah.jw-heal" = {
       serviceConfig = {
-        ProgramArguments = [ "${localBin}/jw-heal" ];
+        ProgramArguments = [
+          "${dotfilesBin}/daemon-wrapper"
+          "${localBin}/jw-heal"
+        ];
         RunAtLoad = true;
         StartInterval = 300;
+        WorkingDirectory = home;
+        EnvironmentVariables = {
+          HOME = home;
+          PATH = defaultPATH;
+          DAEMON_NAME = "jw-heal";
+          DAEMON_PORT = "0";
+          DAEMON_DISPLAY_NAME = "jw-heal";
+          DAEMON_TYPE = "child-block";
+          DAEMON_HEALTH_URL = "pid-only";
+          DAEMON_HEALTH_CMD = "/bin/true";
+        };
         StandardOutPath = "${home}/.local/share/jw/heal-stdout.log";
         StandardErrorPath = "${home}/.local/share/jw/heal-stderr.log";
+      };
+    };
+
+    # verify-machine: daily baseline audit at 09:00
+    # Keeps the machine capability manifest honest — catches stale claims,
+    # ghost tools, and config drift within 24 hours.
+    "com.jwalinshah.verify-machine" = {
+      serviceConfig = {
+        ProgramArguments = [
+          "${localBin}/bridge"
+          "verify-machine"
+        ];
+        RunAtLoad = true;
+        StartCalendarInterval = {
+          Hour = 9;
+          Minute = 0;
+        };
+        WorkingDirectory = "${home}/projects/bridge";
+        EnvironmentVariables = {
+          HOME = home;
+          PATH = "${localBin}:${dotfilesBin}:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin";
+        };
+        StandardOutPath = "${home}/.local/share/jw/verify-machine-stdout.log";
+        StandardErrorPath = "${home}/.local/share/jw/verify-machine-stderr.log";
       };
     };
 

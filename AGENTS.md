@@ -1,6 +1,6 @@
 # dotfiles — Mac setup via nix-darwin + home-manager
 
-This repo is a fork of `kunchenguid/dotfiles` with a `captain/` overlay. One
+This repo is a fork of `kunchenguid/dotfiles` with local overlays. One
 machine. One command: `./rebuild.sh`.
 
 ## Architecture
@@ -8,18 +8,16 @@ machine. One command: `./rebuild.sh`.
 ```
 configuration.nix     nix-darwin — LaunchAgents, Homebrew brews/casks, system daemons
 home.nix              home-manager — packages, aliases, config symlinks, all inline
-captain/
-  bin/                 launcher wrappers (all bash, all ≤5 lines, all exec to real binary)
-    *-wrapper          claude, ca, ct, agy, cua, cx, ko, kt, oo, ot
-    openwiki            npm openwiki launcher
-    jw-restart          jw-* service restarter
-  bin/tools/           personal tool wrappers (ctx7, brave-automation, cursor-login)
-  config/
-    models.env          ML model paths (sourced by mlx-chat-server)
-    opencode.json       OpenCode provider config
+bin/                  launcher wrappers + daemon-wrapper + utility scripts
+  *-wrapper            claude, ca, ct, agy, cua, cx
+  openwiki             npm openwiki launcher
+  jw-restart           jw-* service restarter
+tools/                personal tool wrappers (ctx7, brave-automation, cursor-login)
 home/                  agent configs — symlinked into ~/ by home.nix
-bin/                   utility scripts — audit, prune, docs
-docs/                  architecture docs, Theo principles
+config/                shared configs (ghostty, aerospace, karabiner, lint)
+docs/                  architecture docs, session logs
+agent-rules/           shared agent rules (known issues, policy)
+skills/                agent skills (nix-managed symlinks)
 ```
 
 ## Rules
@@ -53,7 +51,7 @@ Full talk: `docs/theo-browne-ai-psychosis.md`
 
 - `configuration.nix` owns all Homebrew packages. If you `brew uninstall` something,
   remove it from `configuration.nix` too or the next rebuild reinstalls it.
-- Every `home.file."bin/..."` entry must have a matching source file in `captain/bin/`.
+- Every `home.file."bin/..."` entry must have a matching source file in `bin/` or `tools/`.
 - Every LaunchAgent must reference a binary that exists.
 - No Python exec-wrappers. All launchers are bash with `exec`.
 - No hardcoded `/Users/jwalinshah/` paths — use `${user}` or `$HOME`.
@@ -104,7 +102,7 @@ and every referenced binary has a corresponding source project.
 - The binary-source mapping is documented above. Each binary's source project
   must be built separately; Nix does not build them.
 - When pulling upstream, only `flake.nix` and `home.nix` need conflict resolution.
-  The `captain/` directory is entirely additive.
+  The `bin/` directory is entirely additive.
 
 ## Agent skills
 
