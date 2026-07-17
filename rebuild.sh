@@ -7,7 +7,7 @@ ln -sfn "$DIR" ~/.dotfiles
 brew trust felixkratz/formulae 2>/dev/null || true
 brew trust nikitabobko/tap 2>/dev/null || true
 
-sudo darwin-rebuild switch --flake ~/.dotfiles#mac
+sudo $(command -v darwin-rebuild) switch --flake ~/.dotfiles#mac
 "$DIR/bin/audit-config-ownership.sh"
 "$DIR/bin/audit-hook-ownership.sh"
 "$DIR/bin/audit-doc-freshness.sh"

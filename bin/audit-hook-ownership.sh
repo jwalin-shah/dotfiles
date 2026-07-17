@@ -48,7 +48,11 @@ classify_target() {
       *)            echo "UNOWNED(symlink-outside-nix-and-repo)" ;;
     esac
   elif [ -e "$t" ]; then
-    echo "UNOWNED(hand-placed-regular-file)"
+    real=$(readlink -f "$t" 2>/dev/null || true)
+    case "$real" in
+      "$REPO"/*) [ -x "$t" ] && echo "OWNED(repo)" || echo "OWNED-BUT-NOT-EXECUTABLE" ;;
+      *)         echo "UNOWNED(hand-placed-regular-file)" ;;
+    esac
   else
     echo "MISSING(target-does-not-exist)"
   fi

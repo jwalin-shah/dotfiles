@@ -61,24 +61,19 @@ check_content_match /Users/jwalinshah/.claude-token/settings.json "$repo/home/.c
 check_content_match /Users/jwalinshah/.claude-token/CLAUDE.md "$repo/home/AGENTS.md"
 check_absent /Users/jwalinshah/.config/opencode/AGENTS-face.md
 check_absent /Users/jwalinshah/.config/opencode/profiles/face.json
-check_content_match /Users/jwalinshah/.config/kilo/AGENTS.md "$repo/home/AGENTS.md"
-check_content_match /Users/jwalinshah/.config/opencode/AGENTS.md "$repo/home/AGENTS.md"
 
-check_content_match /Users/jwalinshah/.config/jw/models.env "$repo/captain/config/models.env"
-check_content_match /Users/jwalinshah/bin/ct "$repo/captain/bin/ct-wrapper"
-check_content_match /Users/jwalinshah/bin/claude "$repo/captain/bin/claude-wrapper"
+
+
+check_content_match /Users/jwalinshah/.config/jw/models.env "$repo/config/jw/models.env"
+check_content_match /Users/jwalinshah/bin/ct "$repo/bin/ct-wrapper"
+check_content_match /Users/jwalinshah/bin/claude "$repo/bin/claude-wrapper"
 check_content_match /Users/jwalinshah/bin/audit-config-ownership.sh "$repo/bin/audit-config-ownership.sh"
 check_content_match /Users/jwalinshah/bin/audit-doc-freshness.sh "$repo/bin/audit-doc-freshness.sh"
-check_content_match /Users/jwalinshah/bin/openwiki "$repo/captain/bin/openwiki"
-check_content_match /Users/jwalinshah/bin/jw-restart "$repo/captain/bin/jw-restart"
-check_content_match /Users/jwalinshah/bin/ca "$repo/captain/bin/ca-wrapper"
-check_content_match /Users/jwalinshah/bin/cua "$repo/captain/bin/cua-wrapper"
-check_content_match /Users/jwalinshah/bin/oo "$repo/captain/bin/oo-wrapper"
-check_content_match /Users/jwalinshah/bin/ot "$repo/captain/bin/ot-wrapper"
-check_content_match /Users/jwalinshah/bin/ko "$repo/captain/bin/ko-wrapper"
-check_content_match /Users/jwalinshah/bin/kt "$repo/captain/bin/kt-wrapper"
-check_content_match /Users/jwalinshah/bin/cx "$repo/captain/bin/cx-wrapper"
-check_content_match /Users/jwalinshah/.local/bin/oo "$repo/home/.local/bin/oo"
+check_content_match /Users/jwalinshah/bin/openwiki "$repo/bin/openwiki"
+check_content_match /Users/jwalinshah/bin/jw-restart "$repo/bin/jw-restart"
+check_content_match /Users/jwalinshah/bin/ca "$repo/bin/ca-wrapper"
+check_content_match /Users/jwalinshah/bin/cua "$repo/bin/cua-wrapper"
+check_content_match /Users/jwalinshah/bin/cx "$repo/bin/cx-wrapper"
 check_content_match /Users/jwalinshah/.local/bin/rtldr "$repo/home/.local/bin/rtldr"
 
 # Bridge worker adapters - source lives in ~/projects/bridge/scripts/

@@ -49,10 +49,7 @@
       "command(head)",
       "command(cat)",
       "command(nohup)",
-      "command(~/bin/ot)",
-      "command(/opt/homebrew/bin/opencode)",
-      "command(~/bin/jw-spawn.sh)",
-      "command(~/bin/jw-squeeze-exec.sh)",
+
       "command(pkill)",
       "command(echo)",
       "command(wc)",

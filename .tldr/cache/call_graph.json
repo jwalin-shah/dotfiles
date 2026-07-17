@@ -1,0 +1,472 @@
+{
+  "edges": [
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "SMCReadIndexCount",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "_strtoul"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "printVal",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printSI16"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "SMCWriteKey2",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "SMCCall2"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "printVal",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printSP3C"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "printVal",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printSP78"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "SMCPrintTemps",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "SMCCall"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "printVal",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printFP79"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "printVal",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printBytesHex"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "SMCReadKey2",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "SMCGetKeyInfo"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "main",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "smc_init"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "SMCWriteSimple",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "SMCWriteKey2"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "SMCPrintTemps",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printSP78"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "printVal",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printSPF0"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "main",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printVal"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "printVal",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printPWM"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "SMCPrintFans",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "_strtoul"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "printVal",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printFPC4"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "printVal",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printSP1E"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "printVal",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printSPB4"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "SMCPrintTemps",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "_ultostr"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "printVal",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printFP88"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "SMCReadKey",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "SMCReadKey2"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "main",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "SMCPrintFans"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "printVal",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printSP4B"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "SMCWriteKey2",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "SMCReadKey2"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "SMCReadIndexCount",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "SMCReadKey"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "printUInt",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "_strtoul"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "SMCPrintAll",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "SMCReadKey"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "printVal",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printFP6A"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "SMCPrintAll",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "SMCReadIndexCount"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "printVal",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printSP5A"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "SMCReadKey2",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "_ultostr"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "main",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "smc_close"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "printVal",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printUInt"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "printVal",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printFPA6"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "smc_init",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "SMCOpen"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "printVal",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printSP96"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "SMCGetKeyInfo",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "SMCCall2"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "printVal",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printFPE2"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "SMCReadKey2",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "_strtoul"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "SMCPrintFans",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "SMCReadKey"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "getFloatFromVal",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "_strtof"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "SMCPrintAll",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printVal"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "printVal",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printFLT"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "SMCPrintFans",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "getFloatFromVal"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "printVal",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printSP87"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "SMCWriteKey",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "SMCWriteKey2"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "getFloatFromVal",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "_strtoul"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "printVal",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printSI8"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "main",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "usage"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "SMCReadKey2",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "SMCCall2"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "SMCCall",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "SMCCall2"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "printVal",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printFP5B"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "SMCPrintAll",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "SMCCall"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "SMCPrintTemps",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "SMCReadKey"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "main",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "SMCPrintAll"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "SMCPrintAll",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "_ultostr"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "SMCPrintTemps",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "SMCReadIndexCount"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "main",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "SMCPrintTemps"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "printVal",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printSP69"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "printVal",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printFP4C"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "main",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "SMCWriteKey"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "smc_close",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "SMCClose"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "SMCWriteKey2",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "_strtoul"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "printVal",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "printFP1F"
+    },
+    {
+      "from_file": "tools/smc/smc.c",
+      "from_func": "main",
+      "to_file": "tools/smc/smc.c",
+      "to_func": "SMCReadKey"
+    },
+    {
+      "from_file": "bin/merge-runtime-configs.py",
+      "from_func": "deep_merge",
+      "to_file": "bin/merge-runtime-configs.py",
+      "to_func": "deep_merge"
+    },
+    {
+      "from_file": "tools/tldr_chunker.py",
+      "from_func": "chunk",
+      "to_file": "tools/tldr_chunker.py",
+      "to_func": "_tldr_split"
+    },
+    {
+      "from_file": "tools/tldr_chunker.py",
+      "from_func": "_tldr_split",
+      "to_file": "tools/tldr_chunker.py",
+      "to_func": "_tldr_definitions"
+    },
+    {
+      "from_file": "tools/tldr_chunker.py",
+      "from_func": "_fit_tokens",
+      "to_file": "tools/tldr_chunker.py",
+      "to_func": "_count_tokens"
+    },
+    {
+      "from_file": "bin/merge-runtime-configs.py",
+      "from_func": "<module>",
+      "to_file": "bin/merge-runtime-configs.py",
+      "to_func": "main"
+    },
+    {
+      "from_file": "tools/tldr_chunker.py",
+      "from_func": "_fit_tokens",
+      "to_file": "tools/tldr_chunker.py",
+      "to_func": "_fit_tokens"
+    },
+    {
+      "from_file": "tools/tldr_chunker.py",
+      "from_func": "chunk",
+      "to_file": "tools/tldr_chunker.py",
+      "to_func": "_char_split"
+    },
+    {
+      "from_file": "bin/merge-runtime-configs.py",
+      "from_func": "main",
+      "to_file": "bin/merge-runtime-configs.py",
+      "to_func": "deep_merge"
+    },
+    {
+      "from_file": "bin/merge-runtime-configs.py",
+      "from_func": "main",
+      "to_file": "bin/merge-runtime-configs.py",
+      "to_func": "strip_comments"
+    },
+    {
+      "from_file": "tools/tldr_chunker.py",
+      "from_func": "_tldr_split",
+      "to_file": "tools/tldr_chunker.py",
+      "to_func": "_fit_tokens"
+    },
+    {
+      "from_file": "tools/tldr_chunker.py",
+      "from_func": "_tldr_split",
+      "to_file": "tools/tldr_chunker.py",
+      "to_func": "_needs_verification"
+    }
+  ],
+  "languages": [
+    "c",
+    "lua",
+    "python"
+  ],
+  "timestamp": 1784308555.789886
+}

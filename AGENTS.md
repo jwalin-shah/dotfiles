@@ -69,10 +69,7 @@ Full talk: `docs/theo-browne-ai-psychosis.md`
 ~/bin/agy    → Nix → agy-wrapper     → /opt/homebrew/bin/agy
 ~/bin/cx     → Nix → cx-wrapper      → /opt/homebrew/bin/codex
 ~/bin/cua    → Nix → cua-wrapper     → Cursor.app
-~/bin/ko     → Nix → ko-wrapper      → /opt/homebrew/bin/kilo
-~/bin/kt     → Nix → kt-wrapper      → Bridge Keychain → /opt/homebrew/bin/kilo
-~/bin/ot     → Nix → ot-wrapper      → Bridge Keychain → /opt/homebrew/bin/opencode
-~/bin/oo     → Nix → oo-wrapper      → /opt/homebrew/bin/opencode
+
 ```
 
 One symlink. One bash wrapper. One real binary. No loops.
