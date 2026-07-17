@@ -271,6 +271,7 @@
       "aerospace"
       "alt-tab"
       "brave-browser"
+      "google-chrome"
       "chatgpt-classic"
       "cursor"
       "flux-app"
