@@ -2,16 +2,7 @@
 set -euo pipefail
 
 AP_LOG="$HOME/.applypilot/ap.log"
-AP_LOCK="$HOME/.applypilot/ap.lock"
 mkdir -p "$HOME/.applypilot"
-
-# Single-instance: only one ap process may run at a time.
-# flock is kernel-released on crash/exit — no stale lock risk.
-exec {fd}>"$AP_LOCK"
-if ! flock -n "$fd"; then
-  echo "ap: another applypilot process is already running (lock held on $AP_LOCK)" | tee -a "$AP_LOG" >&2
-  exit 1
-fi
 
 # Fetch TokenRouter API Key from Bridge Secrets Keychain
 tokenrouter_api_key="$(security find-generic-password -a TOKENROUTER_API_KEY -s bridge-secrets -w)" || {
