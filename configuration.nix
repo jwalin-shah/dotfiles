@@ -511,6 +511,24 @@
         StandardErrorPath = "/tmp/voice-engine.log";
       };
     };
+
+    # ladybug-pipeline: incremental LadybugDB knowledge graph update (every 15 min)
+    "com.jwalinshah.ladybug-pipeline" = {
+      serviceConfig = {
+        ProgramArguments = [
+          "${home}/projects/bridge/.bridge/ladybug/pipeline.sh"
+        ];
+        RunAtLoad = true;
+        StartInterval = 900;
+        WorkingDirectory = home;
+        EnvironmentVariables = {
+          HOME = home;
+          PATH = defaultPATH;
+        };
+        StandardOutPath = "${home}/.local/share/orbit/ladybug-pipeline.log";
+        StandardErrorPath = "${home}/.local/share/orbit/ladybug-pipeline.log";
+      };
+    };
   };
 
   # -- Root Daemons --
