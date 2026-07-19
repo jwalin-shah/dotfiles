@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-# OpenWiki via npm, kept in the same launcher pattern as the other captain tools.
-set -euo pipefail
-
-exec npx -y openwiki "$@"

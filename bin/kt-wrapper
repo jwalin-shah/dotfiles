@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-
-exec "$HOME/.local/bin/secret-cache" exec -- env \
-  KILO_API_URL="https://api.tokenrouter.com" \
-  KILO_API_KEY_ENV="TOKENROUTER_API_KEY" \
-  /opt/homebrew/bin/kilo "$@"

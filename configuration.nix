@@ -245,8 +245,7 @@
       "llama.cpp"
       "ncdu"
       "node"
-      "opencode"
-      "openjdk@21"
+      "ripgrep"
       "openjdk"
       "ruff"
       "python@3.14"
@@ -302,7 +301,7 @@
         ProgramArguments = [
           "${dotfilesBin}/daemon-wrapper"
           "${brewBin}/llama-server"
-          "-m" "${home}/.cache/huggingface/hub/models--Qwen--Qwen3-Embedding-0.6B-GGUF/snapshots/main/Qwen3-Embedding-0.6B-Q8_0.gguf"
+          "-m" "$ORBIT_EMBED_MODEL_PATH"
           "--embedding" "--host" "127.0.0.1" "--port" "8081"
           "-c" "2048" "-np" "1" "-b" "2048" "-ub" "2048" "-ngl" "99"
         ];
@@ -316,11 +315,13 @@
           DAEMON_NAME = "llama-embed";
           DAEMON_PORT = "8081";
           DAEMON_DISPLAY_NAME = "llama-embed:8081";
-          DAEMON_TYPE = "foreground";
+          DAEMON_TYPE = "child-block";
           DAEMON_HEALTH_URL = "/health";
+          DAEMON_ENV_FILE = "${home}/.config/orbit/models.env";
+          DAEMON_EXPAND_ENV = "1";
         };
-        StandardOutPath = "${home}/.local/share/jw/llama-embed.log";
-        StandardErrorPath = "${home}/.local/share/jw/llama-embed.log";
+        StandardOutPath = "${home}/.local/share/orbit/llama-embed.log";
+        StandardErrorPath = "${home}/.local/share/orbit/llama-embed.log";
       };
     };
 
@@ -330,7 +331,7 @@
         ProgramArguments = [
           "${dotfilesBin}/daemon-wrapper"
           "${brewBin}/llama-server"
-          "-m" "${home}/.cache/huggingface/hub/models--handwoven8588--CodeRankEmbed-GGUF/snapshots/14be4104a35a5f4e32e6e225955ccf271fb5b956/CodeRankEmbed-Q8_0.gguf"
+          "-m" "$ORBIT_CODERANK_MODEL_PATH"
           "--embedding" "--host" "127.0.0.1" "--port" "8082"
           "-c" "2048" "-np" "1" "-b" "2048" "-ub" "2048" "-ngl" "99"
           "--flash-attn" "on"
@@ -345,11 +346,13 @@
           DAEMON_NAME = "coderank-embed";
           DAEMON_PORT = "8082";
           DAEMON_DISPLAY_NAME = "coderank-embed:8082";
-          DAEMON_TYPE = "foreground";
+          DAEMON_TYPE = "child-block";
           DAEMON_HEALTH_URL = "/health";
+          DAEMON_ENV_FILE = "${home}/.config/orbit/models.env";
+          DAEMON_EXPAND_ENV = "1";
         };
-        StandardOutPath = "${home}/.local/share/jw/coderank-embed.log";
-        StandardErrorPath = "${home}/.local/share/jw/coderank-embed.log";
+        StandardOutPath = "${home}/.local/share/orbit/coderank-embed.log";
+        StandardErrorPath = "${home}/.local/share/orbit/coderank-embed.log";
       };
     };
 
@@ -362,7 +365,7 @@
           "${dotfilesBin}/daemon-wrapper"
           "${uvBin}/mlx-lm/bin/python"
           "${uvBin}/mlx-lm/bin/mlx_lm.server"
-          "--model" "$JW_CHAT_MODEL_REPO"
+          "--model" "$ORBIT_CHAT_MODEL_REPO"
           "--host" "127.0.0.1" "--port" "8080"
           "--trust-remote-code"
           "--chat-template-args" "{\"enable_thinking\":false}"
@@ -377,14 +380,14 @@
           DAEMON_NAME = "mlx-chat";
           DAEMON_PORT = "8080";
           DAEMON_DISPLAY_NAME = "mlx-chat:8080";
-          DAEMON_TYPE = "foreground";
+          DAEMON_TYPE = "child-block";
           DAEMON_HEALTH_URL = "/v1/models";
-          DAEMON_ENV_FILE = "${home}/.config/jw/models.env";
+          DAEMON_ENV_FILE = "${home}/.config/orbit/models.env";
           DAEMON_EXPAND_ENV = "1";
           DAEMON_VALIDATION_CMD = "${uvBin}/mlx-lm/bin/python -c 'import mlx_lm; print(\"OK\")'";
         };
-        StandardOutPath = "${home}/.local/share/jw/mlx-chat.log";
-        StandardErrorPath = "${home}/.local/share/jw/mlx-chat.log";
+        StandardOutPath = "${home}/.local/share/orbit/mlx-chat.log";
+        StandardErrorPath = "${home}/.local/share/orbit/mlx-chat.log";
       };
     };
 
@@ -398,26 +401,19 @@
     "com.jwalinshah.tldr-daemon" = {
       serviceConfig = {
         ProgramArguments = [
-          "${dotfilesBin}/daemon-wrapper"
           "${uvBin}/llm-tldr/bin/llm-tldr"
           "daemon" "start" "--project" "${home}/projects"
         ];
-        KeepAlive.SuccessfulExit = false;
+        KeepAlive = true;
         RunAtLoad = true;
         ThrottleInterval = 30;
         WorkingDirectory = home;
         EnvironmentVariables = {
           HOME = home;
           PATH = defaultPATH;
-          DAEMON_NAME = "tldr-daemon";
-          DAEMON_PORT = "0";
-          DAEMON_DISPLAY_NAME = "tldr-daemon";
-          DAEMON_TYPE = "child-block";
-          DAEMON_HEALTH_URL = "pid-only";
-          DAEMON_HEALTH_CMD = "${uvBin}/llm-tldr/bin/llm-tldr daemon status --project ${home}/projects";
         };
-        StandardOutPath = "${home}/.local/share/jw/tldr-daemon.log";
-        StandardErrorPath = "${home}/.local/share/jw/tldr-daemon.log";
+        StandardOutPath = "${home}/.local/share/orbit/tldr-daemon.log";
+        StandardErrorPath = "${home}/.local/share/orbit/tldr-daemon.log";
       };
     };
 
@@ -446,12 +442,12 @@
           DAEMON_NAME = "cocoindex-daemon";
           DAEMON_PORT = "0";
           DAEMON_DISPLAY_NAME = "cocoindex:daemon";
-          DAEMON_TYPE = "foreground";
+          DAEMON_TYPE = "child-block";
           DAEMON_HEALTH_URL = "pid-only";
           # ponytail: no validation import — tldr_chunker extension doesn't exist yet
         };
-        StandardOutPath = "${home}/.local/share/jw/cocoindex-daemon.log";
-        StandardErrorPath = "${home}/.local/share/jw/cocoindex-daemon.log";
+        StandardOutPath = "${home}/.local/share/orbit/cocoindex-daemon.log";
+        StandardErrorPath = "${home}/.local/share/orbit/cocoindex-daemon.log";
       };
     };
 
@@ -483,84 +479,6 @@
       };
     };
 
-
-    # -- Monitoring & Health --
-    # auto-save: commit + push uncommitted changes every 5 min (never lose work)
-    # ponytail: child-block on a periodic (StartInterval) task keeps a blocker
-    # process alive between runs — not ideal but provides flock single-instance.
-    "com.jwalinshah.auto-save" = {
-      serviceConfig = {
-        ProgramArguments = [
-          "${dotfilesBin}/daemon-wrapper"
-          "/bin/bash" "${home}/bin/auto-save.sh"
-        ];
-        RunAtLoad = true;
-        StartInterval = 300;
-        WorkingDirectory = home;
-        EnvironmentVariables = {
-          HOME = home;
-          PATH = defaultPATH;
-          DAEMON_NAME = "auto-save";
-          DAEMON_PORT = "0";
-          DAEMON_DISPLAY_NAME = "auto-save";
-          DAEMON_TYPE = "child-block";
-          DAEMON_HEALTH_URL = "pid-only";
-          DAEMON_HEALTH_CMD = "/bin/true";
-        };
-        StandardOutPath = "${home}/.local/share/jw/auto-save.log";
-        StandardErrorPath = "${home}/.local/share/jw/auto-save.log";
-      };
-    };
-
-    # jw-heal: periodic health-check sweeper (every 5 min)
-    # ponytail: same child-block-on-periodic concern as auto-save above.
-    "com.jwalinshah.jw-heal" = {
-      serviceConfig = {
-        ProgramArguments = [
-          "${dotfilesBin}/daemon-wrapper"
-          "${localBin}/jw-heal"
-        ];
-        RunAtLoad = true;
-        StartInterval = 300;
-        WorkingDirectory = home;
-        EnvironmentVariables = {
-          HOME = home;
-          PATH = defaultPATH;
-          DAEMON_NAME = "jw-heal";
-          DAEMON_PORT = "0";
-          DAEMON_DISPLAY_NAME = "jw-heal";
-          DAEMON_TYPE = "child-block";
-          DAEMON_HEALTH_URL = "pid-only";
-          DAEMON_HEALTH_CMD = "/bin/true";
-        };
-        StandardOutPath = "${home}/.local/share/jw/heal-stdout.log";
-        StandardErrorPath = "${home}/.local/share/jw/heal-stderr.log";
-      };
-    };
-
-    # verify-machine: daily baseline audit at 09:00
-    # Keeps the machine capability manifest honest — catches stale claims,
-    # ghost tools, and config drift within 24 hours.
-    "com.jwalinshah.verify-machine" = {
-      serviceConfig = {
-        ProgramArguments = [
-          "${localBin}/bridge"
-          "verify-machine"
-        ];
-        RunAtLoad = true;
-        StartCalendarInterval = {
-          Hour = 9;
-          Minute = 0;
-        };
-        WorkingDirectory = "${home}/projects/bridge";
-        EnvironmentVariables = {
-          HOME = home;
-          PATH = "${localBin}:${dotfilesBin}:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin";
-        };
-        StandardOutPath = "${home}/.local/share/jw/verify-machine-stdout.log";
-        StandardErrorPath = "${home}/.local/share/jw/verify-machine-stderr.log";
-      };
-    };
 
     # m5logd: M5 hardware logging daemon
     "com.jwalinshah.m5logd" = {

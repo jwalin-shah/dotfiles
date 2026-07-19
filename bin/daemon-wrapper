@@ -42,12 +42,12 @@ set -euo pipefail
 : "${DAEMON_TYPE:?DAEMON_TYPE required}"
 
 HOME="${HOME:-$(eval echo ~$(whoami))}"
-JW_DATA_DIR="${JW_DATA_DIR:-$HOME/.local/share/jw}"
-STATE_FILE="$JW_DATA_DIR/${DAEMON_NAME}-state.json"
-LOCK_FILE="$JW_DATA_DIR/${DAEMON_NAME}.lock"
-LIFECYCLE_LOG="$JW_DATA_DIR/${DAEMON_NAME}-lifecycle.jsonl"
+ORBIT_DATA_DIR="${ORBIT_DATA_DIR:-$HOME/.local/share/orbit}"
+STATE_FILE="$ORBIT_DATA_DIR/${DAEMON_NAME}-state.json"
+LOCK_FILE="$ORBIT_DATA_DIR/${DAEMON_NAME}.lock"
+LIFECYCLE_LOG="$ORBIT_DATA_DIR/${DAEMON_NAME}-lifecycle.jsonl"
 
-mkdir -p "$JW_DATA_DIR"
+mkdir -p "$ORBIT_DATA_DIR"
 
 # ── Helpers ──────────────────────────────────────────────────────────
 

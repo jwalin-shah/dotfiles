@@ -1,5 +1,0 @@
----
-Checks: 'clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-avoid-c-arrays'
-WarningsAsErrors: '*'
-HeaderFilterRegex: '.*'
-AnalyzeTemporaryDtors: true

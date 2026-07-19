@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-OPENCODE_CONFIG="$HOME/.config/opencode/profiles/oo.json" exec /opt/homebrew/bin/opencode "$@"

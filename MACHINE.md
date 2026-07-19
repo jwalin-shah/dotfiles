@@ -1,127 +1,109 @@
 # Machine Manifest
 
-Single source of truth for what's installed/configured on this machine, how
-each thing is (or isn't) reproducible, and what's still an open question.
-Seeded 2026-07-13 from a full audit (reports in `.jw/plans/*-audit.md`,
-`.jw/plans/*-survey.md`). Check new installs/configs against this file
-before adding them ad hoc — if it's not declared here or in
-`configuration.nix`/`home.nix`, it doesn't survive a fresh machine.
+Single source of truth for everything installed on this machine. If it's not
+declared here or in `configuration.nix`/`home.nix`, it doesn't survive a rebuild.
 
-Status key: **OK** = declared + working. **GAP** = works but not declared
-anywhere (won't survive a rebuild). **STALE** = declared/documented but
-doesn't match reality. **OPEN** = needs a captain decision.
+Status key: **OK** = declared + working. **GAP** = works but not declared.
+**STALE** = declared but doesn't match reality.
 
-## Homebrew (`configuration.nix` homebrew.brews/casks)
+## Homebrew (`configuration.nix` brews/casks)
 
-All 40 brews + 9 casks cross-checked against
-usage evidence — **no removal candidates**, full detail in
-`homebrew-usage-audit.md`. `homebrew.onActivation.cleanup = "zap"` already
-auto-removes anything installed-but-undeclared, so this list only needs
-periodic re-validation for declared-but-dead entries, not orphan cleanup.
+40 brews + 13 casks. `homebrew.onActivation.cleanup = "zap"` auto-removes
+anything not declared here. Run `brew list` for live state, not this file.
 
-- OPEN: `typst` — zero usage evidence despite `modern-resume` supposedly
-  being a Typst project. Verify or drop.
-
-## npm globals (12 packages, declared via `home.activation.npmGlobalTools`)
+## npm globals (declared via `home.activation.npmGlobalTools`)
 
 | package | purpose |
 |---|---|
-| @anthropic-ai/claude-code | `ca` wrapper |
-| @openai/codex | `cx` wrapper |
-| @kilocode/cli | `ko`/`kt` wrappers |
-| command-code | `com` wrapper |
+| @anthropic-ai/claude-code | `ca` / `ct` CLI |
+| @openai/codex | `codex` CLI |
+| command-code | `cmd` CLI — web search + general tasks |
 | gh-axi | GitHub operations |
 | githits | code search |
-| ctx7 | library docs |
 | chrome-devtools-axi | browser automation |
 | lavish-axi | review surfaces |
 | tasks-axi | task management |
 | @inference/cli | observability |
-| gnhf | loops |
+| gnhf | agent loops |
 
-All 12 declared 2026-07-14. Survives fresh machine.
+## Python (uv-managed via `home.activation.uvTools`)
 
-## Python (uv-managed via home.nix)
-
-All 6 Python tools are declared in `home.nix` via `uvTools` — mlx-lm,
-cocoindex, cocoindex-code, llm-tldr, z3-solver. No global pip
-packages remain. The old `pip-to-uv-migration.md` plan is closed:
-the migration was already done when this was written — the plan itself
-was the stale artifact.
-
-Old shared `/opt/homebrew/lib/python3.14/site-packages` packages (including
-`livelm==2.0.0`) are unreferenced. `homebrew.onActivation.cleanup = "zap"`
-handles Brew-level cleanup automatically.
-
-## Project repos (`~/projects/`)
-
-Recoverable from GitHub (`jwalin-shah` account) if ever lost locally —
-confirmed via `gh-axi repo list jwalin-shah`.
-
-| repo | on disk? | build/bootstrap | status |
-|---|---|---|---|
-| mintmux | yes | `go build ./cmd/...` — wired into `bootstrap-projects.sh` Phase 0 | OK, verified working 2026-07-13 |
-| m5tools | yes (cloned 2026-07-13, was missing before) | `make install` — wired into `bootstrap-projects.sh` Phase 0 | OK |
-| btw-v1 | yes | needs its own `uv` venv (see Python section) | OPEN |
-| jw-desk | yes | scaffold only — 2 commits, no implementation yet, NOT obsolete, NOT superseded by research-bridge (unrelated project, confirmed 2026-07-13) | early-stage, no action needed |
-| research-bridge | yes | `uv`/pip venv at `~/projects/research-bridge/.venv`, provides `chatgpt-bridge`/`gemini-bridge`/`perplexity-bridge` binaries | OK |
-
-Everything else in `~/.local/bin` besides mintmux/m5tools — audit in progress, will be
-verified or purged based on usage. (`local-bin-usage-audit.md`).
-
-`bootstrap-projects.sh` now also clones any `PROJECTS` entry missing from
-disk via `gh-axi repo clone jwalin-shah/<name>` before building — a fresh
-machine can self-heal instead of silently skipping missing repos.
-
-## Skills (`~/.agents/skills/`, 26 total)
-
-All 26 are nix-managed symlinks, current as of last `rb`. 0 unmanaged
-directories. 5 `.backup` orphan directories were cleaned up 2026-07-14.
-
-## Tool registry (`~/.agent-rules/TOOL_REGISTRY.md`)
-
-Corrected 2026-07-14: pioneer status REMOVED (was PLANNED), cu→cua, stale
-launchers (`c`, `op`) removed, skills count updated to 26 all-nix-managed,
-`secret-cache` references removed.
-
-## LaunchAgents/daemons
-
-All declared in `configuration.nix` under `launchd.user.agents` +
-`launchd.daemons`. Run `launchctl list | grep org.nixos` for the live list,
-or `jw-status list` for a health dashboard. MACHINE.md does NOT duplicate
-the service inventory — `configuration.nix` is the canonical source.
-
-Services by category (2026-07-14):
-
-- **FIXED 2026-07-14**: voice-paste plist + binaries removed. voice-engine-swift kept.
-- **FIXED 2026-07-14**: `com.jwalin.adblock.plist` — removed, binary already gone.
-- **FIXED 2026-07-14**: `~/CLAUDE.md` now exists (→ `~/.dotfiles/GLOBAL.md`).
-
-## App configs
-
-| app | managed? |
+| tool | purpose |
 |---|---|
-| aerospace | OK, symlinked |
-| karabiner-elements | OK, symlinked |
-| cursor | OK, symlinked (runtime file correctly excluded) |
-| ghostty | **FIXED 2026-07-14** — symlinked into dotfiles + home.nix entry. |
-| brave-browser | intentionally unmanaged (runtime state, not config) |
-| raycast, lulu, lunar, maccy, shottr, flux | low priority, not found in standard locations this pass |
+| mlx-lm | local chat server (:8080) |
+| cocoindex | semantic code indexing |
+| cocoindex-code (`ccc`) | cocoindex CLI |
+| llm-tldr | code structure, call graphs |
+| z3-solver | formal verification (bridge) |
 
-## Claude Code settings/permissions
+## ML Models (`~/.cache/huggingface/hub/`, ~68 GB)
 
-Base `settings.json` identical and clean across `~/.claude`, `~/.claude-a`,
-`~/.claude-token`. No overly-broad grants anywhere.
+| Model | Consumer | Purpose |
+|---|---|---|
+| LiquidAI/LFM2.5-8B-A1B-MLX-4bit | mlx-chat :8080 | primary local chat |
+| LiquidAI/LFM2.5-230M-MLX-bf16 | background tasks | fast auxiliary reasoning |
+| openbmb/MiniCPM5-1B | fallback | edge reasoning |
+| Qwen3-Embedding-0.6B-Q8_0 (GGUF) | llama-server :8081 | general embeddings |
+| CodeRankEmbed-Q8_0 (GGUF) | llama-server :8082 | code embeddings (CocoIndex) |
+| urchade/gliner_* | bridge build_kg.py | entity extraction → LadybugDB |
+| microsoft/deberta-v3-* | bridge | zero-shot classification |
+| moonshine*, parakeet-rnnt | voice-engine-swift | dictation ASR |
+| kompress-v2-base | voice-engine-swift | prompt compression |
 
-- **FIXED 2026-07-14**: deny lists deployed to all three dirs via home.nix.
-- OPEN: the TokenRouter-specific allow list sits in bare `~/.claude` rather
-  than `~/.claude-token` — possible copy-paste-into-wrong-dir mistake,
-  worth confirming.
+## Vector Databases + Knowledge Graphs
 
-## Not yet actioned (require captain approval per `~/CLAUDE.md` gates)
+| Store | Location | Size |
+|---|---|---|
+| LadybugDB (Kuzu) | `~/projects/bridge/.bridge/ladybug/bridge-knowledge` | 304 MB, 182K chunks |
+| CocoIndex | `~/.local/share/cocoindex/` | per-project SQLite indices |
+| Headroom | `~/projects/voice-engine-swift/.headroom/` | voice history vectors |
 
-- **DONE 2026-07-14**: `com.jwalin.adblock.plist` removed.
-- **DONE 2026-07-14**: TOOL_REGISTRY.md corrected.
-- **DONE 2026-07-14**: Ghostty config symlinked into dotfiles.
-- **DONE 2026-07-14**: Deny-list/local settings added to all Claude config dirs.
-- **DONE 2026-07-14**: Lean 4.32.0 + Lake 5.0.0 installed via elan; bridge proofs build clean (12 jobs).
+## Minimum Repos (clone from `jwalin-shah` GitHub)
+
+| repo | purpose | build |
+|---|---|---|
+| dotfiles | machine config, rebuild, LaunchAgents | `./rebuild.sh` |
+| bridge | orchestrator: spawn, verify, quota, orbit | `go build ./cmd/bridge` |
+| mintmux | PTY multiplexer (bridge depends on it) | `go build ./cmd/...` |
+| portfolio | control plane: decisions, maps, contracts | markdown |
+| inbox | daily driver: email, messages, calendar | `uv run python inbox.py` |
+| m5tools | M5 hardware monitoring daemons | `make install` |
+| voice-engine-swift | dictation menubar app | `swift build` |
+
+Other repos (btw-v1, tensor-logic, ApplyPilot, collections-guide, rust-collections)
+are cloned as needed.
+
+## LaunchAgents (`configuration.nix` — `launchctl list | grep org.nixos`)
+
+| Service | Port | What |
+|---|---|---|
+| llama-embed-server | :8081 | Qwen3 0.6B embeddings |
+| coderank-embed-server | :8082 | CodeRank code embeddings |
+| mlx-chat-daemon | :8080 | liquid LFM2.5 8B chat |
+| tldr-daemon | — | code structure auto-index |
+| cocoindex-daemon | — | semantic code indexing |
+| mintmux | — | PTY multiplexer |
+| m5logd | — | M5 hardware logging |
+| voice-engine | — | dictation menubar app |
+
+## Agent Configs
+
+| Agent | Config files | Managed? |
+|---|---|---|
+| ca (Claude direct) | `~/.claude/settings.json`, `settings.local.json` | nix symlink |
+| ct (TokenRouter) | `~/.claude-token/` (shares ca settings) | nix symlink |
+| codex | `~/.codex/config.toml`, `hooks.json`, `rules/` | nix symlink |
+| cursor-agent | `~/.cursor/cli-config.json`, `hooks.json`, `mcp.json` | nix symlink (force) |
+| agy (Gemini) | `~/.gemini/antigravity-cli/settings.json`, `settings.json` | nix symlink (force) |
+| cmd (CommandCode) | self-managed | not in dotfiles |
+
+## Not yet in nix (GAPs)
+
+- `daytona` — CLI at `~/.local/bin/daytona`, installed ad-hoc. Bridge quota provider.
+  Not declared in configuration.nix. Won't survive rebuild.
+- `~/.local/bin/jw` — FirstMate binary. Dead project, binary still on PATH.
+- `~/.local/bin/jw-heal` — dead health checker. LaunchAgent removed Jul 18.
+
+*Last updated: July 18, 2026 — merged MODELS.md, removed dead references
+(@kilocode/cli, ctx7, firstmate, treehouse, jw-desk, research-bridge, cognee),
+updated npm list, added ML models, added minimum repos.*

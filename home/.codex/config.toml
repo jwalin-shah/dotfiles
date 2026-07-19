@@ -51,42 +51,42 @@ hide_full_access_warning = true
 trusted_hash = "sha256:c5fbb77fe65c4317262167575bc74986b8297d58c55b64158b5657e731571faa"
 
 [plugins."google-calendar@openai-curated"]
-enabled = true
+enabled = false
 
 [plugins."slack@openai-curated"]
-enabled = true
+enabled = false
 
 [plugins."sites@openai-bundled"]
-enabled = true
+enabled = false
 
 [plugins."visualize@openai-bundled"]
-enabled = true
+enabled = false
 
 [plugins."documents@openai-primary-runtime"]
-enabled = true
+enabled = false
 
 [plugins."pdf@openai-primary-runtime"]
-enabled = true
+enabled = false
 
 [plugins."spreadsheets@openai-primary-runtime"]
-enabled = true
+enabled = false
 
 [plugins."presentations@openai-primary-runtime"]
-enabled = true
+enabled = false
 
 [plugins."template-creator@openai-primary-runtime"]
-enabled = true
+enabled = false
 
 [plugins."browser@openai-bundled"]
-enabled = true
+enabled = false
 
 [marketplaces.openai-bundled]
-last_updated = "2026-07-14T20:02:49Z"
+last_updated = "2026-07-17T22:27:50Z"
 source_type = "local"
 source = "/Users/jwalinshah/.codex/.tmp/bundled-marketplaces/openai-bundled"
 
 [marketplaces.openai-primary-runtime]
-last_updated = "2026-07-14T19:13:48Z"
+last_updated = "2026-07-17T23:01:23Z"
 source_type = "local"
 source = "/Users/jwalinshah/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-primary-runtime"
 

@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-# ctx7 — library docs lookup. Uses npx like gha, cda, lva.
-set -euo pipefail
-exec npx -y ctx7 "$@"

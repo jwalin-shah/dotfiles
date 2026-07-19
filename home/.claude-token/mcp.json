@@ -1,12 +1,1 @@
-{
-  "mcpServers": {
-    "inbox": {
-      "command": "/bin/bash",
-      "args": [
-        "-c",
-        "source ~/.config/inbox/env && exec uv run --directory ~/projects/inbox python inbox_mcp_stdio.py"
-      ],
-      "description": "Personal data: iMessage, Gmail, Calendar, Tasks, Contacts, Docs, GitHub"
-    }
-  }
-}
+{}
