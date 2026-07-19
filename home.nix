@@ -244,12 +244,6 @@ in
   home.file."bin/daemon-wrapper".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/daemon-wrapper";
 
-  home.file."bin/cocoindex-health.sh".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/cocoindex-health.sh";
-
-  home.file."bin/mlx-chat-health.sh".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/mlx-chat-health.sh";
-
 
   # Bridge worker adapters - source lives in ~/projects/bridge/scripts/
   # (versioned alongside the Go spawn code that calls them)

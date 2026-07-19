@@ -1,23 +1,8 @@
-# herdr runtime artifacts (regenerated at runtime; never commit)
-# NOTE: the whole ~/.config/herdr dir is symlinked into this repo (home.nix),
-# so herdr writes live session state here. These patterns MUST be recursive
-# to catch sessions/<id>/*.log — a non-recursive herdr/*.log misses them.
-home/.config/herdr/**/*.log
-home/.config/herdr/**/*.sock
-home/.config/herdr/sessions/
-home/.config/herdr/session.json
-home/.config/herdr/session-history.json
-
 # macOS + nix build noise
 .DS_Store
 result
 result-*
 
-# session knowledge capture (local, gitignored by design — see skills/stow/)
-data/
-
-# no-mistakes local validation state - never commit in this public repo
-.no-mistakes/*.pyc
 __pycache__/
-# CocoIndex Code (ccc)
 /.cocoindex_code/
+.tldr/cache/

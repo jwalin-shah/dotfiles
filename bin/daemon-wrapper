@@ -7,7 +7,7 @@
 #   - Single-instance via flock (kernel-released on crash, no EXIT trap)
 #   - Crash-loop detection (>=3 starts in 2min while active → exit 0)
 #   - Named in ps via exec -a (e.g. "mlx-chat:8080")
-#   - Lifecycle event logging (JSONL, read by jw-heal)
+#   - Lifecycle event logging (JSONL, read by bridge orbit for health monitoring)
 #   - Handles both foreground tools (exec) and daemonizing tools (child+block)
 #
 # Required env vars:
