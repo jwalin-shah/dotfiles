@@ -401,6 +401,7 @@
     "com.jwalinshah.tldr-daemon" = {
       serviceConfig = {
         ProgramArguments = [
+          "${dotfilesBin}/daemon-wrapper"
           "${uvBin}/llm-tldr/bin/llm-tldr"
           "daemon" "start" "--project" "${home}/projects"
         ];
@@ -411,6 +412,12 @@
         EnvironmentVariables = {
           HOME = home;
           PATH = defaultPATH;
+          DAEMON_NAME = "tldr-daemon";
+          DAEMON_PORT = "0";
+          DAEMON_DISPLAY_NAME = "tldr-daemon";
+          DAEMON_TYPE = "child-block";
+          DAEMON_HEALTH_URL = "pid-only";
+          DAEMON_HEALTH_CMD = "${uvBin}/llm-tldr/bin/llm-tldr daemon status --project ${home}/projects";
         };
         StandardOutPath = "${home}/.local/share/orbit/tldr-daemon.log";
         StandardErrorPath = "${home}/.local/share/orbit/tldr-daemon.log";
