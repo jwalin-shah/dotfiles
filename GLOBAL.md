@@ -49,6 +49,15 @@ Tool selection: `gh-axi` for all GitHub operations. `rg` for text search.
 1. Identify the project. Read its `AGENTS.md`.
 2. Check `git status` — dirty? What branch?
 3. Never start work that overlaps with in-flight work in the same repo.
+4. If the work involves bridge/orbit spawning, or touches shared
+   infrastructure across projects: read
+   `~/projects/portfolio/wayfinder/bridge-loop-architecture/map.md` first —
+   it's the living source of truth for what's actually fixed vs. still open
+   in the spawn pipeline (added 2026-07-20). Don't trust bridge's own
+   ledger/stale-status as evidence a spawn succeeded — check GitHub
+   directly. New work on any project routes through that project's
+   `wayfinder/map.md` (or a portfolio wayfinder map) before code changes to
+   shared infrastructure — see memory `route-through-wayfinder`.
 
 ### End
 Report outcome to captain: what was done, what evidence exists, what needs
