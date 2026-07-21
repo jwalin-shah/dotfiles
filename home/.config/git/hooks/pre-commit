@@ -1,0 +1,42 @@
+#!/bin/sh
+# Global git pre-commit hook (dotfiles-managed via home.nix's core.hooksPath).
+# Applies to every repo on this machine, every tool (not just Claude Code) —
+# unlike a per-repo hand-installed hook, this survives `rebuild.sh` and new
+# clones for free.
+#
+# Currently enforces one thing: never commit directly to a live daemon's core
+# server code from its primary checkout. Add more repo entries below as
+# needed; this is meant to grow, not stay inbox-specific forever.
+
+repo_root="$(git rev-parse --show-toplevel 2>/dev/null)"
+[ -z "$repo_root" ] && exit 0
+
+# A worktree's .git is a FILE (gitdir: pointer); the primary checkout's .git
+# is a real directory. Only the primary should ever be blocked — worktrees
+# are exactly where this kind of change is supposed to happen.
+[ -d "$repo_root/.git" ] || exit 0
+
+# Merge commits are the intended graduation path (worktree -> tested -> merged
+# into primary) -- only block direct edit-then-commit, not merges.
+[ -f "$repo_root/.git/MERGE_HEAD" ] && exit 0
+
+case "$repo_root" in
+  "$HOME/projects/inbox")
+    staged="$(git diff --cached --name-only)"
+    core_files="inbox_server.py services.py scheduler.py inbox_client.py mcp_backend.py mcp_server.py approval_store.py"
+    for f in $core_files; do
+      if echo "$staged" | grep -qx "$f"; then
+        echo "pre-commit: $f is core server code for inbox's live daily-driver" >&2
+        echo "  (port 9849, this primary checkout). Direct commits here are blocked." >&2
+        echo "  Use a worktree instead:" >&2
+        echo "    git worktree add ~/projects/inbox-<topic> -b feat/<topic> main" >&2
+        echo "    cd ~/projects/inbox-<topic> && ./dev.sh   # port 9850" >&2
+        echo "  Merge back into main only after it's tested. See CLAUDE.md" >&2
+        echo "  'Worktree dev workflow'." >&2
+        exit 1
+      fi
+    done
+    ;;
+esac
+
+exit 0

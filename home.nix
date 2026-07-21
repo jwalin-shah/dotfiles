@@ -124,6 +124,19 @@ in
   home.file.".config/nvim".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/nvim";
 
+  # Global git hooks dir -- applies to every repo, every tool (not Claude-Code-
+  # specific). Currently enforces: never commit directly to inbox's core
+  # server code from its primary checkout, only from a worktree. See
+  # home/.config/git/hooks/pre-commit for the dispatch logic.
+  home.file.".config/git/hooks".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/git/hooks";
+  # Not using programs.git here -- ~/.gitconfig is hand-authored, not nix-
+  # managed, and enabling that module would fight it. Just set the one line
+  # idempotently instead.
+  home.activation.gitHooksPath = config.lib.dag.entryAfter ["writeBoundary"] ''
+    /usr/bin/git config --global core.hooksPath "${config.home.homeDirectory}/.config/git/hooks" || true
+  '';
+
   # Claude config dirs (3) -- same settings, symlinked
   home.file.".claude/settings.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/settings.json";
