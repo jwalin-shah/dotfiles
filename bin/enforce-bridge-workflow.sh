@@ -29,8 +29,19 @@ if [ -z "$FILE" ]; then
   exit 0  # No file path — allow (not a file edit).
 fi
 
-# Resolve to absolute path.
-ABS_FILE=$(cd "$(dirname "$FILE")" 2>/dev/null && pwd)/$(basename "$FILE") || ABS_FILE="$FILE"
+# Resolve to absolute path. Handle files that don't exist yet (new file creation).
+# realpath is not available on all macOS versions; use a Python one-liner as fallback.
+if command -v realpath &>/dev/null; then
+  ABS_FILE=$(realpath "$FILE" 2>/dev/null) || ABS_FILE=""
+elif command -v python3 &>/dev/null; then
+  ABS_FILE=$(python3 -c "import os; print(os.path.realpath('$FILE'))" 2>/dev/null) || ABS_FILE=""
+else
+  ABS_FILE=""
+fi
+# If resolution failed (e.g. parent dir doesn't exist), check by prefix match on the raw path.
+if [ -z "$ABS_FILE" ]; then
+  ABS_FILE="$FILE"
+fi
 
 # Check if this file is in a gated project.
 GATED=false
