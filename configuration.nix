@@ -451,6 +451,34 @@
       };
     };
 
+    # inbox-server: unified inbox API (Gmail/iMessage/Calendar/Sheets/Docs)
+    # Was a hand-installed plist, not nix-managed, not through daemon-wrapper
+    # — showed up as generic "python3.12" everywhere, invisible to bridge/
+    # orbit health monitoring. See jwalin-shah/inbox#65.
+    "com.jwalinshah.inbox-server" = {
+      serviceConfig = {
+        ProgramArguments = [
+          "${dotfilesBin}/daemon-wrapper"
+          "${home}/projects/inbox/scripts/run_server_daemon.sh"
+        ];
+        KeepAlive.SuccessfulExit = false;
+        RunAtLoad = true;
+        ThrottleInterval = 30;
+        WorkingDirectory = "${home}/projects/inbox";
+        EnvironmentVariables = {
+          HOME = home;
+          PATH = defaultPATH;
+          DAEMON_NAME = "inbox-server";
+          DAEMON_PORT = "9849";
+          DAEMON_DISPLAY_NAME = "inbox-server:9849";
+          DAEMON_TYPE = "foreground";
+          DAEMON_HEALTH_URL = "http://127.0.0.1:9849/health";
+        };
+        StandardOutPath = "${home}/.local/share/orbit/inbox-server.log";
+        StandardErrorPath = "${home}/.local/share/orbit/inbox-server.log";
+      };
+    };
+
     # -- Session Infrastructure --
     # mintmux: PTY multiplexer (daemonizes internally, child-block mode)
     "com.jwalinshah.mintmux" = {

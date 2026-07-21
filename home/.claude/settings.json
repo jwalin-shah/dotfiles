@@ -3,9 +3,12 @@
     "ENABLE_TOOL_SEARCH": "true"
   },
   "permissions": {
-    "defaultMode": "default"
+    "defaultMode": "default",
+    "allow": [
+      "Bash(cd ~/projects/dotfiles && ./rebuild.sh)",
+      "Bash(~/projects/dotfiles/rebuild.sh)"
+    ]
   },
-  "model": "opus",
   "hooks": {
     "PostToolUse": [
       {
