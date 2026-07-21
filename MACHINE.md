@@ -54,7 +54,7 @@ anything not declared here. Run `brew list` for live state, not this file.
 
 | Store | Location | Size |
 |---|---|---|
-| LadybugDB (Kuzu) | `~/projects/bridge/.bridge/ladybug/bridge-knowledge` | 304 MB, 182K chunks |
+| Neo4j | `~/projects/knowledge-engine/cocoindex.db` | 1196 axioms, 34 sources, 3114 code chunks |
 | CocoIndex | `~/.local/share/cocoindex/` | per-project SQLite indices |
 | Headroom | `~/projects/voice-engine-swift/.headroom/` | voice history vectors |
 
@@ -82,6 +82,8 @@ are cloned as needed.
 | mlx-chat-daemon | :8080 | liquid LFM2.5 8B chat |
 | tldr-daemon | — | code structure auto-index |
 | cocoindex-daemon | — | semantic code indexing |
+| knowledge-engine | — | axiom/source/code → Neo4j pipeline |
+| neo4j | :7687 | knowledge graph database |
 | mintmux | — | PTY multiplexer |
 | m5logd | — | M5 hardware logging |
 | voice-engine | — | dictation menubar app |
@@ -107,3 +109,15 @@ are cloned as needed.
 *Last updated: July 18, 2026 — merged MODELS.md, removed dead references
 (@kilocode/cli, ctx7, firstmate, treehouse, jw-desk, research-bridge, cognee),
 updated npm list, added ML models, added minimum repos.*
+
+## Missing from this file (CRDM gap)
+
+These are tracked by the knowledge engine's wayfinder/deps.json system
+(ticket #7) but not yet consolidated here:
+
+- `bridge/knowledge/` Go package queries Neo4j at context assembly time
+- `neo4j-go-driver/v5` depends on Neo4j :7687 being reachable
+- knowledge-engine pipeline must run BEFORE bridge context assembly
+  (data must exist in Neo4j before bridge queries it)
+- Embedding servers (:8081/:8082) must be running for pipeline operations
+- Bridge audit workflow depends on knowledge engine data being current

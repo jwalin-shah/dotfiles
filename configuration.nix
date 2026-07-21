@@ -244,6 +244,7 @@
       "jq"
       "llama.cpp"
       "ncdu"
+      "neo4j"
       "node"
       "ripgrep"
       "openjdk"
@@ -448,6 +449,30 @@
         };
         StandardOutPath = "${home}/.local/share/orbit/cocoindex-daemon.log";
         StandardErrorPath = "${home}/.local/share/orbit/cocoindex-daemon.log";
+      };
+    };
+
+    # knowledge-engine: incrementally index axioms, sources, and code chunks into Neo4j
+    "com.jwalinshah.knowledge-engine" = {
+      serviceConfig = {
+        ProgramArguments = [
+          "${uvBin}/cocoindex-code/bin/ccc"
+          "update"
+          "${home}/projects/knowledge-engine/main.py"
+        ];
+        KeepAlive.SuccessfulExit = false;
+        RunAtLoad = true;
+        ThrottleInterval = 3600;
+        WorkingDirectory = "${home}/projects/knowledge-engine";
+        EnvironmentVariables = {
+          HOME = home;
+          PATH = defaultPATH;
+          NEO4J_URI = "neo4j://localhost:7687";
+          NEO4J_USER = "neo4j";
+          NEO4J_PASSWORD = "axiom-knowledge";
+        };
+        StandardOutPath = "${home}/.local/share/orbit/knowledge-engine.log";
+        StandardErrorPath = "${home}/.local/share/orbit/knowledge-engine.log";
       };
     };
 
