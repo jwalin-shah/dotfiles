@@ -1,0 +1,409 @@
+#!/usr/bin/env bash
+# check-stale — Cross-Repo Dependency Manifest (CRDM) validator.
+#
+# Reads wayfinder/deps.json from each project under ~/projects/ and checks
+# that declared dependencies are actually satisfied:
+#   - Services are reachable
+#   - Config files exist
+#   - Binaries are on PATH
+#   - Repos are cloned
+#
+# Usage:
+#   check-stale                    # check all projects
+#   check-stale bridge             # check only bridge
+#   check-stale --json             # machine-readable output
+#   check-stale --trace <project> <change>  # what depends on what
+
+set -euo pipefail
+
+# ── Config ──────────────────────────────────────────────────────────────────
+
+PROJECTS_DIR="${HOME}/projects"
+SELF="$0"
+JSON=false
+TRACE=false
+TRACE_PROJECT=""
+TRACE_CHANGE=""
+# ── Fingerprint mode ─────────────────────────────────────────────────────────
+
+if [[ "${SELF}" == *"check-stale" ]] && [[ $# -eq 1 ]] && [[ "$1" == "--fingerprint" ]]; then
+    # Output a SHA-256 of all wayfinder/deps.json files sorted and concatenated.
+    # This produces a content-hash that changes when any CRDM changes.
+    # Consumers can store this hash and compare on next run.
+    if command -v sha256sum &>/dev/null; then
+        find "${PROJECTS_DIR}" -maxdepth 3 -path '*/wayfinder/deps.json' -exec cat {} + | sort | sha256sum | cut -d' ' -f1
+    elif command -v shasum &>/dev/null; then
+        find "${PROJECTS_DIR}" -maxdepth 3 -path '*/wayfinder/deps.json' -exec cat {} + | sort | shasum -a 256 | cut -d' ' -f1
+    else
+        echo "no-sha256sum"
+    fi
+    exit 0
+fi
+
+if [[ $# -eq 1 ]] && [[ "$1" == "--stamp" ]]; then
+    # Write the current fingerprint to .bridge/deps-fingerprint
+    fp=$("${SELF}" --fingerprint)
+    mkdir -p "${PWD}/.bridge"
+    echo "$fp" > "${PWD}/.bridge/deps-fingerprint"
+    echo "Stamped: $fp"
+    exit 0
+fi
+
+if [[ $# -eq 1 ]] && [[ "$1" == "--verify-stamp" ]]; then
+    # Verify the stamp matches current fingerprint
+    stamp_file="${PWD}/.bridge/deps-fingerprint"
+    if [[ ! -f "$stamp_file" ]]; then
+        echo "MISSING: no .bridge/deps-fingerprint — run 'check-stale --stamp' first"
+        exit 1
+    fi
+    current=$("${SELF}" --fingerprint)
+    stored=$(cat "$stamp_file")
+    if [[ "$current" != "$stored" ]]; then
+        echo "STALE: fingerprint changed (${stored} → ${current}) — dependencies have changed since last stamp"
+        exit 1
+    fi
+    echo "FRESH: fingerprint matches ($current)"
+    exit 0
+fi
+
+# ── Parse args ──────────────────────────────────────────────────────────────
+
+ARGS=()
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --json) JSON=true; shift ;;
+        --trace) TRACE=true; TRACE_PROJECT="$2"; TRACE_CHANGE="$3"; shift 3 ;;
+        -h|--help)
+            echo "Usage: check-stale [--json] [--trace <project> <change>] [project...]"
+            echo ""
+            echo "Scans ~/projects/*/wayfinder/deps.json and validates dependencies."
+            echo ""
+            echo "  --json                  output JSON instead of human-readable"
+            echo "  --trace <p> <c>         trace what depends on <c> change in <p>"
+            echo "  project                 restrict to one or more project dirs"
+            exit 0 ;;
+        *) ARGS+=("$1"); shift ;;
+    esac
+done
+
+# ── Helpers ─────────────────────────────────────────────────────────────────
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+
+pass() { echo -e "${GREEN}✓${NC} $1"; }
+warn() { echo -e "${YELLOW}⚠${NC} $1"; }
+fail() { echo -e "${RED}✗${NC} $1"; }
+
+# JSON output accumulates in this array
+json_results=()
+
+json_append() {
+    local project="$1" dep_type="$2" name="$3" status="$4" detail="$5"
+    json_results+=("{\"project\":\"${project}\",\"type\":\"${dep_type}\",\"name\":\"${name}\",\"status\":\"${status}\",\"detail\":\"${detail}\"}")
+}
+
+check_service() {
+    local project="$1" name="$2" uri="$3" required="$4" why="$5"
+    local label="${name}"
+
+    if [[ -n "$uri" ]]; then
+        # Extract host:port from URI
+        host_port=$(echo "$uri" | sed -E 's|^[a-zA-Z0-9+.-]+://||' | sed 's|/.*$||')
+        host=$(echo "$host_port" | cut -d: -f1)
+        port=$(echo "$host_port" | cut -d: -f2)
+
+        if [[ -z "$port" ]]; then
+            port="$uri" # assume it's just a port number like :8081
+            host="localhost"
+        fi
+        if [[ "$port" == "$uri" ]] && echo "$uri" | grep -q '^:'; then
+            port="${uri#:}"
+            host="localhost"
+        fi
+
+        if timeout 2 bash -c "echo > /dev/tcp/${host}/${port}" 2>/dev/null; then
+            if $JSON; then
+                json_append "$project" "service" "$label" "ok" "reachable at ${host}:${port}"
+            else
+                pass "${label} (${host}:${port})"
+            fi
+            return 0
+        else
+            if [[ "$required" == "true" ]]; then
+                if $JSON; then
+                    json_append "$project" "service" "$label" "fail" "unreachable at ${host}:${port} — ${why}"
+                else
+                    fail "${label} (${host}:${port}) — REQUIRED: ${why}"
+                fi
+                return 1
+            else
+                if $JSON; then
+                    json_append "$project" "service" "$label" "warn" "unreachable at ${host}:${port} — ${why}"
+                else
+                    warn "${label} (${host}:${port}) — optional: ${why}"
+                fi
+                return 0
+            fi
+        fi
+    fi
+    # No URI — just report existence
+    if $JSON; then
+        json_append "$project" "service" "$label" "ok" "declared"
+    else
+        pass "${label} (declared, no URI check)"
+    fi
+    return 0
+}
+
+check_binary() {
+    local project="$1" name="$2" required="$3" why="$4"
+
+    if command -v "$name" &>/dev/null; then
+        local path
+        path=$(command -v "$name")
+        if $JSON; then
+            json_append "$project" "binary" "$name" "ok" "at ${path}"
+        else
+            pass "${name} → ${path}"
+        fi
+        return 0
+    else
+        if [[ "$required" == "true" ]]; then
+            if $JSON; then
+                json_append "$project" "binary" "$name" "fail" "not found on PATH — ${why}"
+            else
+                fail "${name} — REQUIRED: ${why}"
+            fi
+            return 1
+        else
+            if $JSON; then
+                json_append "$project" "binary" "$name" "warn" "not found on PATH — ${why}"
+            else
+                warn "${name} — optional: ${why}"
+            fi
+            return 0
+        fi
+    fi
+}
+
+check_repo() {
+    local project="$1" repo="$2" required="$3" why="$4"
+    local repo_path="${PROJECTS_DIR}/${repo}"
+
+    if [[ -d "${repo_path}" ]]; then
+        if $JSON; then
+            json_append "$project" "repo" "$repo" "ok" "cloned at ${repo_path}"
+        else
+            pass "${repo} → ${repo_path}"
+        fi
+        return 0
+    else
+        if [[ "$required" == "true" ]]; then
+            if $JSON; then
+                json_append "$project" "repo" "$repo" "fail" "not cloned — ${why}"
+            else
+                fail "${repo} — REQUIRED: ${why}"
+            fi
+            return 1
+        else
+            if $JSON; then
+                json_append "$project" "repo" "$repo" "warn" "not cloned — ${why}"
+            else
+                warn "${repo} — optional: ${why}"
+            fi
+            return 0
+        fi
+    fi
+}
+
+check_config() {
+    local project="$1" config="$2" why="$3"
+
+    # config format: "repo:path" e.g. "dotfiles:GLOBAL.md"
+    local repo="${config%%:*}"
+    local path="${config#*:}"
+    local full_path="${PROJECTS_DIR}/${repo}/${path}"
+
+    if [[ -f "${full_path}" ]]; then
+        if $JSON; then
+            json_append "$project" "config" "${config}" "ok" "exists at ${full_path}"
+        else
+            pass "${config} → ${full_path}"
+        fi
+        return 0
+    else
+        if $JSON; then
+            json_append "$project" "config" "${config}" "fail" "not found at ${full_path} — ${why}"
+        else
+            fail "${config} — ${why}"
+        fi
+        return 1
+    fi
+}
+
+# ── Trace mode ──────────────────────────────────────────────────────────────
+
+trace_deps() {
+    local project="$1" change="$2"
+    echo "Tracing impact of '${change}' change in '${project}'..."
+    echo ""
+
+    local deps_file="${PROJECTS_DIR}/${project}/wayfinder/deps.json"
+    if [[ ! -f "$deps_file" ]]; then
+        echo "No deps.json found for ${project}"
+        exit 1
+    fi
+
+    # Search reverse dependencies: scan all other deps.json files for this project
+    local consumers=()
+    for d in "${PROJECTS_DIR}"/*/wayfinder/deps.json; do
+        local p
+        p=$(basename "$(dirname "$(dirname "$d")")")
+        [[ "$p" == "$project" ]] && continue
+
+        if grep -q "\"${project}\"" "$d" 2>/dev/null; then
+            consumers+=("$p")
+        fi
+    done
+
+    if [[ ${#consumers[@]} -eq 0 ]]; then
+        echo "  No consumers found for ${project}"
+    else
+        echo "  Consumers of ${project}:"
+        for c in "${consumers[@]}"; do
+            echo "    • ${c}"
+            # Show why
+            grep -B1 "${project}" "${PROJECTS_DIR}/${c}/wayfinder/deps.json" 2>/dev/null | grep '"why"' | head -1
+        done
+    fi
+
+    echo ""
+    echo "  Internal dependencies of ${project}:"
+    python3 -c "
+import json, sys
+with open('${deps_file}') as f:
+    d = json.load(f)
+deps = d.get('depends_on', {})
+for k, v in deps.items():
+    if isinstance(v, list):
+        for item in v:
+            if isinstance(item, dict) and 'name' in item:
+                print(f'    {k}: {item[\"name\"]} — {item.get(\"why\", \"\")}')
+    elif isinstance(v, dict):
+        for item in v:
+            if isinstance(item, dict) and 'name' in item:
+                print(f'    {k}: {item[\"name\"]} — {item.get(\"why\", \"\")}')
+"
+}
+
+# ── Main ────────────────────────────────────────────────────────────────────
+
+if $TRACE; then
+    trace_deps "$TRACE_PROJECT" "$TRACE_CHANGE"
+    exit 0
+fi
+
+# Discover projects to check
+declare -a projects=()
+if [[ ${#ARGS[@]} -gt 0 ]]; then
+    for p in "${ARGS[@]}"; do
+        projects+=("${PROJECTS_DIR}/${p}")
+    done
+else
+    for d in "${PROJECTS_DIR}"/*/wayfinder/deps.json; do
+        projects+=("$(dirname "$d")")
+    done
+fi
+
+total_issues=0
+
+for proj_dir in "${projects[@]}"; do
+    deps_file="${proj_dir}/wayfinder/deps.json"
+    proj_name=$(basename "$proj_dir")
+
+    if [[ ! -f "$deps_file" ]]; then
+        if ! $JSON; then
+            echo ""
+            echo "─── ${proj_name} ───"
+            warn "No wayfinder/deps.json — skipping"
+        fi
+        continue
+    fi
+
+    if ! $JSON; then
+        echo ""
+        echo "─── ${proj_name} ───"
+    fi
+
+    # Parse the deps.json and validate
+    issues=$(python3 -c "
+import json, sys
+with open('${deps_file}') as f:
+    d = json.load(f)
+deps = d.get('depends_on', {})
+issues = 0
+
+# Check services
+for svc in deps.get('services', []):
+    print(f'SERVICE|{svc.get(\"name\",\"?\")}|{svc.get(\"uri\",\"\")}|{json.dumps(str(svc.get(\"required\",\"false\")))}|{svc.get(\"why\",\"\")}')
+
+# Check binaries
+for bin in deps.get('binaries', []):
+    print(f'BINARY|{bin.get(\"name\",\"?\")}|{json.dumps(str(bin.get(\"required\",\"false\")))}|{bin.get(\"why\",\"\")}')
+
+# Check repos
+for repo in deps.get('repos', []):
+    print(f'REPO|{repo.get(\"name\",\"?\")}|{json.dumps(str(repo.get(\"required\",\"false\")))}|{repo.get(\"why\",\"\")}')
+
+# Check configs
+for cfg in deps.get('configs', []):
+    print(f'CONFIG|{cfg.get(\"file\",\"?\")}|||{cfg.get(\"why\",\"\")}')
+" 2>/dev/null || true)
+
+    while IFS='|' read -r dep_type name rest1 rest2 rest3; do
+        [[ -z "$dep_type" ]] && continue
+        case "$dep_type" in
+            SERVICE)
+                uri="$rest1"
+                required=$(echo "$rest2" | tr -d '"')
+                why="$rest3"
+                check_service "$proj_name" "$name" "$uri" "$required" "$why" || ((total_issues++)) ;;
+            BINARY)
+                required=$(echo "$rest1" | tr -d '"')
+                why="$rest2"
+                check_binary "$proj_name" "$name" "$required" "$why" || ((total_issues++)) ;;
+            REPO)
+                required=$(echo "$rest1" | tr -d '"')
+                why="$rest2"
+                check_repo "$proj_name" "$name" "$required" "$why" || ((total_issues++)) ;;
+            CONFIG)
+                why="$rest3"
+                check_config "$proj_name" "$name" "$why" || ((total_issues++)) ;;
+        esac
+    done <<< "$issues"
+done
+
+# ── Summary ─────────────────────────────────────────────────────────────────
+
+if $JSON; then
+    echo "["
+    for ((i=0; i<${#json_results[@]}; i++)); do
+        sep=","
+        [[ $i -eq $((${#json_results[@]} - 1)) ]] && sep=""
+        echo "  ${json_results[$i]}${sep}"
+    done
+    echo "]"
+else
+    echo ""
+    echo "─── Summary ───"
+    if [[ $total_issues -eq 0 ]]; then
+        pass "All dependencies satisfied"
+    else
+        fail "${total_issues} issue(s) found"
+    fi
+fi
+
+exit $(( total_issues > 0 ? 1 : 0 ))
