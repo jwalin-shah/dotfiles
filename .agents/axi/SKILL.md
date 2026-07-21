@@ -1,28 +1,41 @@
 ---
 name: axi
-description: Run AXI tools before writing code — blast radius, call graph, prior art, test coverage, compact shell output.
+description: Mandatory pre-code gates — blast radius, call graph, prior art, test coverage. Run BEFORE writing any code in orbit/bridge.
 ---
 
-# AXI Tools
+# AXI — Pre-Code Invariant Gates
 
-Mandatory pre-code tools. Run these before touching any file.
+These MUST run before any Go file is touched in orbit or bridge. The hook enforces this mechanically.
 
 ## Process
 
 ```bash
-# 1. Blast radius BEFORE writing the tensor equation
+# 1. Blast radius
 llm-tldr impact <file-you-plan-to-change>
 
-# 2. Call graph BEFORE writing pseudocode
-aider-axi calls ~/projects/orbit/<file> <function>
+# 2. Call graph
+aider-axi calls ~/projects/<repo>/<file> <function>
 
-# 3. OSS prior art BEFORE writing pseudocode
+# 3. OSS prior art
 githits-axi example "<problem you are solving>"
 
-# 4. Existing test coverage BEFORE adding invariant gates
-aider-axi tests ~/projects/orbit/<pkg>
+# 4. Test coverage
+aider-axi tests ~/projects/<repo>/<pkg>
 
-# 5. Compact shell output for all build/test runs
+# 5. Compact output
 rtk err <command>
 rtk diff "git diff HEAD"
+```
+
+## When to run
+
+- Before writing any Go code in orbit or bridge
+- Before changing any file that has invariants attached
+- Always — enforced mechanically, not by choice
+
+## Integration
+
+This skill wraps Matt Pocock's `implement` skill. The flow:
+```
+/mattpocock-skills:implement → /axi → write code → P0 gate → /mattpocock-skills:mp-code-review
 ```

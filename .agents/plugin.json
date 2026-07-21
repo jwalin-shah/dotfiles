@@ -1,0 +1,23 @@
+{
+  "name": "bridge-orbit-skills",
+  "version": "1.0.0",
+  "description": "Bridge/Orbit workflow enforcement skills — axi, cocoindex, cocoindex-code",
+  "author": "jwalinshah",
+  "skills": [
+    {
+      "name": "axi",
+      "description": "Mandatory pre-code gates — blast radius, call graph, prior art, test coverage",
+      "path": "axi/SKILL.md"
+    },
+    {
+      "name": "cocoindex",
+      "description": "Semantic code search via cocoindex",
+      "path": "cocoindex/SKILL.md"
+    },
+    {
+      "name": "cocoindex-code",
+      "description": "Manage the cocoindex daemon",
+      "path": "cocoindex-code/SKILL.md"
+    }
+  ]
+}

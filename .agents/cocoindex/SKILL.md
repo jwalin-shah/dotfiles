@@ -1,19 +1,25 @@
 ---
 name: cocoindex
-description: Use cocoindex for semantic code search — index, search, grep by example.
+description: Semantic code search via cocoindex. Indexes 13 repos with dual embeddings for code-aware search.
 ---
 
-# CocoIndex
+# CocoIndex Code
 
-Semantic code search across indexed codebases.
+## Context integration
+
+When bridge assembles a context packet for a spawn, `SearchSource` runs `ccc search` with the ticket's acceptance criteria as the query. Results are fused with `rg` grep via RRF (Reciprocal Rank Fusion) and injected into the context packet as `CodeSearchHits`.
 
 ## Commands
 
-- `ccc status` — check index status
-- `ccc search "<query>"` — semantic search
-- `ccc grep "<example>"` — structural grep by example
-- `ccc index` — reindex current project
+```bash
+ccc status      # index health across 13 repos
+ccc search "how does bridge handle sandbox profiles"  # semantic search
+ccc grep "Spawn(" --lang go  # structural grep
+```
 
-## Integration
+## Daemon
 
-The bridge context assembler uses ccc as a search backend with RRF fusion.
+The daemon watches 13 repos and auto-updates indices. Managed via `launchd` + `daemon-wrapper`:
+```
+ccc run-daemon
+```

@@ -306,11 +306,11 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/karabiner/karabiner.json";
   imports = [
     ({ config, ... }: {
-      # Skills declared once in ./.agents/ and projected into Claude configs.
+      # Skills declared once in ./.agents/ and projected into all agent configs.
       # force = true because these paths held hand-made symlinks predating nix.
       home.file = let
         skills = builtins.attrNames (builtins.readDir ./.agents);
-        skillDirs = [ ".claude" ".claude-a" ".claude-token" ];
+        skillDirs = [ ".claude" ".claude-a" ".claude-token" ".codex" ];
         link = dir: name: {
           name = "${dir}/skills/${name}";
           value = {
@@ -318,8 +318,17 @@ in
             force = true;
           };
         };
+        # Cursor uses "skills-cursor" not "skills"
+        cursorLink = name: {
+          name = ".cursor/skills-cursor/${name}";
+          value = {
+            source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/.agents/${name}";
+            force = true;
+          };
+        };
       in builtins.listToAttrs
-        (builtins.concatMap (dir: map (link dir) skills) skillDirs);
+        ((builtins.concatMap (dir: map (link dir) skills) skillDirs) ++
+         (map cursorLink skills));
     })
   ];
 }

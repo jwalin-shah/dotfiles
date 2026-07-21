@@ -3,20 +3,31 @@
     "ENABLE_TOOL_SEARCH": "true"
   },
   "permissions": {
-    "defaultMode": "default",
     "allow": [
       "Bash(cd ~/projects/dotfiles && ./rebuild.sh)",
       "Bash(~/projects/dotfiles/rebuild.sh)"
-    ]
+    ],
+    "defaultMode": "default"
   },
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/jwalinshah/.dotfiles/bin/enforce-bridge-workflow.sh"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write|MultiEdit",
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/jwalinshah/projects/dotfiles/bin/fmt-on-edit.sh"
+            "command": "/Users/jwalinshah/.dotfiles/bin/fmt-on-edit.sh"
           }
         ]
       }
@@ -28,13 +39,20 @@
     "command": "input=$(cat); model=$(echo \"$input\" | jq -r '.model.display_name'); used=$(echo \"$input\" | jq -r '.context_window.used_percentage // empty'); if [ -n \"$used\" ]; then printf \"%s | ctx: %.0f%% used\" \"$model\" \"$used\"; else printf \"%s\" \"$model\"; fi"
   },
   "enabledPlugins": {
-    "codex@openai-codex": true
+    "codex@openai-codex": true,
+    "mattpocock-skills@mattpocock-skills": true
   },
   "extraKnownMarketplaces": {
     "openai-codex": {
       "source": {
         "source": "github",
         "repo": "openai/codex-plugin-cc"
+      }
+    },
+    "mattpocock-skills": {
+      "source": {
+        "source": "github",
+        "repo": "matt-langston/mattpocock-skills"
       }
     }
   },
