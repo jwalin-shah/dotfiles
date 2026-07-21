@@ -525,20 +525,27 @@
     };
 
     # voice-engine: macOS dictation menubar app
-    "com.jwalinshah.voice-engine" = {
-      serviceConfig = {
-        ProgramArguments = [ "${localBin}/voice-engine" ];
-        KeepAlive = true;
-        RunAtLoad = true;
-        ThrottleInterval = 10;
-        EnvironmentVariables = {
-          HOME = home;
-          PATH = defaultPATH;
-        };
-        StandardOutPath = "/tmp/voice-engine.log";
-        StandardErrorPath = "/tmp/voice-engine.log";
-      };
-    };
+    # DISABLED 2026-07-20 — CoreML's stateful-model feature is broken on this
+    # machine's macOS 27.0 build (26A5378n, Tier-2/pre-release per Homebrew).
+    # Proven with a minimal repro independent of this app's own model; not
+    # fixable from voice-engine-swift. Re-enable (uncomment) once a macOS
+    # update is confirmed to fix it, or if the KV-cache decoder rearchitecture
+    # (avoiding CoreML `states` entirely) is built instead. Full account in
+    # ~/projects/voice-engine-swift/wayfinder/map.md ticket #1.
+    # "com.jwalinshah.voice-engine" = {
+    #   serviceConfig = {
+    #     ProgramArguments = [ "${localBin}/voice-engine" ];
+    #     KeepAlive = true;
+    #     RunAtLoad = true;
+    #     ThrottleInterval = 10;
+    #     EnvironmentVariables = {
+    #       HOME = home;
+    #       PATH = defaultPATH;
+    #     };
+    #     StandardOutPath = "/tmp/voice-engine.log";
+    #     StandardErrorPath = "/tmp/voice-engine.log";
+    #   };
+    # };
 
     # ladybug-pipeline: incremental LadybugDB knowledge graph update (every 15 min)
     "com.jwalinshah.ladybug-pipeline" = {
