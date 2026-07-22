@@ -1,5 +1,8 @@
 # Hook Configuration Reference
 
+Cross-harness SoT: `portfolio/wayfinder/harness-activation-matrix-2026-07-22.md`.
+Prove all harnesses: `bin/prove-harness-hooks.sh`.
+
 All agent hooks route through `dotfiles/bin/fmt-on-edit.sh`. That script is
 the single extension point — add a new formatter there, all agents pick it up.
 
@@ -120,7 +123,7 @@ Layers 1 and 2 are automatic. Layer 3 is on-demand.
 1. Find its hook config file (usually in `~/.agentname/`)
 2. Add the `fmt-on-edit.sh` reference in the agent's hook format
 3. Add a row to the support matrix above
-4. Run `bin/audit-hook-ownership.sh` to verify the hook target is owned
+4. Run `bin/prove-harness-hooks.sh` (docs-backed event names + gate/fmt refs)
 
 ## Updating fmt-on-edit.sh
 
