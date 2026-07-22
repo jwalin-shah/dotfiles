@@ -108,6 +108,11 @@ else:
 PY
 fi
 
+# githits auth — capability gate fuel (fail closed)
+if ! "$ROOT/bin/prove-githits-auth.sh"; then
+  FAIL=1
+fi
+
 if [[ "$FAIL" -ne 0 ]]; then
   echo "prove-harness-hooks: FAILED" >&2
   exit 1
