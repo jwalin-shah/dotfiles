@@ -508,26 +508,10 @@
     };
 
     # -- Session Infrastructure --
-    # neo4j: knowledge graph database
-    "com.jwalinshah.neo4j" = {
-      serviceConfig = {
-        ProgramArguments = [
-          "${brewBin}/neo4j"
-          "console"
-        ];
-        KeepAlive = true;
-        RunAtLoad = true;
-        ThrottleInterval = 30;
-        WorkingDirectory = home;
-        EnvironmentVariables = {
-          HOME = home;
-          PATH = defaultPATH;
-        };
-        StandardOutPath = "${home}/.local/share/orbit/neo4j.log";
-        StandardErrorPath = "${home}/.local/share/orbit/neo4j.log";
-      };
-    };
-
+    # neo4j: sole knowledge store. Package declared in brews above; runtime
+    # ownership is Homebrew `brew services` (homebrew.mxcl.neo4j) — do NOT
+    # also declare an org.nixos LaunchAgent or both fight over :7687.
+    # Verified 2026-07-21: dual managers left nix agent exit -15 and HTTP down.
     # mintmux: PTY multiplexer (daemonizes internally, child-block mode)
     "com.jwalinshah.mintmux" = {
       serviceConfig = {
