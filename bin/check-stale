@@ -115,6 +115,9 @@ check_service() {
         host=$(echo "$host_port" | cut -d: -f1)
         port=$(echo "$host_port" | cut -d: -f2)
 
+        if [[ -z "$host" ]]; then
+            host="localhost"
+        fi
         if [[ -z "$port" ]]; then
             port="$uri" # assume it's just a port number like :8081
             host="localhost"
@@ -148,14 +151,34 @@ check_service() {
                 return 0
             fi
         fi
-    fi
-    # No URI — just report existence
-    if $JSON; then
-        json_append "$project" "service" "$label" "ok" "declared"
+        fi
     else
-        pass "${label} (declared, no URI check)"
+        # No URI — check if running via pgrep or launchctl
+        if pgrep -fi "$name" >/dev/null || launchctl list | grep -qi "$name"; then
+            if $JSON; then
+                json_append "$project" "service" "$label" "ok" "process running"
+            else
+                pass "${label} (running)"
+            fi
+            return 0
+        else
+            if [[ "$required" == "true" ]]; then
+                if $JSON; then
+                    json_append "$project" "service" "$label" "fail" "process not running — ${why}"
+                else
+                    fail "${label} — REQUIRED: ${why} (process not found)"
+                fi
+                return 1
+            else
+                if $JSON; then
+                    json_append "$project" "service" "$label" "warn" "process not running — ${why}"
+                else
+                    warn "${label} — optional: ${why} (process not found)"
+                fi
+                return 0
+            fi
+        fi
     fi
-    return 0
 }
 
 check_binary() {
@@ -227,7 +250,14 @@ check_config() {
     local path="${config#*:}"
     local full_path="${PROJECTS_DIR}/${repo}/${path}"
 
-    if [[ -f "${full_path}" ]]; then
+    local matches=()
+    for f in ${full_path}; do
+        if [[ -f "$f" ]]; then
+            matches+=("$f")
+        fi
+    done
+
+    if [[ ${#matches[@]} -gt 0 ]]; then
         if $JSON; then
             json_append "$project" "config" "${config}" "ok" "exists at ${full_path}"
         else
