@@ -56,6 +56,6 @@
   "hasChangedDefaultModel": true,
   "maxMode": false,
   "approvalMode": "allowlist",
-  "sandbox": { "mode": "disabled", "networkAccess": "user_config_with_defaults" },
+  "sandbox": { "mode": "enabled", "networkAccess": "disabled" },
   "attribution": { "attributeCommitsToAgent": true, "attributePRsToAgent": true }
 }

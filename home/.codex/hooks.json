@@ -3,6 +3,9 @@
     "pre-edit": [
       {
         "command": "/Users/jwalinshah/.dotfiles/bin/enforce-bridge-workflow.sh"
+      },
+      {
+        "command": "/Users/jwalinshah/.dotfiles/bin/check-stale-gate.py"
       }
     ],
     "post-edit": [

@@ -311,8 +311,15 @@ in
     ({ config, ... }: {
       # Skills declared once in ./.agents/ and projected into all agent configs.
       # force = true because these paths held hand-made symlinks predating nix.
+      # IMPORTANT: entries under ./.agents/ must be real files/dirs (skill content),
+      # never symlinks into ~/.claude/skills (that creates a closed loop with this rule).
+      # Exclude *.backup and anything else that is not a skill name.
       home.file = let
-        skills = builtins.attrNames (builtins.readDir ./.agents);
+        allEntries = builtins.attrNames (builtins.readDir ./.agents);
+        isSkill = name:
+          !(builtins.match ".*\\.backup" name != null)
+          && name != "plugin.json.backup";
+        skills = builtins.filter isSkill allEntries;
         skillDirs = [ ".claude" ".claude-a" ".claude-token" ".codex" ];
         link = dir: name: {
           name = "${dir}/skills/${name}";

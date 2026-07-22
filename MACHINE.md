@@ -83,10 +83,13 @@ are cloned as needed.
 | tldr-daemon | — | code structure auto-index |
 | cocoindex-daemon | — | semantic code indexing |
 | knowledge-engine | — | axiom/source/code → Neo4j pipeline |
-| neo4j | :7687 | knowledge graph database |
+| neo4j | :7687 | knowledge graph database (sole store; nix LaunchAgent) |
 | mintmux | — | PTY multiplexer |
 | m5logd | — | M5 hardware logging |
-| voice-engine | — | dictation menubar app |
+| voice-engine | — | dictation menubar app (KV-cache decoder; re-enabled 2026-07-21) |
+
+Ladybug pipeline LaunchAgent is **frozen** — Neo4j is the sole knowledge store.
+The LadybugDB file under `bridge/.bridge/ladybug/` is retained read-only for migration.
 
 ## Agent Configs
 
@@ -101,8 +104,6 @@ are cloned as needed.
 
 ## Not yet in nix (GAPs)
 
-- `daytona` — CLI at `~/.local/bin/daytona`, installed ad-hoc. Bridge quota provider.
-  Not declared in configuration.nix. Won't survive rebuild.
 - `~/.local/bin/jw` — FirstMate binary. Dead project, binary still on PATH.
 - `~/.local/bin/jw-heal` — dead health checker. LaunchAgent removed Jul 18.
 
@@ -110,10 +111,10 @@ are cloned as needed.
 (@kilocode/cli, ctx7, firstmate, treehouse, jw-desk, research-bridge, cognee),
 updated npm list, added ML models, added minimum repos.*
 
-## Missing from this file (CRDM gap)
+## Cross-Repo Dependency Manifest (deps.json) & Neo4j
 
-These are tracked by the knowledge engine's wayfinder/deps.json system
-(ticket #7) but not yet consolidated here:
+These are tracked by each project's `wayfinder/deps.json` (validated by
+`bin/check-stale`) and are fully integrated into dotfiles:
 
 - `bridge/knowledge/` Go package queries Neo4j at context assembly time
 - `neo4j-go-driver/v5` depends on Neo4j :7687 being reachable

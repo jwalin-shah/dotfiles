@@ -9,6 +9,7 @@
     ],
     "defaultMode": "default"
   },
+  "model": "sonnet",
   "hooks": {
     "PreToolUse": [
       {
@@ -17,6 +18,15 @@
           {
             "type": "command",
             "command": "/Users/jwalinshah/.dotfiles/bin/enforce-bridge-workflow.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/jwalinshah/.dotfiles/bin/check-stale-gate.py"
           }
         ]
       }

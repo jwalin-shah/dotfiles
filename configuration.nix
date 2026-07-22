@@ -219,6 +219,7 @@
     taps = [
       "nikitabobko/tap"
       "felixkratz/formulae"
+      "daytonaio/cli"
     ];
 
     brews = [
@@ -229,6 +230,7 @@
       "cmake"
       "container"
       "coreutils"
+      "daytonaio/cli/daytona"
       "direnv"
       "dust"
       "elan-init"
@@ -456,9 +458,10 @@
     "com.jwalinshah.knowledge-engine" = {
       serviceConfig = {
         ProgramArguments = [
-          "${uvBin}/cocoindex-code/bin/ccc"
+          "${dotfilesBin}/daemon-wrapper"
+          "${uvBin}/cocoindex/bin/cocoindex"
           "update"
-          "${home}/projects/knowledge-engine/main.py"
+          "main.py"
         ];
         KeepAlive.SuccessfulExit = false;
         RunAtLoad = true;
@@ -505,6 +508,26 @@
     };
 
     # -- Session Infrastructure --
+    # neo4j: knowledge graph database
+    "com.jwalinshah.neo4j" = {
+      serviceConfig = {
+        ProgramArguments = [
+          "${brewBin}/neo4j"
+          "console"
+        ];
+        KeepAlive = true;
+        RunAtLoad = true;
+        ThrottleInterval = 30;
+        WorkingDirectory = home;
+        EnvironmentVariables = {
+          HOME = home;
+          PATH = defaultPATH;
+        };
+        StandardOutPath = "${home}/.local/share/orbit/neo4j.log";
+        StandardErrorPath = "${home}/.local/share/orbit/neo4j.log";
+      };
+    };
+
     # mintmux: PTY multiplexer (daemonizes internally, child-block mode)
     "com.jwalinshah.mintmux" = {
       serviceConfig = {
@@ -550,45 +573,42 @@
     };
 
     # voice-engine: macOS dictation menubar app
-    # DISABLED 2026-07-20 — CoreML's stateful-model feature is broken on this
-    # machine's macOS 27.0 build (26A5378n, Tier-2/pre-release per Homebrew).
-    # Proven with a minimal repro independent of this app's own model; not
-    # fixable from voice-engine-swift. Re-enable (uncomment) once a macOS
-    # update is confirmed to fix it, or if the KV-cache decoder rearchitecture
-    # (avoiding CoreML `states` entirely) is built instead. Full account in
-    # ~/projects/voice-engine-swift/wayfinder/map.md ticket #1.
-    # "com.jwalinshah.voice-engine" = {
-    #   serviceConfig = {
-    #     ProgramArguments = [ "${localBin}/voice-engine" ];
-    #     KeepAlive = true;
-    #     RunAtLoad = true;
-    #     ThrottleInterval = 10;
-    #     EnvironmentVariables = {
-    #       HOME = home;
-    #       PATH = defaultPATH;
-    #     };
-    #     StandardOutPath = "/tmp/voice-engine.log";
-    #     StandardErrorPath = "/tmp/voice-engine.log";
-    #   };
-    # };
-
-    # ladybug-pipeline: incremental LadybugDB knowledge graph update (every 15 min)
-    "com.jwalinshah.ladybug-pipeline" = {
+    # (Re-enabled: KV-cache decoder rearchitecture built to avoid CoreML states)
+    "com.jwalinshah.voice-engine" = {
       serviceConfig = {
-        ProgramArguments = [
-          "${home}/projects/bridge/.bridge/ladybug/pipeline.sh"
-        ];
+        ProgramArguments = [ "${localBin}/voice-engine" ];
+        KeepAlive = true;
         RunAtLoad = true;
-        StartInterval = 900;
-        WorkingDirectory = home;
+        ThrottleInterval = 10;
         EnvironmentVariables = {
           HOME = home;
           PATH = defaultPATH;
         };
-        StandardOutPath = "${home}/.local/share/orbit/ladybug-pipeline.log";
-        StandardErrorPath = "${home}/.local/share/orbit/ladybug-pipeline.log";
+        StandardOutPath = "/tmp/voice-engine.log";
+        StandardErrorPath = "/tmp/voice-engine.log";
       };
     };
+
+    # ladybug-pipeline: FROZEN 2026-07-21 — Neo4j is the sole knowledge store
+    # (Portfolio ADR neo4j-sole-store). LadybugDB file retained read-only as a
+    # migration source until knowledge-engine parity is proven. Do not re-enable
+    # writers without reversing that ADR.
+    # "com.jwalinshah.ladybug-pipeline" = {
+    #   serviceConfig = {
+    #     ProgramArguments = [
+    #       "${home}/projects/bridge/.bridge/ladybug/pipeline.sh"
+    #     ];
+    #     RunAtLoad = true;
+    #     StartInterval = 900;
+    #     WorkingDirectory = home;
+    #     EnvironmentVariables = {
+    #       HOME = home;
+    #       PATH = defaultPATH;
+    #     };
+    #     StandardOutPath = "${home}/.local/share/orbit/ladybug-pipeline.log";
+    #     StandardErrorPath = "${home}/.local/share/orbit/ladybug-pipeline.log";
+    #   };
+    # };
   };
 
   # -- Root Daemons --

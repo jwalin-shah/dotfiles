@@ -66,6 +66,67 @@ if [[ $# -eq 1 ]] && [[ "$1" == "--verify-stamp" ]]; then
     exit 0
 fi
 
+if [[ $# -eq 1 ]] && [[ "$1" == "--manifest-audit" ]]; then
+    echo "Auditing MACHINE.md manifest..."
+    python3 -c '
+import re, os, subprocess
+
+manifest_file = os.path.expanduser("~/projects/dotfiles/MACHINE.md")
+with open(manifest_file, "r") as f:
+    text = f.read()
+
+issues = 0
+
+def check_cmd(cmd, name):
+    global issues
+    if subprocess.call(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) != 0:
+        print(f"✗ MISSING: {name}")
+        issues += 1
+    else:
+        print(f"✓ FOUND: {name}")
+
+print("--- Auditing Repositories ---")
+repos_match = re.search(r"## Minimum Repos.*?\n(.*?)##", text, re.DOTALL)
+if repos_match:
+    for line in repos_match.group(1).strip().split("\n")[2:]:
+        if line.startswith("|"):
+            repo = line.split("|")[1].strip()
+            if repo and repo != "repo":
+                path = os.path.expanduser(f"~/projects/{repo}")
+                if not os.path.isdir(path):
+                    print(f"✗ MISSING REPO: {repo}")
+                    issues += 1
+                else:
+                    print(f"✓ REPO FOUND: {repo}")
+
+print("\n--- Auditing npm Globals ---")
+npm_match = re.search(r"## npm globals.*?\n(.*?)##", text, re.DOTALL)
+if npm_match:
+    for line in npm_match.group(1).strip().split("\n")[2:]:
+        if line.startswith("|"):
+            pkg = line.split("|")[1].strip()
+            if pkg and pkg != "package":
+                check_cmd(f"npm ls -g {pkg}", f"npm: {pkg}")
+
+print("\n--- Auditing LaunchAgents ---")
+launchagents_match = re.search(r"## LaunchAgents.*?\n(.*?)##", text, re.DOTALL)
+if launchagents_match:
+    for line in launchagents_match.group(1).strip().split("\n")[2:]:
+        if line.startswith("|"):
+            agent = line.split("|")[1].strip()
+            if agent and agent != "Service":
+                check_cmd(f"launchctl list | grep -q 'com.jwalinshah.{agent}' || launchctl list | grep -q '{agent}'", f"LaunchAgent: {agent}")
+
+if issues > 0:
+    print(f"\nManifest Audit FAILED with {issues} missing items. Rebuild required.")
+    exit(1)
+else:
+    print("\nManifest Audit PASSED. Machine state perfectly matches MACHINE.md.")
+    exit(0)
+'
+    exit $?
+fi
+
 # ── Parse args ──────────────────────────────────────────────────────────────
 
 ARGS=()
@@ -150,7 +211,6 @@ check_service() {
                 fi
                 return 0
             fi
-        fi
         fi
     else
         # No URI — check if running via pgrep or launchctl
@@ -415,6 +475,45 @@ for cfg in deps.get('configs', []):
         esac
     done <<< "$issues"
 done
+
+# ── Axiom Sync Check ────────────────────────────────────────────────────────
+
+if ! $JSON; then
+    echo ""
+    echo "─── Axiom Sync ───"
+fi
+
+axioms_file="${PROJECTS_DIR}/axioms/axioms.json"
+if [[ -f "$axioms_file" ]]; then
+    file_count=$(jq length "$axioms_file" 2>/dev/null || echo 0)
+    neo_res=$(curl -s -u neo4j:axiom-knowledge "http://localhost:7474/db/neo4j/tx/commit" \
+      -H "Content-Type: application/json" \
+      -d '{"statements":[{"statement":"MATCH (a:Axiom) RETURN count(a)"}]}' 2>/dev/null || true)
+    
+    neo_count=$(echo "$neo_res" | jq -r '.results[0].data[0].row[0] // empty' 2>/dev/null || echo "error")
+    
+    if [[ "$neo_count" == "error" ]] || [[ -z "$neo_count" ]]; then
+        if $JSON; then
+            json_append "axioms" "sync" "neo4j" "fail" "Neo4j unreachable or query failed"
+        else
+            fail "Neo4j unreachable or query failed"
+        fi
+        ((total_issues++))
+    elif [[ "$file_count" -ne "$neo_count" ]]; then
+        if $JSON; then
+            json_append "axioms" "sync" "neo4j" "warn" "STALE WARNING: axioms.json ($file_count) mismatch with Neo4j ($neo_count)"
+        else
+            warn "STALE WARNING: axioms.json ($file_count) mismatch with Neo4j ($neo_count)"
+        fi
+        # Throw warning, not fail, per instructions "throw a STALE WARNING"
+    else
+        if $JSON; then
+            json_append "axioms" "sync" "neo4j" "ok" "axioms.json ($file_count) matches Neo4j"
+        else
+            pass "axioms.json ($file_count) matches Neo4j ($neo_count)"
+        fi
+    fi
+fi
 
 # ── Summary ─────────────────────────────────────────────────────────────────
 

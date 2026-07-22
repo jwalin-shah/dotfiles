@@ -35,6 +35,9 @@ trust_level = "trusted"
 [projects."/Users/jwalinshah/Documents/Codex/2026-07-14/create-a-scheduled-task-called-weekday"]
 trust_level = "trusted"
 
+[projects."/Users/jwalinshah/projects/axioms"]
+trust_level = "trusted"
+
 [tui.model_availability_nux]
 "gpt-5.5" = 4
 "gpt-5.6-sol" = 4

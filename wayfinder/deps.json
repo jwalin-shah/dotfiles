@@ -1,0 +1,38 @@
+{
+  "provides": {
+    "binaries": [
+      {
+        "name": "check-stale",
+        "why": "System-wide Cross-Repo Dependency Manifest (deps.json) validator"
+      },
+      {
+        "name": "daemon-wrapper",
+        "why": "LaunchAgent supervisor enforcing single-instance flocking"
+      }
+    ],
+    "configs": [
+      {
+        "file": "MACHINE.md",
+        "why": "Human-readable source of truth for machine state"
+      },
+      {
+        "file": "GLOBAL.md",
+        "why": "Machine Constitution for agent behavior"
+      }
+    ]
+  },
+  "depends_on": {
+    "binaries": [
+      {
+        "name": "nix",
+        "required": true,
+        "why": "Package manager for declarative environment"
+      },
+      {
+        "name": "brew",
+        "required": true,
+        "why": "Fallback package manager for macOS binaries"
+      }
+    ]
+  }
+}
