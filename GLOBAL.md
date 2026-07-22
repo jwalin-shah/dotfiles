@@ -30,6 +30,14 @@ decision. No exceptions for speed, convenience, or confidence.
    Trace the flow end to end. Then write the smallest diff that solves the
    real problem. Deletion over addition. Boring over clever.
 
+5. **Service capability gate (ponytail / AX-017).** Before integrating or
+   extending any tool/service (cocoindex, tldr, Neo4j, bridge, axioms,
+   embed servers, …): inventory what it already offers — official docs +
+   `githits` prior art + package/CLI surface. Prefer native built-ins over
+   hand-rolled substitutes. No custom chunker/indexer/client until the
+   inventory is written down (wayfinder note or ticket) and a prove command
+   exists. Skipping the inventory is a bug, same as an unverified claim.
+
 ---
 
 ## Conventions

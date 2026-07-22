@@ -426,46 +426,28 @@
     # Was crash-looping since July 2 with missing Auth0 device client ID.
     # The uv tool and LaunchAgent config are both removed.
 
-    # cocoindex-daemon: incremental semantic code search
-    "com.jwalinshah.cocoindex-daemon" = {
-      serviceConfig = {
-        ProgramArguments = [
-          "${dotfilesBin}/daemon-wrapper"
-          "${uvBin}/cocoindex-code/bin/ccc"
-          "run-daemon"
-        ];
-        KeepAlive.SuccessfulExit = false;
-        RunAtLoad = true;
-        ThrottleInterval = 30;
-        WorkingDirectory = home;
-        EnvironmentVariables = {
-          HOME = home;
-          PATH = defaultPATH;
-          PYTHONPATH = "${home}/.cocoindex_code/extensions:${uvBin}/cocoindex-code/lib/python3.13/site-packages";
-          DAEMON_NAME = "cocoindex-daemon";
-          DAEMON_PORT = "0";
-          DAEMON_DISPLAY_NAME = "cocoindex:daemon";
-          DAEMON_TYPE = "child-block";
-          DAEMON_HEALTH_URL = "pid-only";
-          # ponytail: no validation import — tldr_chunker extension doesn't exist yet
-        };
-        StandardOutPath = "${home}/.local/share/orbit/cocoindex-daemon.log";
-        StandardErrorPath = "${home}/.local/share/orbit/cocoindex-daemon.log";
-      };
-    };
+    # cocoindex-daemon: REMOVED 2026-07-22 — Neo4j is sole semantic+structure store
+    # (knowledge-engine on-change + daily catch-up). Optional `ccc` CLI may remain
+    # for bridge soft-fail SearchSource until Neo4j vector search replaces it.
+    # Do not re-enable this LaunchAgent as a second sink.
 
-    # knowledge-engine: cocoindex embeds then sync-graph (structure + CALLS) into Neo4j.
+    # knowledge-engine: daily catch-up (cocoindex embeds + sync-graph).
+    # Primary path is on-change: fmt-on-edit → neo4j-on-change → on-change-sync.sh.
     # MUST use project .venv (has requests + cocoindex[neo4j]); global uv tool lacks deps.
-    # KeepAlive SuccessfulExit=true + ThrottleInterval=3600 → hourly re-run after success.
     "com.jwalinshah.knowledge-engine" = {
       serviceConfig = {
         ProgramArguments = [
           "${dotfilesBin}/daemon-wrapper"
           "${home}/projects/knowledge-engine/scripts/sync-and-embed.sh"
         ];
-        KeepAlive.SuccessfulExit = true;
         RunAtLoad = true;
-        ThrottleInterval = 3600;
+        # Daily catch-up only — not hourly theater. On-change owns freshness.
+        StartCalendarInterval = [
+          {
+            Hour = 3;
+            Minute = 15;
+          }
+        ];
         WorkingDirectory = "${home}/projects/knowledge-engine";
         EnvironmentVariables = {
           HOME = home;

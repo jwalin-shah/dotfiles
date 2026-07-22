@@ -20,3 +20,8 @@ Your first answer may be wrong.
 
 ## Minimum Code, Maximum Understanding
 Read before changing. Trace the flow. Smallest diff. Deletion over addition.
+
+## Service Capability Gate (Ponytail / AX-017)
+Before integrating any tool/service: official docs + `githits` + inventory of
+built-ins. Prefer native. No hand-rolled substitute until inventory is written
+and proved. Skipping inventory is a bug.

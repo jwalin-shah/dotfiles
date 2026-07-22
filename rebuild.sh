@@ -92,7 +92,11 @@ if command -v bridge >/dev/null 2>&1; then
   bridge verify-machine
 fi
 
-for svc in com.jwalinshah.tldr-daemon com.jwalinshah.cocoindex-daemon; do
+# Unload retired cocoindex-daemon if a stale plist remains after nix switch.
+launchctl bootout "gui/$(id -u)/org.nixos.com.jwalinshah.cocoindex-daemon" 2>/dev/null || true
+pkill -f 'ccc run-daemon' 2>/dev/null || true
+
+for svc in com.jwalinshah.tldr-daemon; do
   launchctl kickstart -k "gui/$(id -u)/org.nixos.$svc" 2>/dev/null || true
 done
 

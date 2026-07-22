@@ -198,6 +198,9 @@ in
   home.file.".cursor/cli-config.json".force = true;
   home.file.".cursor/AGENTS.md".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/GLOBAL.md";
+  home.file.".cursor/rules".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.cursor/rules";
+  home.file.".cursor/rules".force = true;
 
   home.file.".gemini/config/mcp_config.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.gemini/config/mcp_config.json";

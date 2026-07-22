@@ -6,7 +6,9 @@ the single extension point — add a new formatter there, all agents pick it up.
 ## What hooks do
 
 After any file edit by an agent, the hook runs `fmt-on-edit.sh` with the
-edited file path. The script dispatches by extension:
+edited file path. The script dispatches by extension, then fans in Neo4j
+on-change sync via `neo4j-on-change.sh` → `knowledge-engine/scripts/on-change-sync.sh`
+(async, factory repos only).
 
 | Extension | Formatter | Command |
 |---|---|---|

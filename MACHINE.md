@@ -32,7 +32,7 @@ anything not declared here. Run `brew list` for live state, not this file.
 |---|---|
 | mlx-lm | local chat server (:8080) |
 | cocoindex | semantic code indexing |
-| cocoindex-code (`ccc`) | cocoindex CLI |
+| cocoindex-code (`ccc`) | optional CLI only — daemon LaunchAgent removed 2026-07-22; Neo4j is SoT |
 | llm-tldr | code structure, call graphs |
 | z3-solver | formal verification (bridge) |
 
@@ -81,9 +81,9 @@ are cloned as needed.
 | llama-embed-server | :8081 | Qwen3 0.6B embeddings |
 | coderank-embed-server | :8082 | CodeRank code embeddings |
 | mlx-chat-daemon | :8080 | liquid LFM2.5 8B chat |
-| tldr-daemon | — | code structure auto-index (**producer** → Neo4j via sync-graph; cache not SoT) |
-| cocoindex-daemon | — | local semantic sock — **deprecated as sink**; Neo4j is SoT |
-| knowledge-engine | — | cocoindex embeds + sync-graph (structure/CALLS) → Neo4j hourly |
+| tldr-daemon | — | code structure auto-index (**producer**; local cache not SoT) |
+| cocoindex-daemon | — | **REMOVED** 2026-07-22 — do not re-enable as second sink |
+| knowledge-engine | — | on-change (fmt→neo4j-on-change→on-change-sync) + daily 03:15 catch-up sync-and-embed → Neo4j |
 | neo4j | :7687 | sole knowledge store — Homebrew `brew services` (not a nix LaunchAgent) |
 | mintmux | — | PTY multiplexer |
 | m5logd | — | M5 hardware logging |
