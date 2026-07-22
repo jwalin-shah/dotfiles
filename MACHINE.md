@@ -81,9 +81,9 @@ are cloned as needed.
 | llama-embed-server | :8081 | Qwen3 0.6B embeddings |
 | coderank-embed-server | :8082 | CodeRank code embeddings |
 | mlx-chat-daemon | :8080 | liquid LFM2.5 8B chat |
-| tldr-daemon | — | code structure auto-index |
-| cocoindex-daemon | — | semantic code indexing |
-| knowledge-engine | — | axiom/source/code → Neo4j pipeline |
+| tldr-daemon | — | code structure auto-index (**producer** → Neo4j via sync-graph; cache not SoT) |
+| cocoindex-daemon | — | local semantic sock — **deprecated as sink**; Neo4j is SoT |
+| knowledge-engine | — | cocoindex embeds + sync-graph (structure/CALLS) → Neo4j hourly |
 | neo4j | :7687 | sole knowledge store — Homebrew `brew services` (not a nix LaunchAgent) |
 | mintmux | — | PTY multiplexer |
 | m5logd | — | M5 hardware logging |

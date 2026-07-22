@@ -454,22 +454,27 @@
       };
     };
 
-    # knowledge-engine: incrementally index axioms, sources, and code chunks into Neo4j
+    # knowledge-engine: cocoindex embeds then sync-graph (structure + CALLS) into Neo4j.
+    # MUST use project .venv (has requests + cocoindex[neo4j]); global uv tool lacks deps.
+    # KeepAlive SuccessfulExit=true + ThrottleInterval=3600 → hourly re-run after success.
     "com.jwalinshah.knowledge-engine" = {
       serviceConfig = {
         ProgramArguments = [
           "${dotfilesBin}/daemon-wrapper"
-          "${uvBin}/cocoindex/bin/cocoindex"
-          "update"
-          "main.py"
+          "${home}/projects/knowledge-engine/scripts/sync-and-embed.sh"
         ];
-        KeepAlive.SuccessfulExit = false;
+        KeepAlive.SuccessfulExit = true;
         RunAtLoad = true;
         ThrottleInterval = 3600;
         WorkingDirectory = "${home}/projects/knowledge-engine";
         EnvironmentVariables = {
           HOME = home;
-          PATH = defaultPATH;
+          PATH = "${home}/projects/knowledge-engine/.venv/bin:${defaultPATH}";
+          DAEMON_NAME = "knowledge-engine";
+          DAEMON_PORT = "0";
+          DAEMON_DISPLAY_NAME = "knowledge-engine:neo4j";
+          DAEMON_TYPE = "foreground";
+          DAEMON_HEALTH_URL = "pid-only";
           NEO4J_URI = "neo4j://localhost:7687";
           NEO4J_USER = "neo4j";
           NEO4J_PASSWORD = "axiom-knowledge";
