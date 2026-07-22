@@ -1,0 +1,15 @@
+{
+  "enforce-bridge-workflow": {
+    "PreToolUse": [
+      {
+        "matcher": "edit_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.dotfiles/bin/enforce-bridge-workflow-antigravity.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

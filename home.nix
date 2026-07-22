@@ -86,7 +86,7 @@ in
       grep = "rg";
       find = "fd";
       cx = "command cx";
-      codex = "cx";
+      codex = "command codex";
       cur = "cursor";
       gha = "/opt/homebrew/bin/gh-axi";
       cda = "/opt/homebrew/bin/chrome-devtools-axi";
@@ -201,6 +201,9 @@ in
 
   home.file.".gemini/config/mcp_config.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.gemini/config/mcp_config.json";
+  home.file.".gemini/config/hooks.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.gemini/config/hooks.json";
+  home.file.".gemini/config/hooks.json".force = true;
   home.file.".gemini/settings.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.gemini/settings.json";
   home.file.".gemini/antigravity-cli/settings.json".source =

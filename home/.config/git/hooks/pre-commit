@@ -37,6 +37,28 @@ case "$repo_root" in
       fi
     done
     ;;
+  "$HOME/projects/orbit"|"$HOME/projects/bridge"|"$HOME/projects/portfolio")
+    # Task-marker backstop for enforce-bridge-workflow.sh (the PreToolUse
+    # hook wired into Claude Code / Codex / Cursor / antigravity-cli). If an
+    # editor bypassed that hook, don't let the change reach git history
+    # without an active task file either.
+    if [ ! -f "$repo_root/ORBIT_TASK.md" ] && [ ! -f "$repo_root/.bridge-task" ]; then
+      staged_code="$(git diff --cached --name-only --diff-filter=ACM | grep -vE '^(\.claude/|docs/agents/|wayfinder/|CLAUDE\.md|AGENTS\.md|\.gitignore|go\.mod|go\.sum|README\.md)')"
+      if [ -n "$staged_code" ]; then
+        echo "pre-commit: no active task file (ORBIT_TASK.md or .bridge-task) in $repo_root." >&2
+        echo "  Commit blocked for:" >&2
+        echo "$staged_code" | sed 's/^/    /' >&2
+        echo "  Run: bridge spawn <ticket.json> <brief.md>, or create a task file." >&2
+        exit 1
+      fi
+    fi
+    if [ "$repo_root" != "$HOME/projects/orbit" ] && [ -x "$HOME/projects/bridge/bridge" ]; then
+      if ! "$HOME/projects/bridge/bridge" verify-machine; then
+        echo "pre-commit: machine validation failed. Commit blocked." >&2
+        exit 1
+      fi
+    fi
+    ;;
 esac
 
 exit 0

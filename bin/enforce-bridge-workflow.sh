@@ -83,8 +83,11 @@ if [ -f "$PROJECT_DIR/wayfinder/map.md" ]; then
 fi
 
 # BLOCK: no task file, not an allowed file, in a gated project.
+# Exit 2 specifically: both Claude Code and Cursor treat exit 2 as a hard
+# block for PreToolUse hooks; any other nonzero code fails OPEN by default
+# (Cursor docs are explicit about this; verified Claude Code hooks match).
 echo "[bridge-workflow] BLOCKED: $REL_FILE in $PROJECT_DIR" >&2
 echo "  Direct edits to code files in this project require an active task file." >&2
 echo "  Run: bridge spawn <ticket.json> <brief.md>" >&2
 echo "  Or create: echo 'task: <description>' > $PROJECT_DIR/ORBIT_TASK.md" >&2
-exit 1
+exit 2

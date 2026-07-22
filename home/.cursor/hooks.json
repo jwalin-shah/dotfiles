@@ -6,7 +6,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/jwalinshah/.dotfiles/bin/enforce-bridge-workflow.sh"
+            "command": "/Users/jwalinshah/.dotfiles/bin/enforce-bridge-workflow.sh",
+            "failClosed": true
           }
         ]
       }
