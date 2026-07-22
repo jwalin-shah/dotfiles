@@ -17,7 +17,7 @@ llm-tldr impact <file-you-plan-to-change>
 aider-axi calls ~/projects/<repo>/<file> <function>
 
 # 3. OSS prior art
-githits-axi example "<problem you are solving>"
+githits example "<problem you are solving>"
 
 # 4. Test coverage
 aider-axi tests ~/projects/<repo>/<pkg>

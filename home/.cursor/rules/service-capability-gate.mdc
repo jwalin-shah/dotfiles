@@ -11,7 +11,7 @@ already provide (cocoindex, tldr, Neo4j, axioms, embed servers, bridge, …):
 ## Required before writing integration code
 
 1. **Docs** — fetch/read the project's official docs or examples for the feature.
-2. **githits** — `githits example "<problem>"` (or `githits-axi`) for prior art.
+2. **githits** — `githits example "<problem>"` for prior art.
 3. **Surface inventory** — list built-ins (CLI `--help`, `dir(package.ops)`, API).
 4. **Decision** — use native X, or justify the gap in a wayfinder note / ticket.
 5. **Prove** — a command that exits 0 showing the native path works (or the gap).
