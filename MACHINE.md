@@ -45,17 +45,18 @@ anything not declared here. Run `brew list` for live state, not this file.
 | openbmb/MiniCPM5-1B | fallback | edge reasoning |
 | Qwen3-Embedding-0.6B-Q8_0 (GGUF) | llama-server :8081 | general embeddings |
 | CodeRankEmbed-Q8_0 (GGUF) | llama-server :8082 | code embeddings (CocoIndex) |
-| urchade/gliner_* | bridge build_kg.py | entity extraction → LadybugDB |
+| urchade/gliner_* | bridge build_kg.py | entity extraction (legacy Ladybug path; frozen) |
 | microsoft/deberta-v3-* | bridge | zero-shot classification |
 | moonshine*, parakeet-rnnt | voice-engine-swift | dictation ASR |
 | kompress-v2-base | voice-engine-swift | prompt compression |
 
 ## Vector Databases + Knowledge Graphs
 
-| Store | Location | Size |
+| Store | Location | Size / role |
 |---|---|---|
-| Neo4j | `~/projects/knowledge-engine/cocoindex.db` | 1196 axioms, 34 sources, 3114 code chunks |
-| CocoIndex | `~/.local/share/cocoindex/` | per-project SQLite indices |
+| **Neo4j (sole store)** | `neo4j://localhost:7687` (Homebrew `brew services`) | Live: ~2183 Axiom, ~3153 Chunk, + File/CodeSymbol (parity in progress). Portfolio ADR: `portfolio/wayfinder/neo4j-sole-store.md` |
+| CocoIndex state | `~/projects/knowledge-engine/cocoindex.db` + `~/.local/share/cocoindex/` | Pipeline bookkeeping / per-project indices — **not** the knowledge graph |
+| LadybugDB (frozen) | `~/projects/bridge/.bridge/ladybug/bridge-knowledge` | ~6.75GB migration source only; writers disabled |
 | Headroom | `~/projects/voice-engine-swift/.headroom/` | voice history vectors |
 
 ## Minimum Repos (clone from `jwalin-shah` GitHub)
@@ -83,7 +84,7 @@ are cloned as needed.
 | tldr-daemon | — | code structure auto-index |
 | cocoindex-daemon | — | semantic code indexing |
 | knowledge-engine | — | axiom/source/code → Neo4j pipeline |
-| neo4j | :7687 | knowledge graph database (sole store; nix LaunchAgent) |
+| neo4j | :7687 | sole knowledge store — Homebrew `brew services` (not a nix LaunchAgent) |
 | mintmux | — | PTY multiplexer |
 | m5logd | — | M5 hardware logging |
 | voice-engine | — | dictation menubar app (KV-cache decoder; re-enabled 2026-07-21) |

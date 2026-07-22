@@ -403,8 +403,12 @@ if [[ ${#ARGS[@]} -gt 0 ]]; then
         projects+=("${PROJECTS_DIR}/${p}")
     done
 else
+    # Glob yields ~/projects/<name>/wayfinder/deps.json — project root is
+    # two levels up, not dirname (which is .../wayfinder and breaks the
+    # subsequent ${proj_dir}/wayfinder/deps.json lookup).
     for d in "${PROJECTS_DIR}"/*/wayfinder/deps.json; do
-        projects+=("$(dirname "$d")")
+        [[ -f "$d" ]] || continue
+        projects+=("$(dirname "$(dirname "$d")")")
     done
 fi
 
