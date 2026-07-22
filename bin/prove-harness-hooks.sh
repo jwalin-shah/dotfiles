@@ -108,10 +108,6 @@ else:
 PY
 fi
 
-if [[ ! -x "$ROOT/bin/audit-hook-ownership.sh" ]]; then
-  warn "HOOKS.md cites audit-hook-ownership.sh but it is missing — use prove-harness-hooks.sh"
-fi
-
 if [[ "$FAIL" -ne 0 ]]; then
   echo "prove-harness-hooks: FAILED" >&2
   exit 1
