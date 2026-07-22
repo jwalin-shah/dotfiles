@@ -1,4 +1,4 @@
-{ config, pkgs, user, ... }:
+{ config, pkgs, lib, user, ... }:
 
 let
   dotfiles = "${config.home.homeDirectory}/.dotfiles";
@@ -309,33 +309,39 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/karabiner/karabiner.json";
   imports = [
     ({ config, ... }: {
-      # Skills declared once in ./.agents/ and projected into all agent configs.
-      # force = true because these paths held hand-made symlinks predating nix.
-      # IMPORTANT: entries under ./.agents/ must be real files/dirs (skill content),
-      # never symlinks into ~/.claude/skills (that creates a closed loop with this rule).
-      # Exclude *.backup and anything else that is not a skill name.
+      # Skills live as REAL files under ./.agents/ and are COPIED into the nix
+      # store, then linked into each agent config. Do NOT use mkOutOfStoreSymlink
+      # here: a live link .agents ↔ ~/.claude/skills forms a closed loop the
+      # moment anything (or a prior hand-made symlink) points the wrong way.
+      # Rebuild required after editing a skill — that is intentional.
+      # Skip symlinks and *.backup so a polluted .agents/ cannot re-enter the loop.
       home.file = let
-        allEntries = builtins.attrNames (builtins.readDir ./.agents);
-        isSkill = name:
-          !(builtins.match ".*\\.backup" name != null)
-          && name != "plugin.json.backup";
-        skills = builtins.filter isSkill allEntries;
+        entries = builtins.readDir ./.agents;
+        isSkill = name: type:
+          type != "symlink"
+          && !(builtins.match ".*\\.backup" name != null);
+        skills = builtins.attrNames (lib.filterAttrs isSkill entries);
         skillDirs = [ ".claude" ".claude-a" ".claude-token" ".codex" ];
-        link = dir: name: {
-          name = "${dir}/skills/${name}";
-          value = {
-            source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/.agents/${name}";
-            force = true;
+        link = dir: name:
+          let typ = entries.${name};
+          in {
+            name = "${dir}/skills/${name}";
+            value = {
+              source = ./.agents + "/${name}";
+              force = true;
+              recursive = typ == "directory";
+            };
           };
-        };
-        # Cursor uses "skills-cursor" not "skills"
-        cursorLink = name: {
-          name = ".cursor/skills-cursor/${name}";
-          value = {
-            source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/.agents/${name}";
-            force = true;
+        cursorLink = name:
+          let typ = entries.${name};
+          in {
+            name = ".cursor/skills-cursor/${name}";
+            value = {
+              source = ./.agents + "/${name}";
+              force = true;
+              recursive = typ == "directory";
+            };
           };
-        };
       in builtins.listToAttrs
         ((builtins.concatMap (dir: map (link dir) skills) skillDirs) ++
          (map cursorLink skills));
