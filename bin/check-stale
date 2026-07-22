@@ -428,25 +428,33 @@ for proj_dir in "${projects[@]}"; do
         echo "─── ${proj_name} ───"
     fi
 
-    # Parse the deps.json and validate
+    # Parse the deps.json and validate.
+    # NOTE: emit lowercase "true"/"false" only — bash compares with == "true".
+    # json.dumps(str(True)) produced "True" and silently treated required deps
+    # as optional (fail-open).
     issues=$(python3 -c "
 import json, sys
 with open('${deps_file}') as f:
     d = json.load(f)
 deps = d.get('depends_on', {})
-issues = 0
+
+def req(obj):
+    v = obj.get('required', False)
+    if isinstance(v, bool):
+        return 'true' if v else 'false'
+    return 'true' if str(v).lower() in ('true', '1', 'yes') else 'false'
 
 # Check services
 for svc in deps.get('services', []):
-    print(f'SERVICE|{svc.get(\"name\",\"?\")}|{svc.get(\"uri\",\"\")}|{json.dumps(str(svc.get(\"required\",\"false\")))}|{svc.get(\"why\",\"\")}')
+    print(f'SERVICE|{svc.get(\"name\",\"?\")}|{svc.get(\"uri\",\"\")}|{req(svc)}|{svc.get(\"why\",\"\")}')
 
 # Check binaries
 for bin in deps.get('binaries', []):
-    print(f'BINARY|{bin.get(\"name\",\"?\")}|{json.dumps(str(bin.get(\"required\",\"false\")))}|{bin.get(\"why\",\"\")}')
+    print(f'BINARY|{bin.get(\"name\",\"?\")}|{req(bin)}|{bin.get(\"why\",\"\")}')
 
 # Check repos
 for repo in deps.get('repos', []):
-    print(f'REPO|{repo.get(\"name\",\"?\")}|{json.dumps(str(repo.get(\"required\",\"false\")))}|{repo.get(\"why\",\"\")}')
+    print(f'REPO|{repo.get(\"name\",\"?\")}|{req(repo)}|{repo.get(\"why\",\"\")}')
 
 # Check configs
 for cfg in deps.get('configs', []):
