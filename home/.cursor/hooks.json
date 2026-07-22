@@ -1,28 +1,17 @@
 {
+  "version": 1,
   "hooks": {
-    "PreToolUse": [
+    "preToolUse": [
       {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/Users/jwalinshah/.dotfiles/bin/enforce-bridge-workflow.sh",
-            "failClosed": true
-          }
-        ]
+        "matcher": "Write|Edit|Delete|TabWrite",
+        "command": "/Users/jwalinshah/.dotfiles/bin/enforce-bridge-workflow.sh",
+        "failClosed": true
       }
     ],
-    "PostToolUse": [
+    "afterFileEdit": [
       {
-        "matcher": "Edit|Write|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/Users/jwalinshah/projects/dotfiles/bin/fmt-on-edit.sh"
-          }
-        ]
+        "command": "/Users/jwalinshah/.dotfiles/bin/cursor-after-file-edit.sh"
       }
     ]
-  },
-  "version": 1
+  }
 }

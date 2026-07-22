@@ -193,11 +193,13 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.cursor/mcp.json";
   home.file.".cursor/hooks.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.cursor/hooks.json";
+  home.file.".cursor/hooks.json".force = true;
   home.file.".cursor/cli-config.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.cursor/cli-config.json";
   home.file.".cursor/cli-config.json".force = true;
   home.file.".cursor/AGENTS.md".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/GLOBAL.md";
+  home.file.".cursor/AGENTS.md".force = true;
   home.file.".cursor/rules".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.cursor/rules";
   home.file.".cursor/rules".force = true;

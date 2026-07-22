@@ -1,93 +1,73 @@
 #!/usr/bin/env bash
-# enforce-bridge-workflow.sh — PreToolUse hook for all agents.
+# enforce-bridge-workflow.sh — preToolUse / PreToolUse for agents.
 # Blocks direct file writes in orbit/bridge/portfolio unless a task file exists.
-# This forces every change through the bridge spawn pipeline.
-#
-# Deployed to: Claude Code, Codex, Cursor hooks
-# Source: ~/.dotfiles/bin/enforce-bridge-workflow.sh
+set -u
 
-set -euo pipefail
+export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
 
-# ── Config ────────────────────────────────────────────────────────────────
-
-# Projects that require bridge spawn for any file change.
 GATED_PROJECTS=("orbit" "bridge" "portfolio")
+TASK_MARKERS=("ORBIT_TASK.md" ".bridge-task")
+ALWAYS_ALLOWED=(".claude/" "docs/agents/" "wayfinder/" "CLAUDE.md" "AGENTS.md" ".gitignore" "go.mod" "go.sum" "README.md" "OPERATING_MODEL.md")
 
-# Files that signal an active, valid workflow.
-TASK_MARKERS=("ORBIT_TASK.md" "ORBIT_TASK.md" ".bridge-task")
+INPUT=$(cat || true)
 
-# Files that are always allowed (config, docs, wayfinder maps).
-ALWAYS_ALLOWED=(".claude/" "docs/agents/" "wayfinder/" "CLAUDE.md" "AGENTS.md" ".gitignore" "go.mod" "go.sum" "README.md")
+FILE=$(INPUT="$INPUT" python3 - <<'PY' 2>/dev/null || true
+import json, os, sys
+raw = os.environ.get("INPUT", "")
+if not raw.strip():
+    sys.exit(0)
+try:
+    d = json.loads(raw)
+except Exception:
+    sys.exit(0)
+ti = d.get("tool_input") or {}
+for key in ("file_path", "path"):
+    if isinstance(ti, dict) and ti.get(key):
+        print(ti[key]); sys.exit(0)
+if d.get("file_path"):
+    print(d["file_path"])
+PY
+)
 
-# ── Main ──────────────────────────────────────────────────────────────────
-
-# Get the file being edited from the hook input (JSON on stdin).
-INPUT=$(cat)
-FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
-
-if [ -z "$FILE" ]; then
-  exit 0  # No file path — allow (not a file edit).
+if [ -z "${FILE:-}" ]; then
+  exit 0
 fi
 
-# Resolve to absolute path. Handle files that don't exist yet (new file creation).
-# realpath is not available on all macOS versions; use a Python one-liner as fallback.
-if command -v realpath &>/dev/null; then
-  ABS_FILE=$(realpath "$FILE" 2>/dev/null) || ABS_FILE=""
-elif command -v python3 &>/dev/null; then
-  ABS_FILE=$(python3 -c "import os; print(os.path.realpath('$FILE'))" 2>/dev/null) || ABS_FILE=""
-else
-  ABS_FILE=""
-fi
-# If resolution failed (e.g. parent dir doesn't exist), check by prefix match on the raw path.
-if [ -z "$ABS_FILE" ]; then
-  ABS_FILE="$FILE"
-fi
+ABS_FILE=$(python3 -c "import os,sys; print(os.path.realpath(sys.argv[1]))" "$FILE" 2>/dev/null || echo "$FILE")
 
-# Check if this file is in a gated project.
 GATED=false
 PROJECT_DIR=""
 for proj in "${GATED_PROJECTS[@]}"; do
   PROJ_PATH="$HOME/projects/$proj"
-  if [[ "$ABS_FILE" == "$PROJ_PATH"* ]]; then
-    GATED=true
-    PROJECT_DIR="$PROJ_PATH"
-    break
-  fi
+  case "$ABS_FILE" in
+    "$PROJ_PATH"/*|"$PROJ_PATH")
+      GATED=true
+      PROJECT_DIR="$PROJ_PATH"
+      break
+      ;;
+  esac
 done
 
 if [ "$GATED" = false ]; then
-  exit 0  # Not in a gated project — allow.
+  exit 0
 fi
 
-# Check if this is an always-allowed file.
-REL_FILE="${ABS_FILE#$PROJECT_DIR/}"
+REL_FILE="${ABS_FILE#"$PROJECT_DIR"/}"
 for allowed in "${ALWAYS_ALLOWED[@]}"; do
-  if [[ "$REL_FILE" == "$allowed"* ]]; then
-    exit 0  # Always-allowed file — allow.
-  fi
+  case "$REL_FILE" in
+    "$allowed"*) exit 0 ;;
+  esac
 done
 
-# Check for an active task marker.
 for marker in "${TASK_MARKERS[@]}"; do
   if [ -f "$PROJECT_DIR/$marker" ]; then
-    exit 0  # Active task file exists — allow.
+    exit 0
   fi
 done
 
-# Check for wayfinder map (read-only orientation, not write approval).
-if [ -f "$PROJECT_DIR/wayfinder/map.md" ]; then
-  echo "[bridge-workflow] WARNING: No active task file in $PROJECT_DIR." >&2
-  echo "  The wayfinder map exists but no ORBIT_TASK.md or .bridge-task is active." >&2
-  echo "  Changes to $REL_FILE should be routed through bridge spawn." >&2
-  echo "  Create a task file or spawn through bridge: bridge spawn <ticket> <brief>" >&2
-fi
-
-# BLOCK: no task file, not an allowed file, in a gated project.
-# Exit 2 specifically: both Claude Code and Cursor treat exit 2 as a hard
-# block for PreToolUse hooks; any other nonzero code fails OPEN by default
-# (Cursor docs are explicit about this; verified Claude Code hooks match).
+MSG="Direct edits to code files in $PROJECT_DIR require ORBIT_TASK.md or bridge spawn. Blocked: $REL_FILE"
 echo "[bridge-workflow] BLOCKED: $REL_FILE in $PROJECT_DIR" >&2
-echo "  Direct edits to code files in this project require an active task file." >&2
-echo "  Run: bridge spawn <ticket.json> <brief.md>" >&2
-echo "  Or create: echo 'task: <description>' > $PROJECT_DIR/ORBIT_TASK.md" >&2
+echo "  $MSG" >&2
+# Cursor preToolUse: JSON deny on stdout; exit 2 also blocks (Claude + Cursor).
+python3 -c "import json; print(json.dumps({'permission':'deny','user_message':'''$MSG''','agent_message':'''$MSG'''}))" 2>/dev/null || true
 exit 2

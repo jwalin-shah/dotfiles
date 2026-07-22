@@ -27,9 +27,26 @@ Add new entries to `bin/fmt-on-edit.sh` to support more languages.
 | `ca` (token) | `~/.claude-token/settings.json` | `PostToolUse` | ✅ wired |
 | `agy` | `~/.gemini/settings.json` | `PostToolUse` | ✅ wired |
 | `cx` (Codex) | `~/.codex/hooks.json` | `post-edit` | ✅ wired |
-| `cua` (Cursor Agent) | `~/.cursor/hooks.json` | `PostToolUse` | ✅ wired |
+| `cua` (Cursor Agent) | `~/.cursor/hooks.json` | **`afterFileEdit`** + **`preToolUse`** | ✅ fixed 2026-07-22 |
 
 OpenCode and Kilo removed from machine (Jul 2026). Not in home.nix.
+
+### Cursor ≠ Claude (do not copy keys)
+
+Cursor schema uses camelCase events (`afterFileEdit`, `preToolUse`, …).
+Claude Code uses `PostToolUse` / `PreToolUse`. Copying Claude keys into
+`~/.cursor/hooks.json` is a **silent no-op** — fmt and enforce never run.
+
+Prove:
+
+```bash
+~/projects/dotfiles/bin/prove-cursor-hooks.sh
+```
+
+Cursor `afterFileEdit` sends `{ "file_path": "..." }` on stdin. Wrapper:
+`bin/cursor-after-file-edit.sh` → `fmt-on-edit.sh`. After editing
+`home/.cursor/hooks.json`, run `./rebuild.sh` so HM reasserts
+`force = true` out-of-store links for hooks + AGENTS.md.
 
 ## Hook limitation: agent-level only
 

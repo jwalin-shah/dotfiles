@@ -6,3 +6,4 @@ result-*
 __pycache__/
 /.cocoindex_code/
 .tldr/cache/
+ORBIT_TASK.md
