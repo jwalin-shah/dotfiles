@@ -3,27 +3,62 @@ set -euo pipefail
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 ln -sfn "$DIR" ~/.dotfiles
 
-# Guard: .agents/ must hold real skill content, never symlinks into agent skill dirs
-# (that recreates the closed loop home-manager projects outward from .agents/).
+# Guard: .agents/ must hold real skill content, never symlinks.
 if [[ -d "$DIR/.agents" ]]; then
   while IFS= read -r -d '' entry; do
     if [[ -L "$entry" ]]; then
       echo "ERROR: $entry is a symlink — refusing rebuild." >&2
-      echo "  Skills under .agents/ must be real files/dirs (source of truth)." >&2
       echo "  Fix: git checkout HEAD -- .agents/" >&2
       exit 1
     fi
   done < <(/usr/bin/find "$DIR/.agents" -mindepth 1 -maxdepth 1 -print0)
   if /usr/bin/find "$DIR/.agents" -type l | grep -q .; then
-    echo "ERROR: symlink(s) inside .agents/ — refusing rebuild (HM would corrupt source)." >&2
+    echo "ERROR: symlink(s) inside .agents/ — refusing rebuild." >&2
     /usr/bin/find "$DIR/.agents" -type l -print >&2
     exit 1
   fi
 fi
 
-# CRITICAL: remove prior ~/.*/skills projections BEFORE home-manager activates.
-# If those paths are still out-of-store symlinks into .agents/, HM force+recursive
-# follows them and writes store links INTO .agents/ (corrupting the source).
+# Ensure skill sources exist (flake copies ./.agents into the store — must be tracked + present).
+for req in axi/SKILL.md cocoindex/SKILL.md cocoindex-code/SKILL.md plugin.json; do
+  if [[ ! -e "$DIR/.agents/$req" ]]; then
+    echo "ERROR: missing $DIR/.agents/$req — refusing rebuild." >&2
+    echo "  Fix: git checkout HEAD -- .agents/" >&2
+    exit 1
+  fi
+done
+
+# Remove prior skill projections WITHOUT following links into .agents/.
+# If ~/.claude/skills/axi → .agents/axi, a naive rm -rf would wipe the source.
+clear_skill_target() {
+  local target="$1"
+  if [[ -L "$target" ]]; then
+    local dest
+    dest=$(readlink "$target" || true)
+    # Absolute or relative — resolve
+    local resolved
+    resolved=$(realpath "$target" 2>/dev/null || true)
+    if [[ -n "$resolved" && "$resolved" == "$DIR/.agents"* ]]; then
+      echo "==> unlinking $target (-> .agents; link only, keep source)"
+      /bin/rm -f "$target"
+      return
+    fi
+    echo "==> unlinking $target"
+    /bin/rm -f "$target"
+    return
+  fi
+  if [[ -e "$target" ]]; then
+    local resolved
+    resolved=$(realpath "$target" 2>/dev/null || true)
+    if [[ -n "$resolved" && "$resolved" == "$DIR/.agents"* ]]; then
+      echo "ERROR: $target resolves into .agents but is not a symlink — refuse to delete." >&2
+      exit 1
+    fi
+    echo "==> clearing stale skill target $target"
+    /bin/rm -rf "$target"
+  fi
+}
+
 skill_targets=(
   .claude/skills
   .claude-a/skills
@@ -33,11 +68,7 @@ skill_targets=(
 )
 for base in "${skill_targets[@]}"; do
   for name in axi cocoindex cocoindex-code plugin.json; do
-    target="$HOME/$base/$name"
-    if [[ -L "$target" || -e "$target" ]]; then
-      echo "==> clearing stale skill target $target"
-      /bin/rm -rf "$target"
-    fi
+    clear_skill_target "$HOME/$base/$name"
   done
 done
 
@@ -61,14 +92,17 @@ for svc in com.jwalinshah.tldr-daemon com.jwalinshah.cocoindex-daemon; do
   launchctl kickstart -k "gui/$(id -u)/org.nixos.$svc" 2>/dev/null || true
 done
 
-# Prove skills are readable (no symlink loop) AND .agents source stayed real files
+# Prove skills readable AND .agents source stayed real files
 if ! head -1 "$HOME/.claude/skills/axi/SKILL.md" >/dev/null 2>&1; then
-  echo "ERROR: ~/.claude/skills/axi/SKILL.md unreadable after rebuild (symlink loop?)" >&2
+  echo "ERROR: ~/.claude/skills/axi/SKILL.md unreadable after rebuild." >&2
   exit 1
 fi
 if [[ -L "$DIR/.agents/axi/SKILL.md" || -L "$DIR/.agents/plugin.json" ]]; then
   echo "ERROR: .agents/ source was corrupted into store symlinks during rebuild." >&2
-  echo "  HM followed a stale ~/.claude/skills → .agents link. Source restored? Refuse." >&2
+  exit 1
+fi
+if [[ ! -f "$DIR/.agents/axi/SKILL.md" ]]; then
+  echo "ERROR: .agents/axi/SKILL.md missing after rebuild." >&2
   exit 1
 fi
 
