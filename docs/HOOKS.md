@@ -1,17 +1,20 @@
 # Hook Configuration Reference
 
 Cross-harness SoT: `portfolio/wayfinder/harness-activation-matrix-2026-07-22.md`.
+Launcher inventory: `portfolio/wayfinder/launcher-inventory-2026-07-23.md`.
 Prove all harnesses: `bin/prove-harness-hooks.sh`.
-
-All agent hooks route through `dotfiles/bin/fmt-on-edit.sh`. That script is
-the single extension point — add a new formatter there, all agents pick it up.
+Prove launchers/LaunchAgents: `bin/prove-launchers.sh`.
+Daily machine gate: LaunchAgent `org.nixos.com.jwalinshah.verify-machine` (09:00).
 
 ## What hooks do
 
-After any file edit by an agent, the hook runs `fmt-on-edit.sh` with the
-edited file path. The script dispatches by extension, then fans in Neo4j
-on-change sync via `neo4j-on-change.sh` → `knowledge-engine/scripts/on-change-sync.sh`
-(async, factory repos only).
+**PreToolUse / pre-edit / preToolUse:** `enforce-bridge-workflow.sh` (+ Claude/Codex
+`check-stale-gate.py`). Deny = exit **2** (exit 1 is treated as allow by vendors).
+
+**PostToolUse / afterFileEdit / post-edit:**
+1. `fmt-on-edit.sh` — format by extension, then `neo4j-on-change.sh` → KE sync
+2. Claude only: `check-on-edit.sh` — ruff/tsc/go vet; **stdout must stay empty**
+   (diagnostics on stderr) or Claude reports "Hook JSON output validation failed"
 
 | Extension | Formatter | Command |
 |---|---|---|
@@ -25,11 +28,11 @@ Add new entries to `bin/fmt-on-edit.sh` to support more languages.
 
 | Agent | Config file | Hook key | Status |
 |---|---|---|---|
-| `ca` / `ct` | `~/.claude/settings.json` | `PostToolUse` | ✅ wired |
-| `ca` (account A) | `~/.claude-a/settings.json` | `PostToolUse` | ✅ wired |
-| `ca` (token) | `~/.claude-token/settings.json` | `PostToolUse` | ✅ wired |
-| `agy` | `~/.gemini/config/hooks.json` | `PreToolUse` (`edit_file`) | ✅ gate via shared hooks.json; settings.json = permissions only |
-| `cx` (Codex) | `~/.codex/hooks.json` | `post-edit` | ✅ wired |
+| `ca` / `ct` | `~/.claude/settings.json` | `PreToolUse` + `PostToolUse` | ✅ enforce + check-stale + fmt + check-on-edit |
+| `ca` (account A) | `~/.claude-a/settings.json` | same (shared settings) | ✅ |
+| `ca` (token) | `~/.claude-token/settings.json` | same (shared settings) | ✅ |
+| `agy` | `~/.gemini/config/hooks.json` | `PreToolUse` (`edit_file`) | ✅ gate; settings.json = permissions only |
+| `cx` (Codex) | `~/.codex/hooks.json` | `pre-edit` / `post-edit` | ✅ file gate; **shell bypass WAIVER** |
 | `cua` (Cursor Agent) | `~/.cursor/hooks.json` | **`afterFileEdit`** + **`preToolUse`** | ✅ fixed 2026-07-22 |
 
 OpenCode and Kilo removed from machine (Jul 2026). Not in home.nix.
