@@ -28,7 +28,7 @@ Add new entries to `bin/fmt-on-edit.sh` to support more languages.
 | `ca` / `ct` | `~/.claude/settings.json` | `PostToolUse` | ✅ wired |
 | `ca` (account A) | `~/.claude-a/settings.json` | `PostToolUse` | ✅ wired |
 | `ca` (token) | `~/.claude-token/settings.json` | `PostToolUse` | ✅ wired |
-| `agy` | `~/.gemini/settings.json` | `PostToolUse` | ✅ wired |
+| `agy` | `~/.gemini/config/hooks.json` | `PreToolUse` (`edit_file`) | ✅ gate via shared hooks.json; settings.json = permissions only |
 | `cx` (Codex) | `~/.codex/hooks.json` | `post-edit` | ✅ wired |
 | `cua` (Cursor Agent) | `~/.cursor/hooks.json` | **`afterFileEdit`** + **`preToolUse`** | ✅ fixed 2026-07-22 |
 
@@ -65,7 +65,7 @@ no Write-tool bypass via shell.
 | Cursor | `preToolUse` | `Write\|Edit\|Delete\|TabWrite\|Shell`; `failClosed: false` in this worker (hook runner cannot spawn shell — `failClosed:true` + crash = total lockout). Do **not** use `beforeShellExecution` here until Cursor can exec hooks without nesting failure. |
 | Claude | `PreToolUse` | `Edit\|Write\|Bash` |
 | Codex | `pre-edit` | file edits only today — **shell bypass still open on Codex** until a shell pre-hook exists |
-| Gemini/agy | `PreToolUse` | `edit_file` via `enforce-bridge-workflow-antigravity.sh` |
+| Gemini/agy | `PreToolUse` | shared `~/.gemini/config/hooks.json` (`edit_file`) → `enforce-bridge-workflow.sh`; `settings.json` has no hooks key by design |
 
 Prove: `bin/prove-bridge-workflow-gate.sh`
 

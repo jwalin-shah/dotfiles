@@ -124,16 +124,32 @@ print("OK: gemini-settings: PreToolUse enforce + PostToolUse fmt")
 PY
 fi
 
-if [[ -f "${HOME}/.gemini/antigravity-cli/settings.json" ]]; then
-  python3 - <<'PY'
-import json
+# agy hooks live in ~/.gemini/config/hooks.json (shared), NOT antigravity-cli/settings.json
+# (settings is model/permissions only — product contract; changelog 2026 moved /hooks writes here).
+if [[ -f "${HOME}/.gemini/config/hooks.json" ]]; then
+  python3 - <<'PY' || FAIL=1
+import json, sys
 from pathlib import Path
-d = json.loads((Path.home()/".gemini"/"antigravity-cli"/"settings.json").read_text())
-if d.get("hooks"):
-    print("OK: antigravity-cli has hooks object")
-else:
-    print("WARN: antigravity-cli settings have no hooks — do not claim ✅ wired", file=__import__("sys").stderr)
+path = Path.home()/".gemini"/"config"/"hooks.json"
+data = json.loads(path.read_text())
+blob = json.dumps(data)
+if "PreToolUse" not in blob or "enforce-bridge" not in blob:
+    print("FAIL: gemini config/hooks.json missing PreToolUse enforce for agy", file=sys.stderr)
+    raise SystemExit(1)
+if "edit_file" not in blob and "Edit" not in blob:
+    print("WARN: agy hooks.json has enforce but no edit_file/Edit matcher", file=sys.stderr)
+print("OK: agy gate via ~/.gemini/config/hooks.json (PreToolUse enforce)")
+# settings.json intentionally has no hooks key
+settings = Path.home()/".gemini"/"antigravity-cli"/"settings.json"
+if settings.exists():
+    d = json.loads(settings.read_text())
+    if d.get("hooks"):
+        print("WARN: antigravity-cli/settings.json unexpectedly has hooks (split brain?)", file=sys.stderr)
+    else:
+        print("OK: antigravity-cli/settings.json is permissions-only (hooks elsewhere — correct)")
 PY
+else
+  fail "missing ~/.gemini/config/hooks.json (agy gate path)"
 fi
 
 # githits auth — capability gate fuel (fail closed)
