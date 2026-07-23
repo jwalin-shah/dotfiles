@@ -71,6 +71,7 @@ PROVE_OK=1
   ~/projects/dotfiles/bin/prove-harness-hooks.sh
   ~/projects/dotfiles/bin/prove-launchers.sh
   ~/projects/bridge/scripts/prove-neo4j-packet.sh
+  ~/projects/bridge/scripts/prove-worktree-lease.sh
   bridge verify-machine
   orbit status | grep 'bridge health' || true
 } >>"$LOG" 2>&1 || PROVE_OK=0

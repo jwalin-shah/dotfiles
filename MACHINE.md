@@ -87,7 +87,7 @@ are cloned as needed.
 | bridge-cdp-quota | — | CDP scrape → `~/.bridge/cdp-cache.json` every 6h |
 | **verify-machine** | — | daily 09:00 `bridge verify-machine` + `prove-launchers.sh` |
 | **bridge-serve** | :9100 / :9101 | Orbit HTTP + gRPC surface (`org.nixos.com.jwalinshah.bridge-serve`, KeepAlive). Prove: `prove-launchers.sh`, `orbit status` |
-| **overnight-harden** | — | every 15m prove pack + one queued spawn (`overnight-harden-tick.sh`) |
+| **overnight-harden** | — | every 15m prove+spawn (LaunchAgent); Cursor Layer A continuous ~90s while chat awake |
 | neo4j | :7687 | sole knowledge store — Homebrew `brew services` (not a nix LaunchAgent) |
 | mintmux | — | PTY multiplexer |
 | m5logd | — | M5 hardware logging |
