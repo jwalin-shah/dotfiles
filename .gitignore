@@ -7,3 +7,9 @@ __pycache__/
 /.cocoindex_code/
 .tldr/cache/
 ORBIT_TASK.md
+*.pem
+credentials.json
+*_rsa
+.netrc
+.env.*
+.env
