@@ -172,7 +172,7 @@ def extract_shell(d: dict) -> tuple[str | None, str | None]:
 
 def is_mutation(cmd: str) -> bool:
     cleaned = re.sub(r"\d*>&\d+", "", cmd)
-    cleaned = re.sub(r"&>?/dev/null", "", cleaned)
+    cleaned = re.sub(r"(?:\d*|&)>>?\s*/dev/null", "", cleaned)
     if re.search(r"(^|[^-=])>(?!&)", cleaned):
         return True
     if "<<" in cmd and re.search(r">>?\s*\S+", cmd):

@@ -589,6 +589,46 @@
       };
     };
 
+    # verify-machine: daily machine health (hooks + daemons + config).
+    # Closes the gap where verify-machine only ran on rebuild/pre-commit.
+    # Log: ~/.local/share/orbit/verify-machine.log
+    "com.jwalinshah.verify-machine" = {
+      serviceConfig = {
+        ProgramArguments = [
+          "/bin/bash"
+          "-c"
+          ''
+            export PATH="${home}/.local/bin:${home}/bin:${dotfilesBin}:${brewBin}:$PATH"
+            mkdir -p "${home}/.local/share/orbit"
+            {
+              echo "=== $(date -u +%Y-%m-%dT%H:%M:%SZ) verify-machine ==="
+              if command -v bridge >/dev/null 2>&1; then
+                bridge verify-machine
+              else
+                echo "ERROR: bridge not on PATH" >&2
+                exit 1
+              fi
+              "${home}/projects/dotfiles/bin/prove-launchers.sh" || exit 1
+            } >>"${home}/.local/share/orbit/verify-machine.log" 2>&1
+          ''
+        ];
+        RunAtLoad = false;
+        StartCalendarInterval = [
+          {
+            Hour = 9;
+            Minute = 0;
+          }
+        ];
+        WorkingDirectory = home;
+        EnvironmentVariables = {
+          HOME = home;
+          PATH = defaultPATH;
+        };
+        StandardOutPath = "${home}/.local/share/orbit/verify-machine-launchd.log";
+        StandardErrorPath = "${home}/.local/share/orbit/verify-machine-launchd.log";
+      };
+    };
+
     # ladybug-pipeline: FROZEN 2026-07-21 — Neo4j is the sole knowledge store
     # (Portfolio ADR neo4j-sole-store). LadybugDB file retained read-only as a
     # migration source until knowledge-engine parity is proven. Do not re-enable

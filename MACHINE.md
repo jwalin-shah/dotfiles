@@ -83,15 +83,20 @@ are cloned as needed.
 | mlx-chat-daemon | :8080 | liquid LFM2.5 8B chat |
 | tldr-daemon | — | code structure auto-index (**producer**; local cache not SoT) |
 | cocoindex-daemon | — | **REMOVED** 2026-07-22 — do not re-enable as second sink |
-| knowledge-engine | — | on-change (fmt→neo4j-on-change→on-change-sync) + daily 03:15 catch-up sync-and-embed → Neo4j |
-| bridge-cdp-quota | — | CDP scrape → `~/.bridge/cdp-cache.json` every 6h (`ensure-cdp-browser` + `cdp-scrape-quota`) |
+| knowledge-engine | — | on-change + daily 03:15 catch-up → Neo4j |
+| bridge-cdp-quota | — | CDP scrape → `~/.bridge/cdp-cache.json` every 6h |
+| **verify-machine** | — | daily 09:00 `bridge verify-machine` + `prove-launchers.sh` |
 | neo4j | :7687 | sole knowledge store — Homebrew `brew services` (not a nix LaunchAgent) |
 | mintmux | — | PTY multiplexer |
 | m5logd | — | M5 hardware logging |
-| voice-engine | — | dictation menubar app (KV-cache decoder; re-enabled 2026-07-21) |
+| voice-engine | — | dictation menubar app |
+| inbox-server | :9849 | unified inbox API |
 
 Ladybug pipeline LaunchAgent is **frozen** — Neo4j is the sole knowledge store.
 The LadybugDB file under `bridge/.bridge/ladybug/` is retained read-only for migration.
+
+Canonical inventory: `portfolio/wayfinder/launcher-inventory-2026-07-23.md`
+Prove: `dotfiles/bin/prove-launchers.sh`
 
 ## Agent Configs
 
@@ -102,17 +107,15 @@ The LadybugDB file under `bridge/.bridge/ladybug/` is retained read-only for mig
 | codex | `~/.codex/config.toml`, `hooks.json`, `rules/` | nix symlink |
 | cursor-agent | `~/.cursor/cli-config.json`, `hooks.json`, `mcp.json` | nix symlink (force) |
 | agy (Gemini) | `~/.gemini/antigravity-cli/settings.json`, `settings.json` | nix symlink (force) |
-| cmd (CommandCode) | self-managed | not in dotfiles |
+| cmd (CommandCode) | self-managed | **WAIVER** — not in dotfiles hooks |
 
-## Not yet in nix (GAPs)
+## Not yet in nix (GAPs / WAIVERS)
 
-- `~/.local/bin/jw` — FirstMate binary. Dead project, binary still on PATH.
-- `~/.local/bin/jw-heal` — dead health checker. LaunchAgent removed Jul 18.
+- `~/bin/chrome-ai-tools`, `chrome-main`, `chrome-third` — unmanaged wrappers (WAIVER).
+- `cmd` — Homebrew npm tool; no mutation gate (WAIVER).
+- `com.jwalinshah.reconcile-outcomes` — hand LaunchAgent, not in configuration.nix (investigate).
 
-*Last updated: July 18, 2026 — merged MODELS.md, removed dead references
-(@kilocode/cli, ctx7, firstmate, treehouse, jw-desk, research-bridge, cognee),
-updated npm list, added ML models, added minimum repos.*
-
+*Last updated: 2026-07-23 — launcher lock-in: verify-machine LaunchAgent, inventory, prove-launchers.*
 ## Cross-Repo Dependency Manifest (deps.json) & Neo4j
 
 These are tracked by each project's `wayfinder/deps.json` (validated by

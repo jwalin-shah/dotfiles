@@ -9,7 +9,7 @@
     ],
     "defaultMode": "default"
   },
-  "model": "sonnet",
+  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
@@ -38,6 +38,15 @@
           {
             "type": "command",
             "command": "/Users/jwalinshah/.dotfiles/bin/fmt-on-edit.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/jwalinshah/.dotfiles/bin/check-on-edit.sh"
           }
         ]
       }

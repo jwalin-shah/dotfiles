@@ -37,11 +37,11 @@ case "$repo_root" in
       fi
     done
     ;;
-  "$HOME/projects/orbit"|"$HOME/projects/bridge"|"$HOME/projects/portfolio")
+  "$HOME/projects/orbit"|"$HOME/projects/bridge"|"$HOME/projects/portfolio"|"$HOME/projects/dotfiles"|"$HOME/projects/knowledge-engine"|"$HOME/projects/axioms"|"$HOME/projects/mintmux")
     # Task-marker backstop for enforce-bridge-workflow.sh (the PreToolUse
     # hook wired into Claude Code / Codex / Cursor / antigravity-cli). If an
-    # editor bypassed that hook, don't let the change reach git history
-    # without an active task file either.
+    # editor bypassed that hook (Codex shell gap), don't let the change reach
+    # git history without an active task file either.
     if [ ! -f "$repo_root/ORBIT_TASK.md" ] && [ ! -f "$repo_root/.bridge-task" ]; then
       staged_code="$(git diff --cached --name-only --diff-filter=ACM | grep -vE '^(\.claude/|docs/agents/|wayfinder/|CLAUDE\.md|AGENTS\.md|\.gitignore|go\.mod|go\.sum|README\.md)')"
       if [ -n "$staged_code" ]; then
@@ -52,10 +52,12 @@ case "$repo_root" in
         exit 1
       fi
     fi
-    if [ "$repo_root" != "$HOME/projects/orbit" ] && [ -x "$HOME/projects/bridge/bridge" ]; then
-      if ! "$HOME/projects/bridge/bridge" verify-machine; then
-        echo "pre-commit: machine validation failed. Commit blocked." >&2
-        exit 1
+    if [ "$repo_root" = "$HOME/projects/bridge" ] || [ "$repo_root" = "$HOME/projects/portfolio" ]; then
+      if [ -x "$HOME/projects/bridge/bridge" ]; then
+        if ! "$HOME/projects/bridge/bridge" verify-machine; then
+          echo "pre-commit: machine validation failed. Commit blocked." >&2
+          exit 1
+        fi
       fi
     fi
     ;;

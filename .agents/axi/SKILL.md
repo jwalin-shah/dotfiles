@@ -1,41 +1,68 @@
 ---
 name: axi
-description: Mandatory pre-code gates — blast radius, call graph, prior art, test coverage. Run BEFORE writing any code in orbit/bridge.
+description: "Pre-code gates: assess blast radius, call graph, prior art, then decide on worktree isolation. Run BEFORE any code change."
 ---
 
-# AXI — Pre-Code Invariant Gates
+# Axioms — Pre-Code Invariant Gates
 
-These MUST run before any Go file is touched in orbit or bridge. The hook enforces this mechanically.
+These gates run before every code change. The hook enforces this mechanically.
+The purpose: verify before you mutate. Know what you'll break before you touch it.
 
-## Process
+## Tools (all verified installed)
 
-```bash
-# 1. Blast radius
-llm-tldr impact <file-you-plan-to-change>
+| Gate | Tool | Command |
+|------|------|---------|
+| Blast radius | `llm-tldr impact` | `llm-tldr impact <function> <dir>` — who calls this? |
+| Call graph | `llm-tldr calls` | `llm-tldr calls <dir>` — cross-file call graph |
+| Prior art | `githits example` | `githits example "<problem>" --lang <lang>` — OSS implementations |
+| Diagnostics | `llm-tldr diagnostics` | `llm-tldr diagnostics <file>` — type/lint errors |
+| Diff surface | `git diff` | `git diff --stat` or `git diff HEAD` |
 
-# 2. Call graph
-aider-axi calls ~/projects/<repo>/<file> <function>
+## The full workflow
 
-# 3. OSS prior art
-githits example "<problem you are solving>"
+```
+1. ASSESS
+   └─ Run axiom gates:
+      llm-tldr impact <function> <dir>
+      llm-tldr calls <dir>
+      githits example "<problem>"
+      llm-tldr diagnostics <file>
 
-# 4. Test coverage
-aider-axi tests ~/projects/<repo>/<pkg>
+2. DECIDE
+   └─ Wide blast radius (>3 files touched)?
+      Deep call graph (many callers)?
+      Novel code (no prior art found)?
+      → YES to any → USE WORKTREE ISOLATION
+      → NO to all → edit in-place is fine
 
-# 5. Compact output
-rtk err <command>
-rtk diff "git diff HEAD"
+3. ISOLATE (if needed)
+   └─ Create isolated worktree:
+      worktree create <feature-name>
+      # Or use the built-in EnterWorktree tool
+
+4. IMPLEMENT
+   └─ Write the change in the worktree
+   └─ check-on-edit.sh runs type/lint checks automatically
+
+5. VERIFY
+   └─ Run tests: cargo test / npx vitest / pytest / go test
+   └─ Run type checker: cargo check / npx tsc / pyright / go vet
+   └─ Re-run blast radius: llm-tldr impact <function> <dir>
+
+6. LAND
+   └─ Commit, push, PR
+   └─ Clean up: worktree remove <feature-name>
+   └─ Or: ExitWorktree (keep or remove worktree)
 ```
 
 ## When to run
 
-- Before writing any Go code in orbit or bridge
-- Before changing any file that has invariants attached
-- Always — enforced mechanically, not by choice
+- Before any code change across any project (not just orbit/bridge)
+- The hook enforces this — you shouldn't have to remember
 
 ## Integration
 
-This skill wraps Matt Pocock's `implement` skill. The flow:
+This wraps the pre-code assessment phase. The flow is:
 ```
-/mattpocock-skills:implement → /axi → write code → P0 gate → /mattpocock-skills:mp-code-review
+/axi → /mattpocock-skills:implement → write code → verify → /mattpocock-skills:mp-code-review
 ```

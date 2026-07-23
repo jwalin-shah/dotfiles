@@ -65,6 +65,30 @@ run_case "shell-heredoc-with-task-allow" \
   "{\"command\":\"cat > $TARGET/evil.py <<'E'\\nx\\nE\",\"cwd\":\"$TARGET\"}" 0
 rm -f "$TARGET/.bridge-task"
 
+# Exit-code contract: deny must be 2 (Claude/Cursor treat exit 1 as allow).
+# Document that exit 1 must never be used for policy deny.
+run_case "empty-stdin-allow" "{}" 0
+python3 - <<'PY'
+# Codex shell waiver note — vendor has no shell pre-hook; prove documents it.
+print("OK: WAIVER codex-shell-bypass until vendor adds shell pre-hook")
+PY
+
+# Post-edit smoke: check-on-edit stdout empty
+CHECK="${HOME}/.dotfiles/bin/check-on-edit.sh"
+tmpf="$(mktemp /tmp/prove-check-XXXX.go)"
+echo 'package p; func F() {}' > "$tmpf"
+set +e
+stdout=$(CLAUDE_TOOL_INPUT_FILE_PATH="$tmpf" "$CHECK" 2>/dev/null)
+ec=$?
+set -e
+rm -f "$tmpf"
+if [[ "$ec" -eq 0 && -z "$stdout" ]]; then
+  echo "OK: check-on-edit-stdout-empty (exit $ec)"; PASS=$((PASS+1))
+else
+  echo "FAIL: check-on-edit-stdout-empty exit=$ec stdout=${stdout:0:60}" >&2
+  FAIL=$((FAIL+1))
+fi
+
 # Cross-harness wiring checks (source files)
 python3 - <<'PY'
 import json, sys
@@ -80,6 +104,8 @@ assert c["hooks"]["preToolUse"][0].get("failClosed") is False
 cl = json.loads((root/".claude/settings.json").read_text())
 blob = json.dumps(cl["hooks"]["PreToolUse"])
 assert "Bash" in blob and "enforce-bridge-workflow" in blob
+post = json.dumps(cl["hooks"].get("PostToolUse", []))
+assert "check-on-edit" in post, "check-on-edit must be wired in Claude PostToolUse"
 # Codex: pre-edit has enforce (file path); shell gap documented not asserted here
 cx = json.loads((root/".codex/hooks.json").read_text())
 assert "enforce-bridge-workflow" in json.dumps(cx)

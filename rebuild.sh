@@ -90,6 +90,10 @@ if command -v bridge >/dev/null 2>&1; then
   echo "==> refreshing machine capability manifest"
   bridge freeze --write 2>/dev/null || true
   bridge verify-machine
+  echo "==> proving harness hooks"
+  "$DIR/bin/prove-harness-hooks.sh" || exit 1
+  echo "==> proving launchers / LaunchAgents"
+  "$DIR/bin/prove-launchers.sh" || exit 1
 fi
 
 # Unload retired cocoindex-daemon if a stale plist remains after nix switch.

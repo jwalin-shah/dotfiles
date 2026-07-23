@@ -92,9 +92,36 @@ if "fmt-on-edit" not in blob:
     print(f"FAIL: {label}: fmt-on-edit.sh not referenced", file=sys.stderr); sys.exit(1)
 if "enforce-bridge-workflow" not in blob:
     print(f"FAIL: {label}: enforce-bridge-workflow not referenced", file=sys.stderr); sys.exit(1)
-print(f"OK: {label}: PreToolUse+PostToolUse with enforce+fmt")
+if "check-on-edit" not in blob:
+    print(f"FAIL: {label}: check-on-edit.sh not referenced", file=sys.stderr); sys.exit(1)
+if "check-stale-gate" not in blob:
+    print(f"FAIL: {label}: check-stale-gate.py not referenced", file=sys.stderr); sys.exit(1)
+print(f"OK: {label}: PreToolUse+PostToolUse with enforce+fmt+check-on-edit+check-stale")
 PY
 }
+
+# check-on-edit must emit nothing on stdout (Claude JSON-parses PostToolUse stdout)
+if [[ -x "$ROOT/bin/check-on-edit.sh" ]]; then
+  tmpgo="$(mktemp /tmp/check-on-edit-XXXX.go)"
+  echo 'package main; func main() {}' > "$tmpgo"
+  set +e
+  out=$(CLAUDE_TOOL_INPUT_FILE_PATH="$tmpgo" "$ROOT/bin/check-on-edit.sh" 2>/dev/null)
+  ec=$?
+  set -e
+  rm -f "$tmpgo"
+  if [[ "$ec" -ne 0 ]]; then
+    fail "check-on-edit.sh exited $ec (must exit 0)"
+  elif [[ -n "$out" ]]; then
+    fail "check-on-edit.sh wrote to stdout (must be empty for Claude PostToolUse JSON): ${out:0:80}"
+  else
+    ok "check-on-edit.sh stdout empty on clean .go file"
+  fi
+else
+  fail "missing check-on-edit.sh"
+fi
+
+# Claude source (dotfiles) must match live expectations
+check_claude "claude-source" "$ROOT/home/.claude/settings.json" || FAIL=1
 
 for pair in \
   "claude-live:${HOME}/.claude/settings.json" \

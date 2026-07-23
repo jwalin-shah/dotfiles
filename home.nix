@@ -25,6 +25,8 @@ in
     fastfetch
     ripgrep-all
     tree
+    zsh-vi-mode
+    zsh-history-substring-search
   ];
 
   fonts.fontconfig.enable = true;
@@ -39,6 +41,18 @@ in
     enable = true;
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
+    plugins = [
+      {
+        name = "zsh-vi-mode";
+        src = pkgs.zsh-vi-mode;
+        file = "share/zsh-vi-mode/zsh-vi-mode.plugin.zsh";
+      }
+      {
+        name = "zsh-history-substring-search";
+        src = pkgs.zsh-history-substring-search;
+        file = "share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh";
+      }
+    ];
     initContent = ''
       bindkey '^f' autosuggest-accept
       eval "$(direnv hook zsh)"
@@ -70,6 +84,25 @@ in
 
       # Include dotfiles in glob patterns
       setopt GLOB_DOTS
+
+      # zoxide (installed via homebrew) — smarter cd
+      eval "$(/opt/homebrew/bin/zoxide init zsh)"
+
+      # worktree CLI — shell wrapper for directory navigation
+      eval "$(worktree-bin init zsh 2>/dev/null)"
+
+      # fzf key-bindings + completions
+      source /opt/homebrew/opt/fzf/shell/key-bindings.zsh
+      source /opt/homebrew/opt/fzf/shell/completion.zsh
+
+      # fzf defaults + previews with bat and eza
+      export FZF_DEFAULT_OPTS="--layout=reverse --height 40% --border"
+      export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always {}'"
+      export FZF_ALT_C_OPTS="--preview 'eza --tree --color=always {} | head -50'"
+
+      # history-substring-search keybindings
+      bindkey '^[[A' history-substring-search-up
+      bindkey '^[[B' history-substring-search-down
     '';
     shellAliases = {
       ".." = "cd ..";
@@ -262,6 +295,9 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/ca-wrapper";
 
   # Personal tool wrappers (only useful ones — dead wrappers removed)
+  home.file."bin/worktree".source =
+    config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/.cargo/bin/worktree-bin";
+
   home.file."bin/ap".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/ap";
 
