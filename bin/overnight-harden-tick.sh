@@ -118,14 +118,9 @@ if orbit status 2>/dev/null | rg -q 'sessions=[1-9]'; then
   exit 0
 fi
 
-# orbit sessions= can stay 0 while mintmux/agy is live — also gate on processes
-# and recent adapter heartbeats under the jw worktree pool.
+# orbit sessions= can stay 0 while mintmux/agy is live — also gate on processes.
 if pgrep -f '[b]ridge spawn' >/dev/null 2>&1 || pgrep -f '[b]ridge-agy|[b]ridge-ca' >/dev/null 2>&1; then
   log "active bridge spawn/adapter process — skip queue"
-  exit 0
-fi
-if find "${HOME}/.local/share/jw/worktrees" -name '.bridge-*-heartbeat' -mmin -30 2>/dev/null | head -1 | grep -q .; then
-  log "recent worktree adapter heartbeat — skip queue"
   exit 0
 fi
 
