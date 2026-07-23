@@ -17,6 +17,22 @@ for bin in orbit bridge; do
   fi
 done
 
+# bridge-serve must not be older than ~/.local/bin/bridge (stale gRPC binary).
+BRIDGE_BIN="${HOME}/.local/bin/bridge"
+if [[ -x "$BRIDGE_BIN" ]]; then
+  bin_m=$(stat -f %m "$BRIDGE_BIN" 2>/dev/null || echo 0)
+  serve_pid=$(pgrep -f 'bridge-serve:9101' | head -1 || true)
+  if [[ -n "$serve_pid" && "$bin_m" -gt 0 ]]; then
+    lstart=$(ps -p "$serve_pid" -o lstart= 2>/dev/null || true)
+    started=$(date -j -f "%a %b %e %T %Y" "$(echo "$lstart" | tr -s ' ')" +%s 2>/dev/null || echo 0)
+    if [[ "$started" -gt 0 && "$bin_m" -gt "$started" ]]; then
+      fail "bridge-serve stale (bin mtime $bin_m > serve start $started) — kickstart org.nixos.com.jwalinshah.bridge-serve"
+    else
+      ok "bridge-serve not older than ~/.local/bin/bridge"
+    fi
+  fi
+fi
+
 if [[ -x "${HOME}/bin/ca" && -x "${HOME}/bin/ct" ]]; then
   ok "HM launchers ca+ct present"
 else
@@ -61,6 +77,11 @@ if [[ ! -f "$CFG" ]]; then
   fail "missing configuration.nix"
 else
   ok "configuration.nix present"
+  if rg -q 'defaultPATH.*usr/sbin' "$CFG"; then
+    ok "configuration.nix defaultPATH includes /usr/sbin"
+  else
+    fail "configuration.nix defaultPATH missing /usr/sbin (LaunchAgent ghost lsof/chown)"
+  fi
 fi
 
 required=(
@@ -106,8 +127,63 @@ if grep -q 'com.jwalinshah.overnight-harden' "$CFG"; then
   else
     warn "overnight-harden not loaded yet — run rebuild.sh (or interim LaunchAgent)"
   fi
+  OH_TICK="${HOME}/projects/dotfiles/bin/overnight-harden-tick.sh"
+  if [[ -x "$OH_TICK" ]]; then
+    if bash -n "$OH_TICK" 2>/dev/null; then
+      ok "overnight-harden-tick.sh bash -n clean"
+    else
+      fail "overnight-harden-tick.sh bash -n failed (syntax)"
+    fi
+    if [[ -x "${HOME}/projects/dotfiles/bin/prove-overnight-pr-belt.sh" ]]; then
+      if "${HOME}/projects/dotfiles/bin/prove-overnight-pr-belt.sh" >/dev/null; then
+        ok "prove-overnight-pr-belt.sh PASS"
+      else
+        fail "prove-overnight-pr-belt.sh FAILED"
+      fi
+    fi
+    if rg -q '/usr/sbin' "$OH_TICK"; then
+      ok "overnight-harden-tick.sh PATH includes /usr/sbin"
+    else
+      fail "overnight-harden-tick.sh PATH missing /usr/sbin (lsof/chown ghost under LaunchAgent)"
+    fi
+  else
+    fail "missing executable $OH_TICK"
+  fi
 else
   fail "overnight-harden missing from configuration.nix"
+fi
+
+# CDP quota prove (offline merge always; live optional via CDP_PROVE_LIVE=1)
+CDP_PROVE="${HOME}/projects/bridge/scripts/prove-cdp-quota.sh"
+if [[ -x "$CDP_PROVE" ]]; then
+  if CDP_PROVE_OFFLINE=1 "$CDP_PROVE"; then
+    ok "prove-cdp-quota.sh OFFLINE PASS"
+  else
+    fail "prove-cdp-quota.sh OFFLINE FAILED"
+  fi
+  if [[ "${CDP_PROVE_LIVE:-}" == "1" ]]; then
+    if "$CDP_PROVE"; then
+      ok "prove-cdp-quota.sh LIVE PASS"
+    else
+      fail "prove-cdp-quota.sh LIVE FAILED"
+    fi
+  else
+    warn "prove-cdp-quota LIVE skipped (set CDP_PROVE_LIVE=1 to open Brave + scrape)"
+  fi
+else
+  fail "missing executable $CDP_PROVE"
+fi
+
+# Factory e2e scorecard schema (Y rows must prove)
+SCHEMA_PROVE="${HOME}/projects/dotfiles/bin/prove-factory-e2e-scorecard.sh"
+if [[ -x "$SCHEMA_PROVE" ]]; then
+  if "$SCHEMA_PROVE"; then
+    ok "prove-factory-e2e-scorecard.sh PASS"
+  else
+    fail "prove-factory-e2e-scorecard.sh FAILED"
+  fi
+else
+  fail "missing executable $SCHEMA_PROVE"
 fi
 
 # Inventory note exists
@@ -116,6 +192,14 @@ if [[ -f "$INV" ]]; then
   ok "launcher inventory CRDM present"
 else
   fail "missing $INV"
+fi
+
+# Factory e2e readiness CRDM
+E2E="${HOME}/projects/portfolio/wayfinder/factory-e2e-readiness-2026-07-23.md"
+if [[ -f "$E2E" ]]; then
+  ok "factory e2e readiness CRDM present"
+else
+  fail "missing $E2E"
 fi
 
 if [[ "$FAIL" -ne 0 ]]; then

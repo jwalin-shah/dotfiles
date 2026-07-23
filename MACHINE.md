@@ -85,9 +85,11 @@ are cloned as needed.
 | cocoindex-daemon | — | **REMOVED** 2026-07-22 — do not re-enable as second sink |
 | knowledge-engine | — | on-change + daily 03:15 catch-up → Neo4j |
 | bridge-cdp-quota | — | CDP scrape → `~/.bridge/cdp-cache.json` every 6h |
+| prove-launchers | — | PATH orbit/bridge, LaunchAgents, overnight PATH,/usr/sbin, **CDP offline prove**, **factory e2e schema prove** |
 | **verify-machine** | — | daily 09:00 `bridge verify-machine` + `prove-launchers.sh` |
+| factory-e2e | — | `wayfinder/factory-e2e-readiness-2026-07-23.md` + `prove-factory-e2e-scorecard.sh` |
 | **bridge-serve** | :9100 / :9101 | Orbit HTTP + gRPC surface (`org.nixos.com.jwalinshah.bridge-serve`, KeepAlive). Prove: `prove-launchers.sh`, `orbit status` |
-| **overnight-harden** | — | every 15m prove+spawn (LaunchAgent); Cursor Layer A continuous ~90s while chat awake |
+| **overnight-harden** | — | every 15m prove+spawn (LaunchAgent); Cursor Layer A continuous ~5m while chat awake |
 | neo4j | :7687 | sole knowledge store — Homebrew `brew services` (not a nix LaunchAgent) |
 | mintmux | — | PTY multiplexer |
 | m5logd | — | M5 hardware logging |
@@ -117,7 +119,7 @@ Prove: `dotfiles/bin/prove-launchers.sh`
 - `cmd` — Homebrew npm tool; no mutation gate (WAIVER).
 - `com.jwalinshah.reconcile-outcomes` — hand LaunchAgent, not in configuration.nix (investigate).
 
-*Last updated: 2026-07-23 — launcher lock-in: verify-machine LaunchAgent, inventory, prove-launchers.*
+*Last updated: 2026-07-23 — factory e2e scorecard + CDP offline prove wired into prove-launchers.*
 ## Cross-Repo Dependency Manifest (deps.json) & Neo4j
 
 These are tracked by each project's `wayfinder/deps.json` (validated by
