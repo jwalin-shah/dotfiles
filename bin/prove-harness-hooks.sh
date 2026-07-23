@@ -9,9 +9,34 @@ ok() { echo "OK: $*"; }
 warn() { echo "WARN: $*" >&2; }
 fail() { echo "FAIL: $*" >&2; FAIL=1; }
 
+# HM mkOutOfStoreSymlink: readlink shows /nix/store/... but resolve→dotfiles.
+# Only warn when resolve is still a frozen store path.
+hm_link_ok() {
+  local label="$1" path="$2"
+  python3 - "$label" "$path" <<'PY'
+import os, sys
+from pathlib import Path
+label, path = sys.argv[1], Path(sys.argv[2])
+if not path.is_symlink():
+    print(f"OK: {label}: not a symlink")
+    raise SystemExit(0)
+resolved = str(path.resolve())
+dotfiles = str(Path.home() / "projects" / "dotfiles")
+if resolved.startswith(dotfiles + os.sep) or resolved == dotfiles:
+    print(f"OK: {label}: out-of-store via HM (resolve→dotfiles)")
+    raise SystemExit(0)
+if resolved.startswith("/nix/store/"):
+    print(f"WARN: {label}: still frozen in nix store (resolve={resolved})", file=sys.stderr)
+    raise SystemExit(0)
+print(f"OK: {label}: resolve={resolved}")
+PY
+}
+
+
 "$ROOT/bin/prove-cursor-hooks.sh" \
   "$ROOT/home/.cursor/hooks.json" \
   "${HOME}/.cursor/hooks.json" || FAIL=1
+hm_link_ok "cursor-live" "${HOME}/.cursor/hooks.json"
 
 # Machine-wide mutation gate canary (file + shell; all ~/projects/*)
 if [[ -x "$ROOT/bin/prove-bridge-workflow-gate.sh" ]]; then
@@ -47,9 +72,7 @@ PY
 check_keys "codex-source" "$ROOT/home/.codex/hooks.json" "pre-edit,post-edit" || FAIL=1
 if [[ -f "${HOME}/.codex/hooks.json" ]]; then
   check_keys "codex-live" "${HOME}/.codex/hooks.json" "pre-edit,post-edit" || FAIL=1
-  case "$(readlink "${HOME}/.codex/hooks.json" 2>/dev/null || true)" in
-    /nix/store/*) warn "codex-live nix-store backed — force symlink + rebuild recommended" ;;
-  esac
+  hm_link_ok "codex-live" "${HOME}/.codex/hooks.json"
 fi
 
 check_claude() {
@@ -81,9 +104,7 @@ do
   label="${pair%%:*}"; path="${pair#*:}"
   [[ -f "$path" ]] || { warn "$label missing"; continue; }
   check_claude "$label" "$path" || FAIL=1
-  case "$(readlink "$path" 2>/dev/null || true)" in
-    /nix/store/*) warn "$label nix-store backed — force symlink + rebuild recommended" ;;
-  esac
+  hm_link_ok "$label" "$path"
 done
 
 if [[ -f "${HOME}/.gemini/settings.json" ]]; then
