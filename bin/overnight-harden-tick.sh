@@ -65,6 +65,11 @@ if [[ -f "$STOP" ]]; then
   log "STOP present — prove only, no spawn"
 fi
 
+if ! bridge freeze >/dev/null 2>&1; then
+  log "capability hash drift detected — auto-running bridge freeze --write"
+  bridge freeze --write >>"$LOG" 2>&1 || true
+fi
+
 PROVE_OK=1
 {
   echo "=== $(ts) prove pack ==="
