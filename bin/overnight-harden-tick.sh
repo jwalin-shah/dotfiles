@@ -81,6 +81,13 @@ PROVE_OK=1
   orbit status | grep 'bridge health' || true
 } >>"$LOG" 2>&1 || PROVE_OK=0
 
+# Belt: verify-machine exits 1 on failed gates, but never mark GREEN if a ✗
+# gate line landed in this tick's prove section (guards log/redirect races).
+if [[ "$PROVE_OK" -eq 1 ]] && tail -60 "$LOG" | rg -q '^  ✗ '; then
+  PROVE_OK=0
+  log "prove pack RED — verify-machine gate failure seen in log"
+fi
+
 if [[ "$PROVE_OK" -eq 1 ]]; then
   log "prove pack GREEN"
 else
