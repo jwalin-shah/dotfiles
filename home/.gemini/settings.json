@@ -10,6 +10,17 @@
           }
         ]
       }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|Bash|edit_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/jwalinshah/.dotfiles/bin/enforce-bridge-workflow.sh"
+          }
+        ]
+      }
     ]
   },
   "context": {

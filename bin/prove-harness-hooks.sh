@@ -13,6 +13,13 @@ fail() { echo "FAIL: $*" >&2; FAIL=1; }
   "$ROOT/home/.cursor/hooks.json" \
   "${HOME}/.cursor/hooks.json" || FAIL=1
 
+# Machine-wide mutation gate canary (file + shell; all ~/projects/*)
+if [[ -x "$ROOT/bin/prove-bridge-workflow-gate.sh" ]]; then
+  "$ROOT/bin/prove-bridge-workflow-gate.sh" || FAIL=1
+else
+  fail "missing prove-bridge-workflow-gate.sh"
+fi
+
 check_keys() {
   local label="$1" path="$2" expect_csv="$3"
   python3 - "$label" "$path" "$expect_csv" <<'PY' || return 1
@@ -90,9 +97,9 @@ if "PostToolUse" not in hooks:
     print("FAIL: gemini-settings: no PostToolUse", file=sys.stderr); raise SystemExit(1)
 if "fmt-on-edit" not in blob:
     print("FAIL: gemini-settings: no fmt-on-edit", file=sys.stderr); raise SystemExit(1)
-if "enforce-bridge" not in blob and "PreToolUse" not in hooks:
-    print("WARN: gemini-settings: fmt only — no PreToolUse gate (agy gap)", file=sys.stderr)
-print("OK: gemini-settings: PostToolUse+fmt present")
+if "PreToolUse" not in hooks or "enforce-bridge" not in blob:
+    print("FAIL: gemini-settings: missing PreToolUse enforce gate", file=sys.stderr); raise SystemExit(1)
+print("OK: gemini-settings: PreToolUse enforce + PostToolUse fmt")
 PY
 fi
 

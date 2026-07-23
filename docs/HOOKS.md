@@ -51,6 +51,30 @@ Cursor `afterFileEdit` sends `{ "file_path": "..." }` on stdin. Wrapper:
 `home/.cursor/hooks.json`, run `./rebuild.sh` so HM reasserts
 `force = true` out-of-store links for hooks + AGENTS.md.
 
+## Bridge workflow gate (all harnesses)
+
+One script: `bin/enforce-bridge-workflow.sh`.
+
+**Policy:** any mutation under `~/projects/<repo>` needs `ORBIT_TASK.md` or
+`.bridge-task` in that repo. Applies to **every** project dir, not a 3-name
+allowlist. Shell write-forms (`>`, heredoc, `tee`, `rm`, …) are mutations —
+no Write-tool bypass via shell.
+
+| Harness | Event | Matcher / notes |
+|---------|-------|-----------------|
+| Cursor | `preToolUse` | `Write\|Edit\|Delete\|TabWrite\|Shell`; `failClosed: false` in this worker (hook runner cannot spawn shell — `failClosed:true` + crash = total lockout). Do **not** use `beforeShellExecution` here until Cursor can exec hooks without nesting failure. |
+| Claude | `PreToolUse` | `Edit\|Write\|Bash` |
+| Codex | `pre-edit` | file edits only today — **shell bypass still open on Codex** until a shell pre-hook exists |
+| Gemini/agy | `PreToolUse` | `edit_file` via `enforce-bridge-workflow-antigravity.sh` |
+
+Prove: `bin/prove-bridge-workflow-gate.sh`
+
+Lesson (2026-07-22): Cursor `failClosed: true` when the worker cannot execute
+the hook command (`Shell execution is not available in the worker extension
+host`) blocks **all** Write/Shell, including gate self-repair. That is not
+“stricter security” — it is a dead agent. Policy deny = exit 2 from a running
+hook; infrastructure crash must not be conflated with policy deny.
+
 ## Hook limitation: agent-level only
 
 PostToolUse only fires when an agent edits a file. Manual edits in a terminal

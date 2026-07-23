@@ -140,6 +140,7 @@ in
   # Claude config dirs (3) -- same settings, symlinked
   home.file.".claude/settings.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/settings.json";
+  home.file.".claude/settings.json".force = true;
   home.file.".claude/settings.local.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/settings.local.json";
   home.file.".claude/settings.local.json".force = true;
@@ -184,6 +185,7 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.codex/config.toml";
   home.file.".codex/hooks.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.codex/hooks.json";
+  home.file.".codex/hooks.json".force = true;
   home.file.".codex/rules/default.rules".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.codex/rules/default.rules";
   home.file.".codex/AGENTS.md".source =
@@ -211,6 +213,7 @@ in
   home.file.".gemini/config/hooks.json".force = true;
   home.file.".gemini/settings.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.gemini/settings.json";
+  home.file.".gemini/settings.json".force = true;
   home.file.".gemini/antigravity-cli/settings.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.gemini/antigravity-cli/settings.json";
   home.file.".gemini/antigravity-cli/settings.json".force = true;
