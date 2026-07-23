@@ -136,7 +136,9 @@ if orbit status 2>/dev/null | rg -q 'sessions=[1-9]'; then
 fi
 
 # orbit sessions= can stay 0 while mintmux/agy is live — also gate on processes.
-if pgrep -f '[b]ridge spawn' >/dev/null 2>&1 || pgrep -f '[b]ridge-agy|[b]ridge-ca' >/dev/null 2>&1; then
+if pgrep -f '/bridge-agy([[:space:]]|$)' >/dev/null 2>&1 \
+  || pgrep -f '/bridge-ca([[:space:]]|$)' >/dev/null 2>&1 \
+  || pgrep -f '/bridge[[:space:]]+spawn([[:space:]]|$)' >/dev/null 2>&1; then
   log "active bridge spawn/adapter process — skip queue"
   exit 0
 fi
