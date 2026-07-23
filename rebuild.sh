@@ -94,6 +94,10 @@ if command -v bridge >/dev/null 2>&1; then
   "$DIR/bin/prove-harness-hooks.sh" || exit 1
   echo "==> proving launchers / LaunchAgents"
   "$DIR/bin/prove-launchers.sh" || exit 1
+  if [[ -x "${HOME}/projects/bridge/scripts/prove-neo4j-packet.sh" ]]; then
+    echo "==> proving live Neo4j spawn packet"
+    "${HOME}/projects/bridge/scripts/prove-neo4j-packet.sh" || exit 1
+  fi
 fi
 
 # Unload retired cocoindex-daemon if a stale plist remains after nix switch.

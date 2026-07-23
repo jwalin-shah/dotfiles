@@ -72,6 +72,7 @@ required=(
   org.nixos.com.jwalinshah.knowledge-engine
   org.nixos.com.jwalinshah.inbox-server
   org.nixos.com.jwalinshah.bridge-cdp-quota
+  org.nixos.com.jwalinshah.bridge-serve
   org.nixos.com.jwalinshah.m5logd
   org.nixos.com.jwalinshah.voice-engine
 )

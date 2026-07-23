@@ -494,6 +494,35 @@
       };
     };
 
+    # bridge-serve: gRPC :9101 + HTTP :9100 — orbit thin shell depends on this.
+    # Without KeepAlive, agent-shell nohup dies when the session ends and the
+    # wrap (orbit/hooks/check-stale) fails closed on a false "bridge down".
+    "com.jwalinshah.bridge-serve" = {
+      serviceConfig = {
+        ProgramArguments = [
+          "${dotfilesBin}/daemon-wrapper"
+          "${localBin}/bridge"
+          "serve"
+        ];
+        KeepAlive.SuccessfulExit = false;
+        RunAtLoad = true;
+        ThrottleInterval = 10;
+        WorkingDirectory = "${home}/projects/bridge";
+        EnvironmentVariables = {
+          HOME = home;
+          PATH = defaultPATH;
+          DAEMON_NAME = "bridge-serve";
+          DAEMON_PORT = "9101";
+          DAEMON_DISPLAY_NAME = "bridge-serve:9101";
+          DAEMON_TYPE = "foreground";
+          DAEMON_HEALTH_URL = "http://127.0.0.1:9100/v1/status";
+          DAEMON_WORKING_DIR = "${home}/projects/bridge";
+        };
+        StandardOutPath = "${home}/.local/share/orbit/bridge-serve.log";
+        StandardErrorPath = "${home}/.local/share/orbit/bridge-serve.log";
+      };
+    };
+
     # bridge-cdp-quota: refresh ~/.bridge/cdp-cache.json every 6h.
     # Requires CDP Brave profile (bridge/scripts/ensure-cdp-browser.sh) logged
     # into billing sites. Source of truth was hand-installed
