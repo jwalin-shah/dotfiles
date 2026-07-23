@@ -100,9 +100,13 @@ PROVE_OK=1
 
 # Belt: verify-machine exits 1 on failed gates, but never mark GREEN if a ✗
 # gate line landed in this tick's prove section (guards log/redirect races).
-if [[ "$PROVE_OK" -eq 1 ]] && tail -60 "$LOG" | rg -q '^  ✗ '; then
-  PROVE_OK=0
-  log "prove pack RED — verify-machine gate failure seen in log"
+# NOTE: under set -e, `[[ ok ]] && rg -q` exits the script when rg misses —
+# keep the rg inside a nested if so a clean prove can continue to spawn.
+if [[ "$PROVE_OK" -eq 1 ]]; then
+  if tail -60 "$LOG" | rg -q '^  ✗ '; then
+    PROVE_OK=0
+    log "prove pack RED — verify-machine gate failure seen in log"
+  fi
 fi
 
 if [[ "$PROVE_OK" -eq 1 ]]; then
