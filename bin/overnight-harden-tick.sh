@@ -70,6 +70,23 @@ if ! bridge freeze >/dev/null 2>&1; then
   bridge freeze --write >>"$LOG" 2>&1 || true
 fi
 
+# If ~/.local/bin/bridge was rebuilt after bridge-serve started, reload serve
+# so gRPC/CLI share the same fixes (lease defer, KillSession ENOENT, …).
+BRIDGE_BIN="${HOME}/.local/bin/bridge"
+if [[ -x "$BRIDGE_BIN" ]]; then
+  bin_m=$(stat -f %m "$BRIDGE_BIN" 2>/dev/null || echo 0)
+  serve_pid=$(pgrep -f 'bridge-serve:9101' | head -1 || true)
+  if [[ -n "$serve_pid" && "$bin_m" -gt 0 ]]; then
+    lstart=$(ps -p "$serve_pid" -o lstart= 2>/dev/null || true)
+    started=$(date -j -f "%a %b %e %T %Y" "$(echo "$lstart" | tr -s ' ')" +%s 2>/dev/null || echo 0)
+    if [[ "$started" -gt 0 && "$bin_m" -gt "$started" ]]; then
+      log "bridge binary newer than serve (bin=$bin_m start=$started) — kickstarting bridge-serve"
+      launchctl kickstart -k "gui/$(id -u)/org.nixos.com.jwalinshah.bridge-serve" 2>/dev/null || true
+      sleep 2
+    fi
+  fi
+fi
+
 PROVE_OK=1
 {
   echo "=== $(ts) prove pack ==="
