@@ -40,11 +40,23 @@ run_case() {
 run_case "write-code-no-task-deny" \
   "{\"tool_input\":{\"path\":\"$TARGET/extract.py\"}}" 2
 
+# Chicken-egg: Write of task markers is always allowed (no prior marker)
+run_case "write-bridge-task-no-task-allow" \
+  "{\"tool_input\":{\"path\":\"$TARGET/.bridge-task\"}}" 0
+run_case "write-orbit-task-no-task-allow" \
+  "{\"tool_input\":{\"path\":\"$TARGET/ORBIT_TASK.md\"}}" 0
+
 run_case "shell-readonly-allow" \
   "{\"tool_input\":{\"command\":\"ls $TARGET\",\"working_directory\":\"$TARGET\"}}" 0
 
 run_case "shell-heredoc-deny" \
   "{\"command\":\"cat > $TARGET/evil.py <<'E'\\nx\\nE\",\"cwd\":\"$TARGET\"}" 2
+
+# Narrow shell: marker-only mutation allowed without prior task
+run_case "shell-write-bridge-task-allow" \
+  "{\"command\":\"echo ticket > $TARGET/.bridge-task\",\"cwd\":\"$TARGET\"}" 0
+run_case "shell-write-orbit-task-allow" \
+  "{\"command\":\"echo ticket > $TARGET/ORBIT_TASK.md\",\"cwd\":\"$TARGET\"}" 0
 
 echo "ticket: prove-gate" > "$TARGET/.bridge-task"
 run_case "write-with-task-allow" \

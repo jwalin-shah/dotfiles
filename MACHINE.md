@@ -84,6 +84,7 @@ are cloned as needed.
 | tldr-daemon | — | code structure auto-index (**producer**; local cache not SoT) |
 | cocoindex-daemon | — | **REMOVED** 2026-07-22 — do not re-enable as second sink |
 | knowledge-engine | — | on-change (fmt→neo4j-on-change→on-change-sync) + daily 03:15 catch-up sync-and-embed → Neo4j |
+| bridge-cdp-quota | — | CDP scrape → `~/.bridge/cdp-cache.json` every 6h (`ensure-cdp-browser` + `cdp-scrape-quota`) |
 | neo4j | :7687 | sole knowledge store — Homebrew `brew services` (not a nix LaunchAgent) |
 | mintmux | — | PTY multiplexer |
 | m5logd | — | M5 hardware logging |

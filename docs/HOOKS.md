@@ -60,6 +60,13 @@ One script: `bin/enforce-bridge-workflow.sh`.
 allowlist. Shell write-forms (`>`, heredoc, `tee`, `rm`, …) are mutations —
 no Write-tool bypass via shell.
 
+**Always-allowed (exact / prefix):** repo-root `ORBIT_TASK.md` and
+`.bridge-task` (chicken-egg bootstrap so Write/Edit — and narrow shell that
+only touches those paths — can place the marker), plus gate self-repair paths
+(`bin/enforce-bridge-workflow*.sh`, `bin/prove-bridge-workflow-gate.sh`,
+harness hook JSON under `home/`, `docs/HOOKS.md`, and a few docs/scaffold
+files). See `ALWAYS_ALLOWED_PREFIXES` in `bin/enforce-bridge-workflow.sh`.
+
 | Harness | Event | Matcher / notes |
 |---------|-------|-----------------|
 | Cursor | `preToolUse` | `Write\|Edit\|Delete\|TabWrite\|Shell`; `failClosed: false` in this worker (hook runner cannot spawn shell — `failClosed:true` + crash = total lockout). Do **not** use `beforeShellExecution` here until Cursor can exec hooks without nesting failure. |

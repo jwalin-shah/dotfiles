@@ -494,6 +494,35 @@
       };
     };
 
+    # bridge-cdp-quota: refresh ~/.bridge/cdp-cache.json every 6h.
+    # Requires CDP Brave profile (bridge/scripts/ensure-cdp-browser.sh) logged
+    # into billing sites. Source of truth was hand-installed
+    # org.orbit.bridge-cdp-quota (bridge/scripts/org.orbit.bridge-cdp-quota.plist);
+    # after rebuild unload that label if still loaded:
+    #   launchctl bootout gui/$UID/org.orbit.bridge-cdp-quota
+    "com.jwalinshah.bridge-cdp-quota" = {
+      serviceConfig = {
+        ProgramArguments = [
+          "/bin/bash"
+          "-c"
+          ''
+            export PATH="${home}/bin:${home}/.local/bin:${brewBin}:$PATH"
+            "${home}/projects/bridge/scripts/ensure-cdp-browser.sh" && \
+              "${home}/projects/bridge/scripts/cdp-scrape-quota.py" >>"${home}/.bridge/cdp-scrape.log" 2>&1
+          ''
+        ];
+        StartInterval = 21600;
+        RunAtLoad = true;
+        WorkingDirectory = "${home}/projects/bridge";
+        EnvironmentVariables = {
+          HOME = home;
+          PATH = defaultPATH;
+        };
+        StandardOutPath = "${home}/.bridge/cdp-launchd.out.log";
+        StandardErrorPath = "${home}/.bridge/cdp-launchd.err.log";
+      };
+    };
+
     # -- Session Infrastructure --
     # neo4j: sole knowledge store. Package declared in brews above; runtime
     # ownership is Homebrew `brew services` (homebrew.mxcl.neo4j) — do NOT

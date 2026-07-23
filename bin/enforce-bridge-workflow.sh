@@ -25,6 +25,9 @@ HOME = Path(os.environ.get("HOME", "")).expanduser()
 PROJECTS = (HOME / "projects").resolve()
 TASK_MARKERS = ("ORBIT_TASK.md", ".bridge-task")
 ALWAYS_ALLOWED_PREFIXES = (
+    # Repo-root task markers — chicken-egg bootstrap (Write/Edit only these).
+    "ORBIT_TASK.md",
+    ".bridge-task",
     ".claude/",
     "docs/agents/",
     "wayfinder/",
@@ -116,6 +119,24 @@ def always_allowed(project: Path, abs_file: Path) -> bool:
     return any(rel == p or rel.startswith(p) for p in ALWAYS_ALLOWED_PREFIXES)
 
 
+def shell_only_always_allowed(cmd: str, project: Path) -> bool:
+    """True when every project file path in cmd is always_allowed (narrow shell)."""
+    proj = str(project.resolve())
+    rels: list[str] = []
+    for m in re.finditer(re.escape(proj) + r"/([^\s;'\"\\|<>]+)", cmd):
+        rels.append(m.group(1).rstrip("/"))
+    # cwd-relative bare markers (touch .bridge-task, > ORBIT_TASK.md)
+    for name in TASK_MARKERS:
+        if re.search(rf"(?:^|[\s;|&>])(?:\./)?{re.escape(name)}\b", cmd):
+            rels.append(name)
+    if not rels:
+        return False
+    return all(
+        any(rel == p or rel.startswith(p) for p in ALWAYS_ALLOWED_PREFIXES)
+        for rel in rels
+    )
+
+
 def extract_file(d: dict) -> str | None:
     ti = d.get("tool_input") or d.get("toolInput") or {}
     if isinstance(ti, dict):
@@ -205,7 +226,11 @@ def main() -> None:
                 touched.add(p)
         if not touched:
             allow()
-        blocked = [p for p in sorted(touched) if not has_task(p)]
+        blocked = [
+            p
+            for p in sorted(touched)
+            if not has_task(p) and not shell_only_always_allowed(cmd, p)
+        ]
         if not blocked:
             allow()
         names = ", ".join(p.name for p in blocked)
