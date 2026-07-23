@@ -618,6 +618,28 @@
       };
     };
 
+    # overnight-harden: prove pack + one queued spawn every 15m.
+    # Durable wrap worker — does not need a Cursor chat awake.
+    # Queue: portfolio/wayfinder/overnight-queue/{ticket}.json + .brief.md
+    # Stop: touch overnight-queue/STOP or weekly Claude ≥90% (script writes STOP).
+    "com.jwalinshah.overnight-harden" = {
+      serviceConfig = {
+        ProgramArguments = [
+          "${dotfilesBin}/overnight-harden-tick.sh"
+        ];
+        RunAtLoad = true;
+        StartInterval = 900;
+        WorkingDirectory = home;
+        EnvironmentVariables = {
+          HOME = home;
+          PATH = defaultPATH;
+          BRIDGE_AGY_MODEL = "claude-sonnet-4-6";
+        };
+        StandardOutPath = "${home}/.local/share/orbit/overnight-harden-launchd.log";
+        StandardErrorPath = "${home}/.local/share/orbit/overnight-harden-launchd.log";
+      };
+    };
+
     # verify-machine: daily machine health (hooks + daemons + config).
     # Closes the gap where verify-machine only ran on rebuild/pre-commit.
     # Log: ~/.local/share/orbit/verify-machine.log

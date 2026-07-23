@@ -98,6 +98,18 @@ else
   fail "verify-machine missing from configuration.nix"
 fi
 
+# overnight-harden interval agent (durable wrap — not Cursor-session-bound)
+if grep -q 'com.jwalinshah.overnight-harden' "$CFG"; then
+  ok "overnight-harden declared in configuration.nix"
+  if echo "$loaded" | grep -q 'org.nixos.com.jwalinshah.overnight-harden'; then
+    ok "loaded org.nixos.com.jwalinshah.overnight-harden"
+  else
+    warn "overnight-harden not loaded yet — run rebuild.sh (or interim LaunchAgent)"
+  fi
+else
+  fail "overnight-harden missing from configuration.nix"
+fi
+
 # Inventory note exists
 INV="${HOME}/projects/portfolio/wayfinder/launcher-inventory-2026-07-23.md"
 if [[ -f "$INV" ]]; then
