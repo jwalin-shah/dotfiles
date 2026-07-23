@@ -106,6 +106,17 @@ if orbit status 2>/dev/null | rg -q 'sessions=[1-9]'; then
   exit 0
 fi
 
+# orbit sessions= can stay 0 while mintmux/agy is live — also gate on processes
+# and recent adapter heartbeats under the jw worktree pool.
+if pgrep -f '[b]ridge spawn' >/dev/null 2>&1 || pgrep -f '[b]ridge-agy|[b]ridge-ca' >/dev/null 2>&1; then
+  log "active bridge spawn/adapter process — skip queue"
+  exit 0
+fi
+if find "${HOME}/.local/share/jw/worktrees" -name '.bridge-*-heartbeat' -mmin -30 2>/dev/null | head -1 | grep -q .; then
+  log "recent worktree adapter heartbeat — skip queue"
+  exit 0
+fi
+
 # Mintmux must answer mm-ctl ping or spawn fails with EACCES / empty session.
 if ! timeout 5 mm-ctl ping >/dev/null 2>&1; then
   log "mintmux unhealthy (mm-ctl ping failed) — kickstarting LaunchAgent"
