@@ -1,6 +1,6 @@
 # Ticket 002 — Pin and rationalize the agent toolchain
 
-**Status:** implementation and local proof complete; PR/merge pending
+**Status:** implementation and local proof complete; live activation pending
 **Opened:** 2026-07-23
 **Owner:** dotfiles
 
