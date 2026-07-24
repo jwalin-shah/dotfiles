@@ -55,6 +55,11 @@ in
       }
     ];
     initContent = ''
+      # Terminal.app and Ghostty do not consistently import Home Manager's
+      # launchd session variables. Establish the interactive-shell PATH here
+      # so normal panes resolve Homebrew and user-managed tools identically.
+      export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$HOME/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+
       bindkey '^f' autosuggest-accept
       eval "$(direnv hook zsh)"
 
