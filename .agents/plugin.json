@@ -1,13 +1,13 @@
 {
   "name": "bridge-orbit-skills",
-  "version": "1.0.0",
-  "description": "Bridge/Orbit workflow enforcement skills — axi, cocoindex, cocoindex-code",
+  "version": "1.1.0",
+  "description": "Bridge/Orbit workflow enforcement skills — preflight, cocoindex, cocoindex-code",
   "author": "jwalinshah",
   "skills": [
     {
-      "name": "axi",
-      "description": "Mandatory pre-code gates — blast radius, call graph, prior art, test coverage",
-      "path": "axi/SKILL.md"
+      "name": "preflight",
+      "description": "Mandatory pre-code gates — blast radius, call graph, prior art, test coverage (formerly axi)",
+      "path": "preflight/SKILL.md"
     },
     {
       "name": "cocoindex",

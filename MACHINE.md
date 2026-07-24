@@ -27,11 +27,15 @@ anything not declared here. Run `brew list` for live state, not this file.
 | @inference/cli | observability |
 | gnhf | agent loops |
 
+Neovim's current Treesitter plugin compiles parsers with the Home Manager
+`tree-sitter` package (requires CLI 0.26.1 or newer; pinned Nixpkgs provides
+0.26.9).
+
 ## Python (uv-managed by the same exact-version receipt)
 
 | tool | purpose |
 |---|---|
-| mlx-lm | local chat server (:8080) |
+| mlx-lm | **PARKED** 2026-07-23 — was local chat (:8080); Neo4j+embeds only now. See `wayfinder/mlx-chat-parked-2026-07-23.md` |
 | cocoindex | semantic code indexing |
 | cocoindex-code (`ccc`) | optional CLI only — daemon LaunchAgent removed 2026-07-22; Neo4j is SoT |
 | llm-tldr | code structure, call graphs |
@@ -41,7 +45,7 @@ anything not declared here. Run `brew list` for live state, not this file.
 
 | Model | Consumer | Purpose |
 |---|---|---|
-| LiquidAI/LFM2.5-8B-A1B-MLX-4bit | mlx-chat :8080 | primary local chat |
+| LiquidAI/LFM2.5-8B-A1B-MLX-4bit | **PARKED** (was mlx-chat :8080) | was primary local chat — daemon off 2026-07-23 |
 | LiquidAI/LFM2.5-230M-MLX-bf16 | background tasks | fast auxiliary reasoning |
 | openbmb/MiniCPM5-1B | fallback | edge reasoning |
 | Qwen3-Embedding-0.6B-Q8_0 (GGUF) | llama-server :8081 | general embeddings |
@@ -81,7 +85,7 @@ are cloned as needed.
 |---|---|---|
 | llama-embed-server | :8081 | Qwen3 0.6B embeddings |
 | coderank-embed-server | :8082 | CodeRank code embeddings |
-| mlx-chat-daemon | :8080 | liquid LFM2.5 8B chat |
+| mlx-chat-daemon | :8080 | **PARKED** 2026-07-23 — do not re-enable without ticket; Neo4j sole-store uses :8081/:8082 only |
 | tldr incremental cache | — | no LaunchAgent; edit hook marks changed file dirty, next `tldr calls` query patches only that file |
 | cocoindex-daemon | — | **REMOVED** 2026-07-22 — do not re-enable as second sink |
 | knowledge-engine | — | on-change + daily 03:15 catch-up → Neo4j |

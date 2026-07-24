@@ -295,7 +295,7 @@
     uvBin = "${home}/.local/share/uv/tools";
     brewBin = "/opt/homebrew/bin";
     dotfilesBin = "${home}/.dotfiles/bin";
-    defaultPATH = "${localBin}:${dotfilesBin}:${brewBin}:/usr/local/bin:/usr/bin:/bin";
+    defaultPATH = "${localBin}:${dotfilesBin}:${brewBin}:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
   in {
 
     # llama-embed: Qwen3-Embedding 0.6B on :8081 (1024-dim)
@@ -360,39 +360,12 @@
     };
 
     # ── AI Stack (unified daemon-wrapper) ────────────────────────────
-    # mlx-chat: Qwen3.5 9B on :8080 (model from models.env)
-    # Use python binary directly (not the script) so exec -a works for ps naming.
-    "com.jwalinshah.mlx-chat-daemon" = {
-      serviceConfig = {
-        ProgramArguments = [
-          "${dotfilesBin}/daemon-wrapper"
-          "${uvBin}/mlx-lm/bin/python"
-          "${uvBin}/mlx-lm/bin/mlx_lm.server"
-          "--model" "$ORBIT_CHAT_MODEL_REPO"
-          "--host" "127.0.0.1" "--port" "8080"
-          "--trust-remote-code"
-          "--chat-template-args" "{\"enable_thinking\":false}"
-        ];
-        KeepAlive.SuccessfulExit = false;
-        RunAtLoad = true;
-        ThrottleInterval = 30;
-        WorkingDirectory = home;
-        EnvironmentVariables = {
-          HOME = home;
-          PATH = defaultPATH;
-          DAEMON_NAME = "mlx-chat";
-          DAEMON_PORT = "8080";
-          DAEMON_DISPLAY_NAME = "mlx-chat:8080";
-          DAEMON_TYPE = "child-block";
-          DAEMON_HEALTH_URL = "/v1/models";
-          DAEMON_ENV_FILE = "${home}/.config/orbit/models.env";
-          DAEMON_EXPAND_ENV = "1";
-          DAEMON_VALIDATION_CMD = "${uvBin}/mlx-lm/bin/python -c 'import mlx_lm; print(\"OK\")'";
-        };
-        StandardOutPath = "${home}/.local/share/orbit/mlx-chat.log";
-        StandardErrorPath = "${home}/.local/share/orbit/mlx-chat.log";
-      };
-    };
+    # mlx-chat (:8080) PARKED 2026-07-23 — local chat LLM idle after Neo4j
+    # sole-store; knowledge path uses embed :8081/:8082 only. Re-enable by
+    # restoring the LaunchAgent block from git history.
+    # Ticket: wayfinder/tickets/001-park-mlx-chat.md
+    # Notes: wayfinder/mlx-chat-parked-2026-07-23.md
+    #        portfolio/wayfinder/mlx-chat-parked-2026-07-23.md
 
 
 
@@ -630,7 +603,7 @@
           "/bin/bash"
           "-c"
           ''
-            export PATH="${home}/.local/bin:${home}/bin:${dotfilesBin}:${brewBin}:$PATH"
+            export PATH="${home}/.local/bin:${home}/bin:${dotfilesBin}:${brewBin}:/usr/sbin:/sbin:$PATH"
             mkdir -p "${home}/.local/share/orbit"
             {
               echo "=== $(date -u +%Y-%m-%dT%H:%M:%SZ) verify-machine ==="

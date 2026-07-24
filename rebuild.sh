@@ -19,7 +19,7 @@ if [[ -d "$DIR/.agents" ]]; then
   fi
 fi
 
-for req in axi/SKILL.md cocoindex/SKILL.md cocoindex-code/SKILL.md plugin.json; do
+for req in preflight/SKILL.md cocoindex/SKILL.md cocoindex-code/SKILL.md plugin.json; do
   if [[ ! -e "$DIR/.agents/$req" ]]; then
     echo "ERROR: missing $DIR/.agents/$req — refusing rebuild." >&2
     echo "  Fix: git checkout HEAD -- .agents/" >&2
@@ -28,7 +28,7 @@ for req in axi/SKILL.md cocoindex/SKILL.md cocoindex-code/SKILL.md plugin.json; 
 done
 
 # Hand-made alias (seen 2026-07-18): ~/.claude/skills → dotfiles/.agents
-# That makes ~/.claude/skills/axi the SAME inode as .agents/axi. Clearing
+# That makes ~/.claude/skills/preflight the SAME inode as .agents/preflight. Clearing
 # "stale skill targets" under that alias deletes the flake source.
 # Unlink the alias first; home-manager will recreate ~/.claude/skills properly.
 for skills_dir in \
@@ -75,7 +75,8 @@ clear_skill_target() {
 }
 
 for base in .claude/skills .claude-a/skills .claude-token/skills .codex/skills .cursor/skills-cursor; do
-  for name in axi cocoindex cocoindex-code plugin.json; do
+  # Include the retired axi name so activation removes stale projections.
+  for name in axi preflight cocoindex cocoindex-code plugin.json; do
     clear_skill_target "$HOME/$base/$name"
   done
 done
@@ -109,16 +110,16 @@ launchctl bootout "gui/$(id -u)/org.nixos.com.jwalinshah.cocoindex-daemon" 2>/de
 pkill -f 'ccc run-daemon' 2>/dev/null || true
 launchctl bootout "gui/$(id -u)/org.nixos.com.jwalinshah.tldr-daemon" 2>/dev/null || true
 
-if ! head -1 "$HOME/.claude/skills/axi/SKILL.md" >/dev/null 2>&1; then
-  echo "ERROR: ~/.claude/skills/axi/SKILL.md unreadable after rebuild." >&2
+if ! head -1 "$HOME/.claude/skills/preflight/SKILL.md" >/dev/null 2>&1; then
+  echo "ERROR: ~/.claude/skills/preflight/SKILL.md unreadable after rebuild." >&2
   exit 1
 fi
-if [[ -L "$DIR/.agents/axi/SKILL.md" || -L "$DIR/.agents/plugin.json" ]]; then
+if [[ -L "$DIR/.agents/preflight/SKILL.md" || -L "$DIR/.agents/plugin.json" ]]; then
   echo "ERROR: .agents/ source was corrupted into store symlinks during rebuild." >&2
   exit 1
 fi
-if [[ ! -f "$DIR/.agents/axi/SKILL.md" ]]; then
-  echo "ERROR: .agents/axi/SKILL.md missing after rebuild." >&2
+if [[ ! -f "$DIR/.agents/preflight/SKILL.md" ]]; then
+  echo "ERROR: .agents/preflight/SKILL.md missing after rebuild." >&2
   exit 1
 fi
 if [[ -L "$HOME/.claude/skills" ]]; then
