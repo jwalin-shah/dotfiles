@@ -69,18 +69,21 @@ def deny(msg: str) -> None:
     print(f"[bridge-workflow] BLOCKED: {msg}", file=sys.stderr)
     emit(
         {
-            "permission": "deny",
-            "decision": "deny",
-            "user_message": msg,
-            "agent_message": msg,
-            "reason": msg,
+            "hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "permissionDecision": "deny",
+                "permissionDecisionReason": msg,
+            }
         },
         2,
     )
 
 
 def allow() -> None:
-    emit({"permission": "allow", "decision": "allow"}, 0)
+    # Claude Code treats empty stdout as an allow/no-op.  Do not emit the
+    # legacy root-level permission/decision fields: current Claude rejects
+    # them as an invalid PreToolUse output object.
+    raise SystemExit(0)
 
 
 def load() -> dict:

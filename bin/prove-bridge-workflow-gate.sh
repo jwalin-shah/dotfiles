@@ -27,6 +27,18 @@ run_case() {
   local ec=$?
   set -e
   if [[ "$ec" -eq "$expect" ]]; then
+    if [[ "$expect" -eq 2 ]]; then
+      python3 - <<'PY'
+import json
+from pathlib import Path
+d = json.loads(Path('/tmp/gate-out.json').read_text())
+specific = d.get('hookSpecificOutput', {})
+assert specific.get('hookEventName') == 'PreToolUse'
+assert specific.get('permissionDecision') == 'deny'
+assert isinstance(specific.get('permissionDecisionReason'), str)
+assert 'permission' not in d and 'decision' not in d
+PY
+    fi
     echo "OK: $name (exit $ec)"; PASS=$((PASS+1))
   else
     echo "FAIL: $name expected $expect got $ec" >&2
