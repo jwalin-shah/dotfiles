@@ -31,6 +31,7 @@ done
 # that custom activation nodes preserve standard command resolution.
 echo "==> proving generated Home Manager activation"
 "$DIR/bin/prove-home-activation.sh"
+"$DIR/bin/prove-home-activation-mutations.sh"
 
 ln -sfn "$DIR" ~/.dotfiles
 
