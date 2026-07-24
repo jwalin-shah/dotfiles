@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# quota-axi — local fork (jwalin-shah/quota-axi)
+# Run from the local checkout until upstream publishes.
+exec node /Users/jwalinshah/projects/quota-axi/dist/bin/quota-axi.js "$@"

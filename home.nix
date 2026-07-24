@@ -315,6 +315,9 @@ in
   home.file."bin/bridge-cc".source =
     config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-cc";
 
+  home.file."bin/quota-axi".source =
+    config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/dotfiles/bin/quota-axi";
+
   # Mintmux session backends - tmux only (orca/zellij/herdr not installed)
   # source lives in ~/projects/bridge/scripts/ alongside the adapter scripts
   home.file."bin/backends/tmux.sh".source =
