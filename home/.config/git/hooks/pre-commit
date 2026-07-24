@@ -52,6 +52,20 @@ case "$repo_root" in
         exit 1
       fi
     fi
+    if [ "$repo_root" = "$HOME/projects/dotfiles" ]; then
+      activation_files="$(
+        git diff --cached --name-only --diff-filter=ACM \
+          | grep -E '^(configuration\.nix|home\.nix|flake\.nix|flake\.lock|rebuild\.sh|bin/prove-home-activation\.sh)$' \
+          || true
+      )"
+      if [ -n "$activation_files" ]; then
+        echo "pre-commit: proving generated Home Manager activation" >&2
+        if ! "$repo_root/bin/prove-home-activation.sh"; then
+          echo "pre-commit: generated Home Manager activation is unsafe. Commit blocked." >&2
+          exit 1
+        fi
+      fi
+    fi
     if [ "$repo_root" = "$HOME/projects/bridge" ] || [ "$repo_root" = "$HOME/projects/portfolio" ]; then
       if [ -x "$HOME/projects/bridge/bridge" ]; then
         if ! "$HOME/projects/bridge/bridge" verify-machine; then
