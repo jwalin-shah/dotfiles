@@ -60,7 +60,8 @@ case "$repo_root" in
       )"
       if [ -n "$activation_files" ]; then
         echo "pre-commit: proving generated Home Manager activation" >&2
-        if ! "$repo_root/bin/prove-home-activation.sh"; then
+        if ! "$repo_root/bin/prove-home-activation.sh" \
+          || ! "$repo_root/bin/prove-home-activation-mutations.sh"; then
           echo "pre-commit: generated Home Manager activation is unsafe. Commit blocked." >&2
           exit 1
         fi
