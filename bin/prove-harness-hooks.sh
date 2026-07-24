@@ -184,6 +184,14 @@ if ! "$ROOT/bin/prove-githits-auth.sh"; then
   FAIL=1
 fi
 
+if ! "$ROOT/bin/prove-tldr-incremental.sh"; then
+  FAIL=1
+fi
+
+if ! "$ROOT/bin/prove-pi-cockpit.sh"; then
+  FAIL=1
+fi
+
 if [[ "$FAIL" -ne 0 ]]; then
   echo "prove-harness-hooks: FAILED" >&2
   exit 1

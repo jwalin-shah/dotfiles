@@ -398,27 +398,8 @@
 
 
 
-    # tldr daemon: watches ~/projects, auto-refreshes call-graph index.
-    # child-block mode: llm-tldr daemonizes internally, wrapper runs as
-    # child, verifies, then blocks until SIGTERM.
-    "com.jwalinshah.tldr-daemon" = {
-      serviceConfig = {
-        ProgramArguments = [
-          "${uvBin}/llm-tldr/bin/python3"
-          "-m" "tldr.daemon" "${home}/projects" "--foreground"
-        ];
-        KeepAlive = true;
-        RunAtLoad = true;
-        ThrottleInterval = 30;
-        WorkingDirectory = home;
-        EnvironmentVariables = {
-          HOME = home;
-          PATH = defaultPATH;
-        };
-        StandardOutPath = "${home}/.local/share/orbit/tldr-daemon.log";
-        StandardErrorPath = "${home}/.local/share/orbit/tldr-daemon.log";
-      };
-    };
+    # TLDR has no machine-wide LaunchAgent. fmt-on-edit marks one repository
+    # file dirty and `tldr calls` patches that file lazily on its next query.
 
     # ── AI Stack (continued) ──────────────────────────────────────────
 

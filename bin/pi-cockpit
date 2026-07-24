@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+session="${PI_COCKPIT_SESSION:-pi-cockpit}"
+workspace="${PI_COCKPIT_WORKSPACE:-${HOME}/projects/portfolio}"
+resume=0
+
+usage() {
+  echo "usage: pi-cockpit [--continue] [--session NAME] [WORKSPACE]" >&2
+}
+
+while (( $# > 0 )); do
+  case "$1" in
+    --continue|-c)
+      resume=1
+      shift
+      ;;
+    --session)
+      [[ $# -ge 2 ]] || { usage; exit 2; }
+      session="$2"
+      shift 2
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    --*)
+      usage
+      exit 2
+      ;;
+    *)
+      workspace="$1"
+      shift
+      [[ $# -eq 0 ]] || { usage; exit 2; }
+      ;;
+  esac
+done
+
+if [[ ! -d "$workspace" ]]; then
+  echo "pi-cockpit: workspace does not exist: $workspace" >&2
+  exit 1
+fi
+workspace="$(cd "$workspace" && pwd -P)"
+
+for required in pi mm-ctl mm-attach; do
+  if ! command -v "$required" >/dev/null 2>&1; then
+    echo "pi-cockpit: missing $required; run ~/.dotfiles/bin/reconcile-agent-toolchain.sh install and rebuild dotfiles" >&2
+    exit 1
+  fi
+done
+
+if ! mm-ctl ping >/dev/null 2>&1; then
+  launchctl kickstart "gui/$(id -u)/org.nixos.com.jwalinshah.mintmux" >/dev/null 2>&1 || true
+fi
+if ! mm-ctl ping >/dev/null 2>&1; then
+  echo "pi-cockpit: mintmux is unavailable; run launchctl kickstart gui/$UID/org.nixos.com.jwalinshah.mintmux" >&2
+  exit 1
+fi
+
+set +e
+pane_state="$(mm-ctl list-panes --session "$session" 2>&1)"
+pane_rc=$?
+set -e
+if (( pane_rc == 0 )) && [[ "$pane_state" == *"id:"* ]]; then
+  exec mm-attach -detach -session "$session"
+fi
+if (( pane_rc == 0 )); then
+  # Pi exited and left an empty Mintmux session. Remove only that empty shell
+  # and resume Pi's persisted session on the replacement pane.
+  mm-ctl kill-session "$session" >/dev/null
+  resume=1
+fi
+
+pi_bin="$(command -v pi)"
+printf -v pi_command 'exec %q' "$pi_bin"
+if (( resume == 1 )); then
+  pi_command+=" -c"
+fi
+
+mm-ctl new-session --cmd "$pi_command" --dir "$workspace" "$session" >/dev/null
+exec mm-attach -detach -session "$session"

@@ -2,6 +2,7 @@
 # prove-launchers.sh — captain surfaces + LaunchAgents match inventory contract.
 set -euo pipefail
 export PATH="${HOME}/.local/bin:${HOME}/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 
 FAIL=0
 ok() { echo "OK: $*"; }
@@ -88,7 +89,6 @@ required=(
   org.nixos.com.jwalinshah.mlx-chat-daemon
   org.nixos.com.jwalinshah.llama-embed-server
   org.nixos.com.jwalinshah.coderank-embed-server
-  org.nixos.com.jwalinshah.tldr-daemon
   org.nixos.com.jwalinshah.mintmux
   org.nixos.com.jwalinshah.knowledge-engine
   org.nixos.com.jwalinshah.inbox-server
@@ -97,6 +97,12 @@ required=(
   org.nixos.com.jwalinshah.m5logd
   org.nixos.com.jwalinshah.voice-engine
 )
+
+if "$ROOT/bin/reconcile-agent-toolchain.sh" check >/dev/null; then
+  ok "agent toolchain matches exact version receipt"
+else
+  fail "agent toolchain version drift (run reconcile-agent-toolchain.sh install)"
+fi
 
 loaded="$(launchctl list 2>/dev/null || true)"
 for label in "${required[@]}"; do

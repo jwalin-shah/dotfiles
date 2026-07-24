@@ -11,10 +11,11 @@ Status key: **OK** = declared + working. **GAP** = works but not declared.
 40 brews + 13 casks. `homebrew.onActivation.cleanup = "zap"` auto-removes
 anything not declared here. Run `brew list` for live state, not this file.
 
-## npm globals (declared via `home.activation.npmGlobalTools`)
+## Agent toolchain (exact pins in `config/agent-toolchain.tsv`)
 
 | package | purpose |
 |---|---|
+| @earendil-works/pi-coding-agent | `pi` interactive cockpit; `pi-cockpit` hosts it in Mintmux |
 | @anthropic-ai/claude-code | `ca` / `ct` CLI |
 | @openai/codex | `codex` CLI |
 | command-code | `cmd` CLI — web search + general tasks |
@@ -26,7 +27,7 @@ anything not declared here. Run `brew list` for live state, not this file.
 | @inference/cli | observability |
 | gnhf | agent loops |
 
-## Python (uv-managed via `home.activation.uvTools`)
+## Python (uv-managed by the same exact-version receipt)
 
 | tool | purpose |
 |---|---|
@@ -81,7 +82,7 @@ are cloned as needed.
 | llama-embed-server | :8081 | Qwen3 0.6B embeddings |
 | coderank-embed-server | :8082 | CodeRank code embeddings |
 | mlx-chat-daemon | :8080 | liquid LFM2.5 8B chat |
-| tldr-daemon | — | code structure auto-index (**producer**; local cache not SoT) |
+| tldr incremental cache | — | no LaunchAgent; edit hook marks changed file dirty, next `tldr calls` query patches only that file |
 | cocoindex-daemon | — | **REMOVED** 2026-07-22 — do not re-enable as second sink |
 | knowledge-engine | — | on-change + daily 03:15 catch-up → Neo4j |
 | bridge-cdp-quota | — | CDP scrape → `~/.bridge/cdp-cache.json` every 6h |
@@ -106,6 +107,7 @@ Prove: `dotfiles/bin/prove-launchers.sh`
 
 | Agent | Config files | Managed? |
 |---|---|---|
+| pi | `~/.pi/agent/settings.json`; auth remains runtime-owned | nix symlink for settings; `/login` owns auth |
 | ca (Claude direct) | `~/.claude/settings.json`, `settings.local.json` | nix symlink |
 | ct (TokenRouter) | `~/.claude-token/` (shares ca settings) | nix symlink |
 | codex | `~/.codex/config.toml`, `hooks.json`, `rules/` | nix symlink |
@@ -119,7 +121,7 @@ Prove: `dotfiles/bin/prove-launchers.sh`
 - `cmd` — Homebrew npm tool; no mutation gate (WAIVER).
 - `com.jwalinshah.reconcile-outcomes` — hand LaunchAgent, not in configuration.nix (investigate).
 
-*Last updated: 2026-07-23 — factory e2e scorecard + CDP offline prove wired into prove-launchers.*
+*Last updated: 2026-07-23 — Pi cockpit, exact tool receipts, and lazy TLDR invalidation.*
 ## Cross-Repo Dependency Manifest (deps.json) & Neo4j
 
 These are tracked by each project's `wayfinder/deps.json` (validated by

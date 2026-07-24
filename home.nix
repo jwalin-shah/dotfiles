@@ -253,32 +253,18 @@ in
   home.file.".gemini/AGENTS.md".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/GLOBAL.md";
 
-  home.activation.npmGlobalTools = config.lib.dag.entryAfter ["writeBoundary"] ''
-    (
-      export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:$PATH"
-      # Launcher dependencies — wrappers in ~/bin/ exec these directly
-      /opt/homebrew/bin/npm install -g @anthropic-ai/claude-code @openai/codex command-code || true
-      # Agent toolchain — used across all projects by agents and Bridge context assembly
-      /opt/homebrew/bin/npm install -g gh-axi githits chrome-devtools-axi lavish-axi tasks-axi @inference/cli gnhf || true
-      # Linting, formatting, and type-checking — used by Bridge verification gates and agent toolchains
-      /opt/homebrew/bin/npm install -g eslint prettier pyright typescript pnpm || true
-    )
+  # One line-oriented receipt owns exact npm and uv versions. Activation is a
+  # no-op when the live versions match and fails closed on install drift.
+  home.activation.agentToolchain = config.lib.dag.entryAfter ["writeBoundary"] ''
+    export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:$PATH"
+    "${dotfiles}/bin/reconcile-agent-toolchain.sh" install
   '';
 
-  # uv-managed tools: installs are idempotent (uv tool install is a no-op when
-  # already at the right version). These provide binaries that LaunchAgents and
-  # bridge's context assembly depend on. Without this, they're lost on fresh machine.
-  home.activation.uvTools = config.lib.dag.entryAfter ["writeBoundary"] ''
-    (
-      export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:$PATH"
-      uv tool install mlx-lm || true
-      uv tool install cocoindex || true
-      uv tool install cocoindex-code || true
-
-      uv tool install "llm-tldr" || true
-      uv tool install z3-solver || true
-    )
-  '';
+  # Pi owns the interactive cockpit only. Bridge remains the admitted worker
+  # and verification engine. Auth stays runtime-owned in ~/.pi/agent/auth.json.
+  home.file.".pi/agent/settings.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.pi/agent/settings.json";
+  home.file.".pi/agent/settings.json".force = true;
 
   home.file.".config/claude/mcp.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/claude/mcp.json";
@@ -303,6 +289,8 @@ in
 
   home.file."bin/daemon-wrapper".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/daemon-wrapper";
+  home.file."bin/pi-cockpit".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/pi-cockpit";
 
 
   # Bridge worker adapters - source lives in ~/projects/bridge/scripts/
