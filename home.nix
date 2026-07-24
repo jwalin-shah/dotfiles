@@ -257,8 +257,8 @@ in
   # One line-oriented receipt owns exact npm and uv versions. Activation is a
   # no-op when the live versions match and fails closed on install drift.
   home.activation.agentToolchain = config.lib.dag.entryAfter ["writeBoundary"] ''
-    export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:$PATH"
-    "${dotfiles}/bin/reconcile-agent-toolchain.sh" install
+    PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:$PATH" \
+      "${dotfiles}/bin/reconcile-agent-toolchain.sh" install
   '';
 
   # Pi owns the interactive cockpit only. Bridge remains the admitted worker

@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-ln -sfn "$DIR" ~/.dotfiles
 
 # Guard: .agents/ must hold real skill content, never symlinks.
 if [[ -d "$DIR/.agents" ]]; then
@@ -26,6 +25,14 @@ for req in preflight/SKILL.md cocoindex/SKILL.md cocoindex-code/SKILL.md plugin.
     exit 1
   fi
 done
+
+# Build and inspect the actual Home Manager activation program before changing
+# live links or asking for sudo. A successful Nix build alone does not prove
+# that custom activation nodes preserve standard command resolution.
+echo "==> proving generated Home Manager activation"
+"$DIR/bin/prove-home-activation.sh"
+
+ln -sfn "$DIR" ~/.dotfiles
 
 # Hand-made alias (seen 2026-07-18): ~/.claude/skills → dotfiles/.agents
 # That makes ~/.claude/skills/preflight the SAME inode as .agents/preflight. Clearing
