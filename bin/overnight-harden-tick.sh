@@ -8,12 +8,11 @@
 #      bridge-spawn it (one ticket per tick)
 #   3) Stop spawning when STOP file present or weekly Claude ≥90% (best-effort)
 set -euo pipefail
-export PATH="${HOME}/.local/bin:${HOME}/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
+export PATH="${HOME}/.local/bin:${HOME}/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${PATH:-}"
 
 ORBIT_DATA="${HOME}/.local/share/orbit"
 QUEUE="${HOME}/projects/portfolio/wayfinder/overnight-queue"
 LOG="${ORBIT_DATA}/overnight-harden.log"
-EVIDENCE="${HOME}/projects/portfolio/wayfinder/overnight-hardening-loop-2026-07-23.md"
 STOP="${QUEUE}/STOP"
 LOCK="${ORBIT_DATA}/overnight-harden.lock"
 mkdir -p "$ORBIT_DATA" "$QUEUE"
@@ -113,12 +112,19 @@ if [[ "$PROVE_OK" -eq 1 ]]; then
   log "prove pack GREEN"
 else
   log "prove pack RED — see $LOG (no spawn this tick)"
+  # Capture structured gate detail for intermittent flakes (bare ✗ is useless).
+  if command -v bridge >/dev/null 2>&1; then
+    {
+      echo "=== $(ts) verify-machine --json (RED dump) ==="
+      bridge verify-machine --json 2>/dev/null || true
+    } >>"$LOG" 2>&1 || true
+  fi
   exit 1
 fi
 
-# Best-effort quota brake (do not fail tick if script missing)
+# Best-effort quota brake (do not fail tick if script missing / hung)
 if [[ -x "${HOME}/projects/bridge/scripts/quota-recommend.sh" && ! -f "$STOP" ]]; then
-  qout="$(~/projects/bridge/scripts/quota-recommend.sh 2>/dev/null || true)"
+  qout="$(timeout 30 "${HOME}/projects/bridge/scripts/quota-recommend.sh" 2>/dev/null || true)"
   if echo "$qout" | rg -q 'anthropic:.*weekly=(9[0-9]|100)\.'; then
     log "anthropic weekly ≥90 — writing STOP"
     echo "quota brake $(ts)" >"$STOP"
@@ -159,13 +165,14 @@ if ! timeout 5 mm-ctl ping >/dev/null 2>&1; then
   log "mintmux recovered"
 fi
 
-# Pick oldest ready ticket: NAME.json + NAME.brief.md, not *.done
+# Pick oldest ready ticket: NAME.json + NAME.brief.md, not *.done / *.failed
 ticket=""
 brief=""
 for j in "$QUEUE"/*.json; do
   [[ -f "$j" ]] || continue
   base="${j%.json}"
   [[ -f "${base}.done" ]] && continue
+  [[ -f "${base}.failed" ]] && continue
   [[ -f "${base}.brief.md" ]] || continue
   ticket="$j"
   brief="${base}.brief.md"
@@ -177,8 +184,8 @@ if [[ -z "$ticket" ]]; then
   exit 0
 fi
 
-adapter="$(python3 -c "import json,sys; print(json.load(open(sys.argv[1])).get('adapter',''))" "$ticket" 2>/dev/null || true)"
-repo="$(python3 -c "import json,sys; print(json.load(open(sys.argv[1])).get('target_repository',''))" "$ticket" 2>/dev/null || true)"
+adapter="$(jq -r '.adapter // empty' "$ticket" 2>/dev/null || true)"
+repo="$(jq -r '.target_repository // empty' "$ticket" 2>/dev/null || true)"
 repo_dir="${HOME}/projects/${repo}"
 if [[ -z "$repo" || ! -d "$repo_dir" ]]; then
   log "bad target_repository=$repo for $(basename "$ticket")"
@@ -198,9 +205,55 @@ set +e
 ec=$?
 set -e
 if [[ "$ec" -eq 0 ]]; then
+  # Fail-closed belt (042 class): spawn exit 0 + verification_commands can pass
+  # without an open PR. delivery=pr must show a gh-visible open PR matching
+  # ticket id (title/body/branch search). Bridge LandedWorkProof still owns
+  # release; this stops overnight from marking .done on a false ledger.
+  delivery="$(jq -r '.delivery // empty' "$ticket" 2>/dev/null || true)"
+  tid="$(jq -r '.id // empty' "$ticket" 2>/dev/null || true)"
+  if [[ "$delivery" == "pr" ]]; then
+    pr_n=0
+    if [[ -n "$tid" ]] && command -v gh-axi >/dev/null 2>&1; then
+      # Prefer listing open PRs + local match: GitHub --search often misses
+      # abbreviated head branches (047: id had "-requires-", branch did not).
+      pr_n="$(
+        cd "$repo_dir" && gh-axi api \
+          '/repos/{owner}/{repo}/pulls?state=open&per_page=40' 2>/dev/null \
+          | jq --arg tid "$tid" '
+              def tokens: ascii_downcase | gsub("/"; "-") | split("-") | map(select(length > 2));
+              def stem_tokens: tokens
+                | map(select(
+                    (. != "fix" and . != "feat" and . != "feature"
+                     and . != "chore" and . != "docs" and . != "design"
+                     and . != "refactor" and . != "test" and . != "ci"
+                     and . != "clean")
+                    and (test("^[0-9]+$") | not)
+                  ));
+              [.[] | select(
+                (.head.ref | contains($tid)) or
+                (.title | contains($tid)) or
+                ((.body // "") | contains($tid)) or
+                (
+                  (.head.ref | stem_tokens) as $ht
+                  | ($ht | length) >= 4
+                  and ($ht | all(. as $t | ($tid | ascii_downcase | contains($t))))
+                )
+              )] | length
+            ' 2>/dev/null || echo 0
+      )"
+    fi
+    if [[ "${pr_n:-0}" -lt 1 ]]; then
+      touch "${ticket%.json}.failed"
+      log "spawn exit 0 but delivery=pr with no open PR matching id=${tid:-?} — fail-closed → marked failed"
+      exit 1
+    fi
+    log "delivery=pr proved open PR count=$pr_n for id=$tid"
+  fi
   touch "${ticket%.json}.done"
   log "spawn OK → marked done $(basename "$ticket")"
 else
-  log "spawn FAIL exit=$ec for $(basename "$ticket")"
+  # Stop infinite 15m re-burn after ESCALATED / retry_limit — captain reviews .failed
+  touch "${ticket%.json}.failed"
+  log "spawn FAIL exit=$ec for $(basename "$ticket") → marked failed (skip until captain clears)"
   exit "$ec"
 fi

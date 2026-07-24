@@ -20,6 +20,7 @@ in
     bat
     eza
     delta
+    tree-sitter
     btop
     dust
     fastfetch
