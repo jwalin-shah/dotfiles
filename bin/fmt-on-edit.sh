@@ -18,6 +18,14 @@ case "$FILE" in
     ;;
 esac
 
+# TLDR owns the structural `calls` cache. Mark this repository-local file
+# dirty; the next cached calls query patches only the changed file.
+if [ -x "${HOME}/.dotfiles/bin/tldr-mark-dirty" ]; then
+  CLAUDE_TOOL_INPUT_FILE_PATH="$FILE" "${HOME}/.dotfiles/bin/tldr-mark-dirty" || true
+elif [ -x "${HOME}/projects/dotfiles/bin/tldr-mark-dirty" ]; then
+  CLAUDE_TOOL_INPUT_FILE_PATH="$FILE" "${HOME}/projects/dotfiles/bin/tldr-mark-dirty" || true
+fi
+
 # Neo4j sole-store on-change (structure+CALLS). Single fan-in; see neo4j-on-change.sh.
 if [ -x "${HOME}/.dotfiles/bin/neo4j-on-change.sh" ]; then
   CLAUDE_TOOL_INPUT_FILE_PATH="$FILE" "${HOME}/.dotfiles/bin/neo4j-on-change.sh" || true

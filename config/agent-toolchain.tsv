@@ -1,0 +1,22 @@
+# manager	package	version
+npm-safe	@earendil-works/pi-coding-agent	0.81.1
+npm	@anthropic-ai/claude-code	2.1.218
+npm	@openai/codex	0.145.0
+npm	command-code	1.1.1
+npm	gh-axi	0.1.27
+npm	githits	0.6.4
+npm	chrome-devtools-axi	0.1.27
+npm	lavish-axi	0.1.43
+npm	tasks-axi	0.2.3
+npm	@inference/cli	0.0.20
+npm	gnhf	0.1.41
+npm	eslint	10.7.0
+npm	prettier	3.9.6
+npm	pyright	1.1.411
+npm	typescript	7.0.2
+npm	pnpm	11.17.0
+uv	mlx-lm	0.31.3
+uv	cocoindex	1.0.17
+uv	cocoindex-code	0.2.37
+uv	llm-tldr	1.5.2
+uv	z3-solver	4.16.0.0

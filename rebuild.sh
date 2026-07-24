@@ -84,7 +84,7 @@ brew trust felixkratz/formulae 2>/dev/null || true
 brew trust nikitabobko/tap 2>/dev/null || true
 brew trust daytonaio/cli 2>/dev/null || true
 
-sudo $(command -v darwin-rebuild) switch --flake ~/.dotfiles#mac
+sudo "$(command -v darwin-rebuild)" switch --flake ~/.dotfiles#mac
 
 if command -v bridge >/dev/null 2>&1; then
   echo "==> refreshing machine capability manifest"
@@ -104,13 +104,10 @@ if command -v bridge >/dev/null 2>&1; then
   fi
 fi
 
-# Unload retired cocoindex-daemon if a stale plist remains after nix switch.
+# Unload retired index daemons if stale plists remain after nix switch.
 launchctl bootout "gui/$(id -u)/org.nixos.com.jwalinshah.cocoindex-daemon" 2>/dev/null || true
 pkill -f 'ccc run-daemon' 2>/dev/null || true
-
-for svc in com.jwalinshah.tldr-daemon; do
-  launchctl kickstart -k "gui/$(id -u)/org.nixos.$svc" 2>/dev/null || true
-done
+launchctl bootout "gui/$(id -u)/org.nixos.com.jwalinshah.tldr-daemon" 2>/dev/null || true
 
 if ! head -1 "$HOME/.claude/skills/axi/SKILL.md" >/dev/null 2>&1; then
   echo "ERROR: ~/.claude/skills/axi/SKILL.md unreadable after rebuild." >&2

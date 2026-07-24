@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+file="${CLAUDE_TOOL_INPUT_FILE_PATH:-${FILE_PATH:-${1:-}}}"
+[[ -n "$file" && -f "$file" ]] || exit 0
+
+case "$file" in
+  /*) absolute="$file" ;;
+  *) absolute="$(cd "$(dirname "$file")" && pwd -P)/$(basename "$file")" ;;
+esac
+absolute="$(cd "$(dirname "$absolute")" && pwd -P)/$(basename "$absolute")"
+
+repo="$(git -C "$(dirname "$absolute")" rev-parse --show-toplevel 2>/dev/null || true)"
+[[ -n "$repo" ]] || exit 0
+case "$absolute" in
+  "$repo"/*) relative="${absolute#"$repo"/}" ;;
+  *) exit 0 ;;
+esac
+
+tldr_python="${HOME}/.local/share/uv/tools/llm-tldr/bin/python3"
+if [[ ! -x "$tldr_python" ]]; then
+  echo "tldr-mark-dirty: llm-tldr unavailable; call graph may be stale for $relative" >&2
+  exit 0
+fi
+
+cache_dir="$repo/.tldr/cache"
+lock_dir="$cache_dir/.dirty.lock"
+mkdir -p "$cache_dir"
+locked=0
+for _ in {1..20}; do
+  if mkdir "$lock_dir" 2>/dev/null; then
+    locked=1
+    break
+  fi
+  sleep 0.05
+done
+if (( locked == 0 )); then
+  echo "tldr-mark-dirty: lock unavailable after 1s; call graph may be stale for $relative" >&2
+  exit 0
+fi
+trap 'rmdir "$lock_dir" 2>/dev/null || true' EXIT
+
+if ! "$tldr_python" - "$repo" "$relative" <<'PY'
+import sys
+from tldr.dirty_flag import mark_dirty
+
+mark_dirty(sys.argv[1], sys.argv[2])
+PY
+then
+  echo "tldr-mark-dirty: failed; call graph may be stale for $relative" >&2
+  exit 0
+fi

@@ -1,0 +1,8 @@
+{
+  "defaultProjectTrust": "ask",
+  "enableInstallTelemetry": false,
+  "enableAnalytics": false,
+  "warnings": {
+    "anthropicExtraUsage": true
+  }
+}
