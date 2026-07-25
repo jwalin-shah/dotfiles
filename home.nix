@@ -314,6 +314,10 @@ in
     config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-cx";
   home.file."bin/bridge-cc".source =
     config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-cc";
+  home.file."bin/bridge-pi".source =
+    config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-adapter";
+  home.file."bin/bridge-adapter".source =
+    config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-adapter";
 
   home.file."bin/quota-axi".source =
     config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/dotfiles/bin/quota-axi";

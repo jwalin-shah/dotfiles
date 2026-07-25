@@ -1,18 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-tokenrouter_api_key="$(security find-generic-password -a TOKENROUTER_API_KEY -s bridge-secrets -w)" || {
-  echo "ct: TOKENROUTER_API_KEY is missing from the bridge-secrets Keychain service; run 'bridge secrets refresh'" >&2
-  exit 1
-}
-if [ -z "$tokenrouter_api_key" ]; then
-  echo "ct: TOKENROUTER_API_KEY is empty in the bridge-secrets Keychain service; run 'bridge secrets refresh'" >&2
-  exit 1
-fi
+source "$HOME/.local/lib/keychain.bash"
+keychain_get TOKENROUTER_API_KEY
 
 exec env \
   CLAUDE_CONFIG_DIR="$HOME/.claude-token" \
-  ANTHROPIC_API_KEY="$tokenrouter_api_key" \
+  ANTHROPIC_API_KEY="$TOKENROUTER_API_KEY" \
   ANTHROPIC_BASE_URL="https://api.tokenrouter.com" \
   ANTHROPIC_DEFAULT_OPUS_MODEL="deepseek/deepseek-v4-pro" \
   ANTHROPIC_DEFAULT_OPUS_MODEL_SUPPORTED_CAPABILITIES="effort,xhigh_effort,max_effort" \

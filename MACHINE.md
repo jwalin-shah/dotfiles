@@ -8,7 +8,7 @@ Status key: **OK** = declared + working. **GAP** = works but not declared.
 
 ## Homebrew (`configuration.nix` brews/casks)
 
-40 brews + 13 casks. `homebrew.onActivation.cleanup = "zap"` auto-removes
+41 brews + 13 casks. `homebrew.onActivation.cleanup = "zap"` auto-removes
 anything not declared here. Run `brew list` for live state, not this file.
 
 ## Agent toolchain (exact pins in `config/agent-toolchain.tsv`)
@@ -26,6 +26,10 @@ anything not declared here. Run `brew list` for live state, not this file.
 | tasks-axi | task management |
 | @inference/cli | observability |
 | gnhf | agent loops |
+
+`firectl` is a Homebrew-managed Fireworks account/quota CLI. It is declared in
+`configuration.nix` and is intentionally not part of the npm/uv exact-version
+receipt.
 
 Neovim's current Treesitter plugin compiles parsers with the Home Manager
 `tree-sitter` package (requires CLI 0.26.1 or newer; pinned Nixpkgs provides

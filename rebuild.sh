@@ -92,6 +92,7 @@ done
 brew trust felixkratz/formulae 2>/dev/null || true
 brew trust nikitabobko/tap 2>/dev/null || true
 brew trust daytonaio/cli 2>/dev/null || true
+brew trust fw-ai/firectl 2>/dev/null || true
 
 sudo "$(command -v darwin-rebuild)" switch --flake ~/.dotfiles#mac
 
