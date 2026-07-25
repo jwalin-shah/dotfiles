@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+source "$HOME/.local/lib/keychain.bash"
+keychain_get PIONEER_API_KEY
+
+# Clear any claude.ai auth so Pioneer key takes precedence
+/opt/homebrew/bin/claude auth logout 2>/dev/null
+
+exec env \
+  ANTHROPIC_BASE_URL="https://api.pioneer.ai" \
+  ANTHROPIC_API_KEY="$PIONEER_API_KEY" \
+  CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1 \
+  ANTHROPIC_CUSTOM_MODEL_OPTION="claude-sonnet-5" \
+  /opt/homebrew/bin/claude --dangerously-skip-permissions "$@"
