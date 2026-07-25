@@ -279,12 +279,14 @@ in
   home.file.".config/orbit/models.env".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/orbit/models.env";
 
-  # ~/bin launcher wrappers — ca and ct only.
+  # ~/bin launcher wrappers — ct, ca, and clpi.
   # All other agents (codex, cursor-agent, agy, cmd) are called directly.
   home.file."bin/ct".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/ct-wrapper";
   home.file."bin/ca".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/ca-wrapper";
+  home.file."bin/clpi".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/clpi";
 
   # Personal tool wrappers (only useful ones — dead wrappers removed)
   home.file."bin/worktree".source =
