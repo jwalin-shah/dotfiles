@@ -13,3 +13,4 @@ credentials.json
 .netrc
 .env.*
 .env
+.bridge-task

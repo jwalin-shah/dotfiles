@@ -220,6 +220,7 @@
       "nikitabobko/tap"
       "felixkratz/formulae"
       "daytonaio/cli"
+      "fw-ai/firectl"
     ];
 
     brews = [
@@ -243,6 +244,7 @@
       "gofumpt"
       "golangci-lint"
       "infisical"
+      "firectl"
       "jq"
       "llama.cpp"
       "ncdu"
