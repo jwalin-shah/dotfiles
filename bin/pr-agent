@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+source "$HOME/.local/lib/keychain.bash"
+
+# PR-Agent needs an LLM API key — use TokenRouter
+export OPENAI_API_KEY="${OPENAI_API_KEY:-$(keychain_get TOKENROUTER_MGMT_KEY 2>/dev/null || echo "")}"
+export OPENAI_BASE_URL="${OPENAI_BASE_URL:-https://api.tokenrouter.com/v1}"
+
+exec /Users/jwalinshah/.local/venv/pr-agent/bin/pr-agent "$@"
