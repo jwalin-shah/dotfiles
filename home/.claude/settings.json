@@ -9,7 +9,7 @@
     ],
     "defaultMode": "default"
   },
-  "model": "opus",
+  "model": "sonnet",
   "hooks": {
     "PreToolUse": [
       {
@@ -75,7 +75,7 @@
       }
     }
   },
-  "effortLevel": "medium",
+  "effortLevel": "low",
   "skipDangerousModePermissionPrompt": true,
   "theme": "dark-ansi",
   "verbose": false,

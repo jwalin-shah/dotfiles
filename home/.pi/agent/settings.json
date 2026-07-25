@@ -1,8 +1,27 @@
 {
   "defaultProjectTrust": "ask",
-  "enableInstallTelemetry": false,
+  "enableInstallTelemetry": true,
   "enableAnalytics": false,
   "warnings": {
     "anthropicExtraUsage": true
-  }
+  },
+  "lastChangelogVersion": "0.82.0",
+  "theme": "dark",
+  "defaultProvider": "tokenrouter",
+  "defaultModel": "deepseek/deepseek-v4-flash",
+  "packages": [
+    "npm:pi-subagents",
+    "npm:@juicesharp/rpiv-ask-user-question",
+    "npm:@narumitw/pi-plan-mode",
+    "npm:@gotgenes/pi-permission-system"
+  ],
+  "defaultThinkingLevel": "high",
+  "terminal": {
+    "showTerminalProgress": true
+  },
+  "steeringMode": "all",
+  "followUpMode": "all",
+  "transport": "auto",
+  "showCacheMissNotices": true,
+  "treeFilterMode": "all"
 }
