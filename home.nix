@@ -28,6 +28,8 @@ in
     tree
     zsh-vi-mode
     zsh-history-substring-search
+    dafny
+    elan
   ];
 
   fonts.fontconfig.enable = true;
@@ -317,7 +319,7 @@ in
   home.file."bin/bridge-cc".source =
     config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-cc";
   home.file."bin/bridge-pi".source =
-    config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-adapter";
+    config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-pi";
   home.file."bin/bridge-adapter".source =
     config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-adapter";
 

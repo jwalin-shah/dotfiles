@@ -9,7 +9,7 @@
     ],
     "defaultMode": "default"
   },
-  "model": "claude-haiku-4-5",
+  "model": "haiku",
   "hooks": {
     "PreToolUse": [
       {
@@ -75,7 +75,7 @@
       }
     }
   },
-  "effortLevel": "low",
+  "effortLevel": "high",
   "skipDangerousModePermissionPrompt": true,
   "theme": "dark-ansi",
   "verbose": false,
