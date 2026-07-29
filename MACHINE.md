@@ -31,6 +31,9 @@ anything not declared here. Run `brew list` for live state, not this file.
 `configuration.nix` and is intentionally not part of the npm/uv exact-version
 receipt.
 
+Formal proof tool ownership and the no-duplicate rule are recorded in
+`docs/FORMAL_TOOLCHAIN.md`.
+
 Neovim's current Treesitter plugin compiles parsers with the Home Manager
 `tree-sitter` package (requires CLI 0.26.1 or newer; pinned Nixpkgs provides
 0.26.9).
@@ -127,7 +130,8 @@ Prove: `dotfiles/bin/prove-launchers.sh`
 
 - `~/bin/chrome-ai-tools`, `chrome-main`, `chrome-third` — unmanaged wrappers (WAIVER).
 - `cmd` — Homebrew npm tool; no mutation gate (WAIVER).
-- `com.jwalinshah.reconcile-outcomes` — hand LaunchAgent, not in configuration.nix (investigate).
+- `com.jwalinshah.reconcile-outcomes` — hand LaunchAgent, not in configuration.nix (WAIVER; separate job-application owner).
+- `org.orbit.bridge-cdp-quota` — retired duplicate of the Nix-managed CDP quota agent; unloaded and archived under `~/Library/LaunchAgents/archive/` on 2026-07-29.
 
 *Last updated: 2026-07-23 — Pi cockpit, exact tool receipts, and lazy TLDR invalidation.*
 ## Cross-Repo Dependency Manifest (deps.json) & Neo4j

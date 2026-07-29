@@ -1,8 +1,8 @@
 approvals_reviewer = "user"
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
-model = "gpt-5.6-sol"
-model_reasoning_effort = "xhigh"
+model = "gpt-5.6-luna"
+model_reasoning_effort = "high"
 personality = "pragmatic"
 notify = [
     "/Users/jwalinshah/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient",
@@ -41,6 +41,21 @@ trust_level = "trusted"
 trust_level = "trusted"
 
 [projects."/private/tmp/bridge-prove"]
+trust_level = "trusted"
+
+[projects."/Users/jwalinshah/Documents/Codex/2026-07-28/yo"]
+trust_level = "trusted"
+
+[projects."/Users/jwalinshah/Documents/Codex/2026-07-28/research-prior-art-and-tools"]
+trust_level = "trusted"
+
+[projects."/Users/jwalinshah/Documents/Codex/2026-07-28/research-adversarial-red-team"]
+trust_level = "trusted"
+
+[projects."/Users/jwalinshah/Documents/Codex/2026-07-28/ddd"]
+trust_level = "trusted"
+
+[projects."/Users/jwalinshah/Documents/Codex/2026-07-29/apple-container-worker-review"]
 trust_level = "trusted"
 
 [tui.model_availability_nux]
@@ -85,16 +100,22 @@ enabled = false
 [plugins."template-creator@openai-primary-runtime"]
 enabled = false
 
+[plugins."computer-use@openai-bundled"]
+enabled = true
+
+[plugins."chrome@openai-bundled"]
+enabled = true
+
 [plugins."browser@openai-bundled"]
-enabled = false
+enabled = true
 
 [marketplaces.openai-bundled]
-last_updated = "2026-07-17T22:27:50Z"
+last_updated = "2026-07-29T16:53:06Z"
 source_type = "local"
 source = "/Users/jwalinshah/.codex/.tmp/bundled-marketplaces/openai-bundled"
 
 [marketplaces.openai-primary-runtime]
-last_updated = "2026-07-17T23:01:23Z"
+last_updated = "2026-07-28T17:00:55Z"
 source_type = "local"
 source = "/Users/jwalinshah/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-primary-runtime"
 
@@ -109,13 +130,14 @@ NODE_REPL_NODE_MODULE_DIRS = "/Applications/ChatGPT.app/Contents/Resources/cua_n
 NODE_REPL_NODE_PATH = "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node"
 NODE_REPL_TRUSTED_CODE_PATHS = "/Users/jwalinshah/.codex"
 CODEX_HOME = "/Users/jwalinshah/.codex"
-NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "6d25aa7656feac858f3a3bdaea5bcbab0dbfd426c9de8e6931ce90c399ee8e4f,cf732b4a285497bfd7e75a2ac14879bce9ae644eb4e1babeb17bb6a840dfc9bd"
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "330cfa6875d3acd34ed3d321d03e97c0dd9ee3c1855467f2600215089f2d8279,6d25aa7656feac858f3a3bdaea5bcbab0dbfd426c9de8e6931ce90c399ee8e4f"
 BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
 NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
 NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
 NODE_REPL_INSTRUCTIONS_USE_CASE_COMPUTER_USE = "Control desktop apps on macOS through Computer Use."
 BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
-BROWSER_USE_CODEX_APP_VERSION = "26.707.72221"
+BROWSER_USE_CODEX_APP_VERSION = "26.715.31251"
+SKY_CUA_SERVICE_PATH = "/Users/jwalinshah/.codex/plugins/cache/openai-bundled/computer-use/1.0.1000451/Codex Computer Use.app"
 CODEX_CLI_PATH = "/Applications/ChatGPT.app/Contents/Resources/codex"
 
 [mcp_servers.computer-use]
@@ -129,9 +151,13 @@ inherit = "core"
 
 [shell_environment_policy.set]
 ENABLE_TOOL_SEARCH = "true"
+BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "330cfa6875d3acd34ed3d321d03e97c0dd9ee3c1855467f2600215089f2d8279,6d25aa7656feac858f3a3bdaea5bcbab0dbfd426c9de8e6931ce90c399ee8e4f"
+NODE_REPL_TRUSTED_CODE_PATHS = "/Users/jwalinshah/.codex"
 
 [desktop]
 conversationDetailMode = "STEPS_PROSE"
 ambient-suggestions-enabled = false
 show-context-window-usage = true
 followUpQueueMode = "queue"
+keepRemoteControlAwakeWhilePluggedIn = true

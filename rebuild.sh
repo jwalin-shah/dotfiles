@@ -96,6 +96,10 @@ brew trust fw-ai/firectl 2>/dev/null || true
 
 sudo "$(command -v darwin-rebuild)" switch --flake ~/.dotfiles#mac
 
+# Retired hand-installed duplicate. The Nix-managed agent above is the sole
+# CDP quota owner; unload the old label before proving the live inventory.
+launchctl bootout "gui/$(id -u)/org.orbit.bridge-cdp-quota" 2>/dev/null || true
+
 if command -v bridge >/dev/null 2>&1; then
   echo "==> refreshing machine capability manifest"
   bridge freeze --write 2>/dev/null || true

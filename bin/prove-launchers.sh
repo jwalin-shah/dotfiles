@@ -104,12 +104,38 @@ else
   fail "agent toolchain version drift (run reconcile-agent-toolchain.sh install)"
 fi
 
+# Formal tool ownership is deliberate: Dafny is Nix/Home Manager, Z3 is uv,
+# and Lean's lake is installed by elan. Do not restore duplicate Homebrew
+# packages merely because cleanup removed an undeclared copy.
+for formal_bin in dafny z3 java lake; do
+  if command -v "$formal_bin" >/dev/null 2>&1; then
+    ok "formal tool $formal_bin → $(command -v "$formal_bin")"
+  else
+    fail "missing formal tool: $formal_bin (see docs/FORMAL_TOOLCHAIN.md)"
+  fi
+done
+
 loaded="$(launchctl list 2>/dev/null || true)"
 for label in "${required[@]}"; do
   if echo "$loaded" | grep -q "$label"; then
     ok "loaded $label"
   else
     fail "LaunchAgent not loaded: $label (run rebuild.sh)"
+  fi
+done
+
+# Retired labels must not be loaded alongside their Nix-managed replacements.
+# A stale plist on disk is recoverable; a loaded duplicate can double-run work.
+retired=(
+  org.orbit.bridge-cdp-quota
+  org.nixos.com.jwalinshah.cocoindex-daemon
+  org.nixos.com.jwalinshah.tldr-daemon
+)
+for label in "${retired[@]}"; do
+  if echo "$loaded" | grep -qE "[[:space:]]${label}$"; then
+    fail "retired duplicate LaunchAgent is loaded: $label"
+  else
+    ok "retired LaunchAgent not loaded: $label"
   fi
 done
 

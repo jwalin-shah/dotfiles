@@ -9,7 +9,7 @@
     ],
     "defaultMode": "default"
   },
-  "model": "sonnet",
+  "model": "haiku",
   "hooks": {
     "PreToolUse": [
       {
@@ -80,22 +80,5 @@
   "theme": "dark-ansi",
   "verbose": false,
   "agentPushNotifEnabled": true,
-  "models": [
-    {
-      "id": "opus",
-      "model": "deepseek-v4-pro",
-      "display_name": "DeepSeek v4 Pro"
-    },
-    {
-      "id": "sonnet",
-      "model": "deepseek-v4-flash",
-      "display_name": "DeepSeek v4 Flash"
-    },
-    {
-      "id": "haiku",
-      "model": "kimi-k3-free",
-      "display_name": "Kimi K3 Free"
-    }
-  ],
-  "_comment": "Minimal shared Claude settings. Transport is chosen by the launcher wrapper (claude-wrapper, ca-wrapper, ct-wrapper)."
+  "_comment": "Local Claude settings. No API key — uses built-in models only."
 }

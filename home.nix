@@ -192,7 +192,7 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/GLOBAL.md";
 
   home.file.".claude-a/settings.json".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/settings.json";
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude-a/settings.json";
   home.file.".claude-a/settings.json".force = true;
   home.file.".claude-a/settings.local.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/settings.local.json";
