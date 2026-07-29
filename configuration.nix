@@ -473,6 +473,7 @@
           DAEMON_TYPE = "foreground";
           DAEMON_HEALTH_URL = "http://127.0.0.1:9100/v1/status";
           DAEMON_WORKING_DIR = "${home}/projects/bridge";
+          BRIDGE_GRPC_AUTH_TOKEN_FILE = "${home}/.local/state/bridge/grpc-auth-token";
         };
         StandardOutPath = "${home}/.local/share/orbit/bridge-serve.log";
         StandardErrorPath = "${home}/.local/share/orbit/bridge-serve.log";

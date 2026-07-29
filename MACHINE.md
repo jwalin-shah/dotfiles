@@ -100,7 +100,7 @@ are cloned as needed.
 | prove-launchers | — | PATH orbit/bridge, LaunchAgents, overnight PATH,/usr/sbin, **CDP offline prove**, **factory e2e schema prove** |
 | **verify-machine** | — | daily 09:00 `bridge verify-machine` + `prove-launchers.sh` |
 | factory-e2e | — | `wayfinder/factory-e2e-readiness-2026-07-23.md` + `prove-factory-e2e-scorecard.sh` |
-| **bridge-serve** | :9100 / :9101 | Orbit HTTP + gRPC surface (`org.nixos.com.jwalinshah.bridge-serve`, KeepAlive). Prove: `prove-launchers.sh`, `orbit status` |
+| **bridge-serve** | :9100 / :9101 | Orbit HTTP + authenticated gRPC surface (`org.nixos.com.jwalinshah.bridge-serve`, KeepAlive). Token file owner: `~/.local/state/bridge/grpc-auth-token` (0600). Prove: `prove-launchers.sh`, `orbit status` |
 | **overnight-harden** | — | every 15m prove+spawn (LaunchAgent); Cursor Layer A continuous ~5m while chat awake |
 | neo4j | :7687 | sole knowledge store — Homebrew `brew services` (not a nix LaunchAgent) |
 | mintmux | — | PTY multiplexer |
