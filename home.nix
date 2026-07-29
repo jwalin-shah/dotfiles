@@ -287,6 +287,8 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/ct-wrapper";
   home.file."bin/ca".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/ca-wrapper";
+  home.file."bin/ca-watch".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/ca-watch";
   home.file."bin/clpi".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/clpi";
 

@@ -1,0 +1,140 @@
+#!/usr/bin/env bash
+# ca-watch — bounded, read-only watcher for a CA session in Mintmux.
+#
+# It observes project trust state and pane health. It never accepts trust,
+# sends input, restarts a provider, or prints pane contents.
+set -euo pipefail
+
+usage() {
+  cat >&2 <<'EOF'
+usage: ca-watch --pane <id> [--project <dir>] [--max-seconds <n>]
+                [--interval <seconds>] [--once] [--done-marker <text>]
+EOF
+}
+
+PANE=""
+PROJECT="$(pwd -P)"
+MAX_SECONDS=600
+INTERVAL=5
+ONCE=0
+DONE_MARKER=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --pane)
+      [[ $# -ge 2 ]] || { usage; exit 2; }
+      PANE="$2"
+      shift 2
+      ;;
+    --project)
+      [[ $# -ge 2 ]] || { usage; exit 2; }
+      PROJECT="$2"
+      shift 2
+      ;;
+    --max-seconds)
+      [[ $# -ge 2 ]] || { usage; exit 2; }
+      MAX_SECONDS="$2"
+      shift 2
+      ;;
+    --interval)
+      [[ $# -ge 2 ]] || { usage; exit 2; }
+      INTERVAL="$2"
+      shift 2
+      ;;
+    --once)
+      ONCE=1
+      shift
+      ;;
+    --done-marker)
+      [[ $# -ge 2 ]] || { usage; exit 2; }
+      DONE_MARKER="$2"
+      shift 2
+      ;;
+    -h|--help)
+      usage >&1
+      exit 0
+      ;;
+    *)
+      usage
+      exit 2
+      ;;
+  esac
+done
+
+if [[ -z "$PANE" || ! "$PANE" =~ ^[0-9]+$ ]]; then
+  echo "CA_WATCH state=invalid_input reason=--pane_required" >&2
+  exit 2
+fi
+if [[ ! -d "$PROJECT" ]]; then
+  echo "CA_WATCH state=invalid_project reason=project_missing" >&2
+  exit 2
+fi
+if [[ ! "$MAX_SECONDS" =~ ^[1-9][0-9]*$ || ! "$INTERVAL" =~ ^[1-9][0-9]*$ ]]; then
+  echo "CA_WATCH state=invalid_input reason=positive_durations_required" >&2
+  exit 2
+fi
+
+CONFIG_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude-a}"
+STATE_FILE="$CONFIG_DIR/.claude.json"
+started="$(date +%s)"
+last_state=""
+last_reason=""
+
+emit() {
+  local state="$1" reason="$2"
+  if [[ "$state" != "$last_state" || "$reason" != "$last_reason" ]]; then
+    echo "CA_WATCH state=$state reason=$reason pane=$PANE project=$PROJECT"
+    last_state="$state"
+    last_reason="$reason"
+  fi
+}
+
+trust_ok() {
+  [[ -r "$STATE_FILE" ]] || return 1
+  jq -e --arg project "$PROJECT" \
+    '.projects[$project].hasTrustDialogAccepted == true' \
+    "$STATE_FILE" >/dev/null 2>&1
+}
+
+while :; do
+  now="$(date +%s)"
+  if (( now - started >= MAX_SECONDS )); then
+    emit timeout lease_expired
+    exit 2
+  fi
+
+  if trust_ok; then
+    trust_state=trusted
+  else
+    trust_state=trust_required
+  fi
+
+  pane=""
+  if ! pane="$(timeout 5s mm-ctl capture -bytes 16000 "$PANE" 2>/dev/null)"; then
+    emit pane_unavailable capture_failed
+    exit 4
+  fi
+
+  if printf '%s' "$pane" | rg -qi 'overloaded_error|(^|[^0-9])529([^0-9]|$)|rate.?limit|service unavailable'; then
+    emit provider_degraded "${trust_state}_provider_overloaded"
+    final_code=5
+  elif printf '%s' "$pane" | rg -qi 'workspace.*not trusted|trust this folder|project.*not trusted'; then
+    emit trust_required trust_prompt_visible
+    final_code=3
+  elif [[ "$trust_state" != trusted ]]; then
+    emit trust_required trust_not_persisted
+    final_code=3
+  else
+    emit healthy trust_and_pane_observed
+    final_code=0
+  fi
+
+  if [[ -n "$DONE_MARKER" ]] && printf '%s' "$pane" | rg -Fq -- "$DONE_MARKER"; then
+    emit complete done_marker_observed
+    exit 0
+  fi
+  if (( ONCE == 1 )); then
+    exit "$final_code"
+  fi
+  sleep "$INTERVAL"
+done
