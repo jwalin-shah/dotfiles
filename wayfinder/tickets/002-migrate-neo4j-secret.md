@@ -27,6 +27,31 @@ before adding a wrapper or client:
    can project exactly this one secret for the knowledge-engine process.
 4. Which running consumers use the credential and how each is restarted.
 
+## Inventory evidence (2026-07-29)
+
+- **Neo4j service:** the Homebrew `neo4j` LaunchAgent was observed started,
+  with local Bolt and HTTP listeners on loopback. No credential value was
+  printed or persisted by the inventory.
+- **Current daemon boundary:** `bin/daemon-wrapper` can source a configured
+  `DAEMON_ENV_FILE`, but it does not read macOS Keychain or Infisical itself.
+  Using a tracked or Nix-store environment file for this credential would fail
+  the required secrecy boundary, so no new env-file projection was added.
+- **Existing secret authority:** Bridge's `bridge-secrets` store is
+  Keychain-first with Infisical refresh/export on a miss. A direct Keychain
+  presence check found no `NEO4J_PASSWORD` entry. The read-only
+  `bridge secrets audit --json` command returned an empty report; its current
+  implementation skips inaccessible Infisical folders, so that result is not
+  proof that the Infisical root is empty or that rotation is unnecessary.
+- **Consumers:** Dotfiles declares the
+  `com.jwalinshah.knowledge-engine` LaunchAgent for
+  `scripts/sync-and-embed.sh`; the on-change and graph-sync scripts also
+  consume `NEO4J_PASSWORD`. The knowledge-engine LaunchAgent was not running
+  during this inspection. The Bridge Go knowledge client no longer supplies a
+  known fallback password and now rejects a missing value before connecting.
+- **Boundary still open:** no credential was rotated or created. The approved
+  Keychain/Infisical name, projection mechanism, restart order, and history
+  decision remain captain-approved work items.
+
 ## Acceptance
 
 - [ ] No Neo4j credential value in tracked files, generated Nix store paths,
