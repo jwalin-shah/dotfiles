@@ -415,7 +415,11 @@
           DAEMON_HEALTH_URL = "pid-only";
           NEO4J_URI = "neo4j://localhost:7687";
           NEO4J_USER = "neo4j";
-          NEO4J_PASSWORD = "axiom-knowledge";
+          # Secret names are safe to keep declarative; daemon-wrapper reads
+          # values from the macOS Keychain at launch and fails closed if the
+          # approved entry has not been provisioned.
+          DAEMON_KEYCHAIN_SERVICE = "bridge-secrets";
+          DAEMON_KEYCHAIN_SECRETS = "NEO4J_PASSWORD";
         };
         StandardOutPath = "${home}/.local/share/orbit/knowledge-engine.log";
         StandardErrorPath = "${home}/.local/share/orbit/knowledge-engine.log";

@@ -22,6 +22,8 @@
 #   DAEMON_VALIDATION_CMD Command to run as startup validation (optional)
 #   DAEMON_HEALTH_CMD    Command to run as health check (for child-block)
 #   DAEMON_WORKING_DIR   cd here before launch
+#   DAEMON_KEYCHAIN_SERVICE Keychain service for runtime secrets (optional)
+#   DAEMON_KEYCHAIN_SECRETS Comma-separated env-var names to load (optional)
 #
 # Positional args ($@): the command to launch (binary + args).
 #   For foreground:   exec -a "$DAEMON_DISPLAY_NAME" "$@"
@@ -104,6 +106,45 @@ clear_crash_state() {
     log_event "crash_state_cleared" "clean shutdown"
 }
 
+# ── Keychain secret projection ───────────────────────────────────────
+# Only secret names are configured in Nix. Values are read at launch from the
+# macOS Keychain and exported to the child process; they never enter argv,
+# lifecycle logs, tracked files, or the Nix store. Missing or malformed names
+# fail closed rather than starting a partially configured daemon.
+load_keychain_secrets() {
+    local service="${DAEMON_KEYCHAIN_SERVICE:-bridge-secrets}"
+    local names="${DAEMON_KEYCHAIN_SECRETS:-}"
+    local name secret_value
+    [[ -n "$names" ]] || return 0
+
+    [[ "$service" != *$'\n'* && "$service" != *$'\r'* ]] || {
+        echo "[$DAEMON_NAME] FATAL: invalid Keychain service name" >&2
+        exit 1
+    }
+
+    local IFS=,
+    read -ra secret_names <<< "$names"
+    for name in "${secret_names[@]}"; do
+        # Trim surrounding whitespace from comma-separated configuration.
+        name="${name#"${name%%[![:space:]]*}"}"
+        name="${name%"${name##*[![:space:]]}"}"
+        if [[ ! "$name" =~ ^[A-Z_][A-Z0-9_]*$ ]]; then
+            log_event "secret_load_failed" "invalid Keychain secret name"
+            echo "[$DAEMON_NAME] FATAL: invalid Keychain secret name" >&2
+            exit 1
+        fi
+        if ! secret_value="$(/usr/bin/security find-generic-password \
+            -a "$name" -s "$service" -w 2>/dev/null)" || [[ -z "$secret_value" ]]; then
+            log_event "secret_load_failed" "$name missing from Keychain"
+            echo "[$DAEMON_NAME] FATAL: required Keychain secret $name is unavailable" >&2
+            exit 1
+        fi
+        export "$name=$secret_value"
+        unset secret_value
+        log_event "secret_loaded" "$name"
+    done
+}
+
 # ── Phase 1: Single-instance via flock ───────────────────────────────
 # Open lock FD; flock is kernel-released on process death (no EXIT trap).
 # macOS lacks `flock` CLI, so use Python's fcntl.
@@ -162,6 +203,8 @@ if [ -n "${DAEMON_ENV_FILE:-}" ] && [ -f "$DAEMON_ENV_FILE" ]; then
         set -- "${EXPANDED[@]}"
     fi
 fi
+
+load_keychain_secrets
 
 # ── Phase 5: cd if working dir configured ────────────────────────────
 if [ -n "${DAEMON_WORKING_DIR:-}" ]; then

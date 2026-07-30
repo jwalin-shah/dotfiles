@@ -42,7 +42,11 @@ before adding a wrapper or client:
 - **Current daemon boundary:** `bin/daemon-wrapper` can source a configured
   `DAEMON_ENV_FILE`, but it does not read macOS Keychain or Infisical itself.
   Using a tracked or Nix-store environment file for this credential would fail
-  the required secrecy boundary, so no new env-file projection was added.
+  the required secrecy boundary, so the Knowledge Engine LaunchAgent now uses
+  the new Keychain-only `DAEMON_KEYCHAIN_SECRETS` projection instead. The
+  projection exports values only to the child process, logs names not values,
+  and fails closed when a named item is absent. `bin/test-daemon-wrapper-secrets.sh`
+  passes; live activation is still pending the Nix rebuild.
 - **Existing secret authority:** Bridge's `bridge-secrets` store is
   Keychain-first with Infisical refresh/export on a miss. A direct Keychain
   presence check found no `NEO4J_PASSWORD` entry. The read-only
