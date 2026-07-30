@@ -145,7 +145,8 @@ while :; do
     final_code=0
   fi
 
-  if [[ -n "$DONE_MARKER" ]] && printf '%s' "$pane" | rg -Fq -- "$DONE_MARKER"; then
+  if (( final_code == 0 )) && [[ -n "$DONE_MARKER" ]] &&
+    printf '%s' "$pane" | rg -Fq -- "$DONE_MARKER"; then
     emit complete done_marker_observed
     exit 0
   fi
