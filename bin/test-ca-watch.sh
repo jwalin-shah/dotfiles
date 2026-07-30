@@ -79,4 +79,26 @@ output="$(run_watch 5)"
   exit 1
 }
 
+if output="$(
+  CLAUDE_CONFIG_DIR="$config_dir" \
+    PATH="$fake_bin:$PATH" \
+    "$ROOT/bin/ca-watch" --once --pane 7 --project "$project" \
+    --max-seconds 601 2>&1
+)"; then
+  rc=0
+else
+  rc=$?
+fi
+[[ "$rc" == 2 && "$output" == *'bounded_durations_required'* ]] || {
+  printf 'unbounded duration was accepted\n%s\n' "$output" >&2
+  exit 1
+}
+
+CA_WATCH_FIXTURE=''
+output="$(run_watch 4)"
+[[ "$output" == *'state=pane_unavailable reason=empty_capture'* ]] || {
+  printf 'empty pane capture was treated as healthy\n%s\n' "$output" >&2
+  exit 1
+}
+
 printf 'ca-watch contract tests passed\n'

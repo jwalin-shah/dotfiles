@@ -16,6 +16,8 @@ PANE=""
 PROJECT="$(pwd -P)"
 MAX_SECONDS=600
 INTERVAL=5
+MAX_SECONDS_CAP=600
+MAX_INTERVAL_CAP=60
 ONCE=0
 DONE_MARKER=""
 
@@ -69,8 +71,9 @@ if [[ ! -d "$PROJECT" ]]; then
   echo "CA_WATCH state=invalid_project reason=project_missing" >&2
   exit 2
 fi
-if [[ ! "$MAX_SECONDS" =~ ^[1-9][0-9]*$ || ! "$INTERVAL" =~ ^[1-9][0-9]*$ ]]; then
-  echo "CA_WATCH state=invalid_input reason=positive_durations_required" >&2
+if [[ ! "$MAX_SECONDS" =~ ^[1-9][0-9]*$ || ! "$INTERVAL" =~ ^[1-9][0-9]*$ ||
+  "$MAX_SECONDS" -gt "$MAX_SECONDS_CAP" || "$INTERVAL" -gt "$MAX_INTERVAL_CAP" ]]; then
+  echo "CA_WATCH state=invalid_input reason=bounded_durations_required" >&2
   exit 2
 fi
 
@@ -130,7 +133,12 @@ while :; do
     exit 4
   fi
 
-  if printf '%s' "$pane" | rg -qi 'overloaded_error|(^|[^0-9])529([^0-9]|$)|rate.?limit|service unavailable' ||
+  if [[ -z "${pane//[[:space:]]/}" ]]; then
+    emit pane_unavailable empty_capture
+    exit 4
+  fi
+
+  if printf '%s' "$pane" | rg -qi 'overloaded_error|(^|[^0-9])529([^0-9]|$)|rate.?limit|service unavailable|api error|connection reset|timed out' ||
     current_debug_has_provider_error; then
     emit provider_degraded "${trust_state}_provider_overloaded"
     final_code=5
@@ -153,5 +161,10 @@ while :; do
   if (( ONCE == 1 )); then
     exit "$final_code"
   fi
-  sleep "$INTERVAL"
+  remaining=$((MAX_SECONDS - (now - started)))
+  sleep_for="$INTERVAL"
+  if (( sleep_for > remaining )); then
+    sleep_for="$remaining"
+  fi
+  (( sleep_for > 0 )) && sleep "$sleep_for"
 done
