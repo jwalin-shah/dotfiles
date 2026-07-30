@@ -32,6 +32,13 @@ before adding a wrapper or client:
 - **Neo4j service:** the Homebrew `neo4j` LaunchAgent was observed started,
   with local Bolt and HTTP listeners on loopback. No credential value was
   printed or persisted by the inventory.
+- **Native auth/rotation surface:** the installed Neo4j 2026.06.0 CLI exposes
+  `neo4j-admin dbms set-initial-password`, but its help states that it only
+  applies before the database's first startup. The running service therefore
+  needs an authenticated Cypher user-password change, not that bootstrap
+  command. The expected Homebrew `cypher-shell` binary was not present, so no
+  rotation probe was attempted. See the [Neo4j user-management
+  documentation](https://neo4j.com/docs/operations-manual/current/authentication-authorization/manage-users/).
 - **Current daemon boundary:** `bin/daemon-wrapper` can source a configured
   `DAEMON_ENV_FILE`, but it does not read macOS Keychain or Infisical itself.
   Using a tracked or Nix-store environment file for this credential would fail
