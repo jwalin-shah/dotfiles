@@ -96,6 +96,21 @@ trust_ok() {
     "$STATE_FILE" >/dev/null 2>&1
 }
 
+current_debug_has_provider_error() {
+  local debug mtime
+  for debug in "$CONFIG_DIR"/debug/*.txt; do
+    [[ -f "$debug" ]] || continue
+    mtime="$(stat -f %m "$debug" 2>/dev/null || echo 0)"
+    [[ "$mtime" =~ ^[0-9]+$ ]] || continue
+    (( mtime >= started )) || continue
+    if tail -200 "$debug" 2>/dev/null |
+      rg -qi 'overloaded_error|(^|[^0-9])529([^0-9]|$)|rate.?limit|service unavailable'; then
+      return 0
+    fi
+  done
+  return 1
+}
+
 while :; do
   now="$(date +%s)"
   if (( now - started >= MAX_SECONDS )); then
@@ -115,7 +130,8 @@ while :; do
     exit 4
   fi
 
-  if printf '%s' "$pane" | rg -qi 'overloaded_error|(^|[^0-9])529([^0-9]|$)|rate.?limit|service unavailable'; then
+  if printf '%s' "$pane" | rg -qi 'overloaded_error|(^|[^0-9])529([^0-9]|$)|rate.?limit|service unavailable' ||
+    current_debug_has_provider_error; then
     emit provider_degraded "${trust_state}_provider_overloaded"
     final_code=5
   elif printf '%s' "$pane" | rg -qi 'workspace.*not trusted|trust this folder|project.*not trusted'; then
