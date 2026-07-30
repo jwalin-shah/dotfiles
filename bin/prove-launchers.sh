@@ -34,10 +34,10 @@ if [[ -x "$BRIDGE_BIN" ]]; then
   fi
 fi
 
-if [[ -x "${HOME}/bin/ca" && -x "${HOME}/bin/ct" ]]; then
-  ok "HM launchers ca+ct present"
+if [[ -x "${HOME}/bin/ca" && -x "${HOME}/bin/ct" && -x "${HOME}/bin/ca-watch" ]]; then
+  ok "HM launchers ca+ct+ca-watch present"
 else
-  fail "missing ~/bin/ca or ~/bin/ct (need rebuild home.nix)"
+  fail "missing ~/bin/ca, ~/bin/ct, or ~/bin/ca-watch (need rebuild home.nix)"
 fi
 
 for b in bridge-ca bridge-ct bridge-agy bridge-cx; do
