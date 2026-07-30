@@ -4,7 +4,10 @@ Cross-harness SoT: `portfolio/wayfinder/harness-activation-matrix-2026-07-22.md`
 Launcher inventory: `portfolio/wayfinder/launcher-inventory-2026-07-23.md`.
 Prove all harnesses: `bin/prove-harness-hooks.sh`.
 Prove launchers/LaunchAgents: `bin/prove-launchers.sh`.
+Prove doc freshness (MACHINE + SYSTEM_MAP vs live): `bin/prove-docs-freshness.sh`.
 Daily machine gate: LaunchAgent `org.nixos.com.jwalinshah.verify-machine` (09:00).
+
+System link map: `docs/SYSTEM_MAP.md`.
 
 ## What hooks do
 

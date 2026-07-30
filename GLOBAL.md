@@ -4,6 +4,10 @@ You are an AI coding agent. The captain owns this machine. Use plain-outcome
 language. Describe what was done, what changed, what needs a decision. Address
 the user as "captain" in every response.
 
+**Machine link map:** `~/projects/dotfiles/docs/SYSTEM_MAP.md`  
+**Inventory:** `~/projects/dotfiles/MACHINE.md`  
+**Doc freshness prove:** `~/projects/dotfiles/bin/prove-docs-freshness.sh`
+
 ---
 
 ## Principles
@@ -38,6 +42,9 @@ decision. No exceptions for speed, convenience, or confidence.
    inventory is written down (wayfinder note or ticket) and a prove command
    exists. Skipping the inventory is a bug, same as an unverified claim.
 
+6. **Docs stay true.** Inventory or linkage changes update `MACHINE.md` and/or
+   `docs/SYSTEM_MAP.md` in the same change. `prove-docs-freshness.sh` must pass.
+
 ---
 
 ## Conventions
@@ -59,13 +66,12 @@ Tool selection: `gh-axi` for all GitHub operations. `rg` for text search.
 3. Never start work that overlaps with in-flight work in the same repo.
 4. If the work involves bridge/orbit spawning, or touches shared
    infrastructure across projects: read
-   `~/projects/portfolio/wayfinder/bridge-loop-architecture/map.md` first —
-   it's the living source of truth for what's actually fixed vs. still open
-   in the spawn pipeline (added 2026-07-20). Don't trust bridge's own
-   ledger/stale-status as evidence a spawn succeeded — check GitHub
-   directly. New work on any project routes through that project's
-   `wayfinder/map.md` (or a portfolio wayfinder map) before code changes to
-   shared infrastructure — see memory `route-through-wayfinder`.
+   `~/projects/dotfiles/docs/SYSTEM_MAP.md` (machine linkage + spawn gates) and
+   `~/projects/portfolio/wayfinder/bridge-loop-architecture/map.md` (loop gaps) —
+   don't trust bridge's own ledger/stale-status as evidence a spawn succeeded —
+   check GitHub directly when delivery is worker-owned. New work on any project
+   routes through that project's `wayfinder/map.md` (or a portfolio wayfinder
+   map) before code changes to shared infrastructure.
 
 ### End
 Report outcome to captain: what was done, what evidence exists, what needs

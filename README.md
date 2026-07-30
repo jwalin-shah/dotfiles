@@ -1,8 +1,26 @@
 # dotfiles
 
-Watch the walkthrough: https://youtu.be/5N-okeDdIuI
+**Captain entry (this machine):** nix-darwin + home-manager constitution for the
+fleet. Start here:
 
-My personal Mac setup, managed with nix-darwin and home-manager.
+1. [`docs/SYSTEM_MAP.md`](docs/SYSTEM_MAP.md) — how Orbit / Bridge / HomeBase / KE / Seatbelt link  
+2. [`docs/OPERATING.md`](docs/OPERATING.md) — how to use it: commits, worktrees, daily loop  
+3. [`MACHINE.md`](MACHINE.md) — what is installed, PARKED, REMOVED, WAIVER  
+4. [`AGENTS.md`](AGENTS.md) — agent instructions for this repo  
+5. `bin/prove-docs-freshness.sh` — **forced** doc freshness (also via `prove-launchers.sh`)
+
+```sh
+./rebuild.sh                          # apply nix (Tier 3)
+bin/prove-docs-freshness.sh           # docs match live machine
+bin/prove-launchers.sh                # PATH + LaunchAgents + nested proves
+orbit status                          # Bridge thin-shell health
+```
+
+---
+
+Watch the upstream walkthrough: https://youtu.be/5N-okeDdIuI
+
+Personal Mac setup, managed with nix-darwin and home-manager.
 One repo, one command, and a fresh Mac ends up configured the same way every time.
 
 ## What you get

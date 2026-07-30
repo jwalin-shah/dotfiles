@@ -234,6 +234,18 @@ else
   fail "missing $E2E"
 fi
 
+# Forced MACHINE.md / SYSTEM_MAP freshness vs live machine
+DOCS_PROVE="${ROOT}/bin/prove-docs-freshness.sh"
+if [[ -x "$DOCS_PROVE" ]]; then
+  if "$DOCS_PROVE"; then
+    ok "prove-docs-freshness.sh PASS"
+  else
+    fail "prove-docs-freshness.sh FAILED"
+  fi
+else
+  fail "missing executable $DOCS_PROVE"
+fi
+
 if [[ "$FAIL" -ne 0 ]]; then
   echo "prove-launchers: FAILED" >&2
   exit 1

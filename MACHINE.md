@@ -3,6 +3,13 @@
 Single source of truth for everything installed on this machine. If it's not
 declared here or in `configuration.nix`/`home.nix`, it doesn't survive a rebuild.
 
+**How pieces connect (Orbit → Bridge → HomeBase → KE → Seatbelt):** see
+[`docs/SYSTEM_MAP.md`](docs/SYSTEM_MAP.md). Portfolio living map:
+`~/projects/portfolio/wayfinder/one-surface-system-2026-07-30/map.md`.
+
+**Freshness gate:** `bin/prove-docs-freshness.sh` (also via `prove-launchers.sh`).
+Update this file in the same change as any LaunchAgent / PATH / PARKED edit.
+
 Status key: **OK** = declared + working. **GAP** = works but not declared.
 **STALE** = declared but doesn't match reality.
 
@@ -75,16 +82,42 @@ Neovim's current Treesitter plugin compiles parsers with the Home Manager
 
 | repo | purpose | build |
 |---|---|---|
-| dotfiles | machine config, rebuild, LaunchAgents | `./rebuild.sh` |
-| bridge | orchestrator: spawn, verify, quota, orbit | `go build ./cmd/bridge` |
+| dotfiles | machine constitution, rebuild, LaunchAgents, proves | `./rebuild.sh` |
+| orbit | captain CLI (thin shell over bridge-serve) | `go build ./cmd/orbit` |
+| bridge | spawn / verify / deliver / ledger / Seatbelt | `go build ./cmd/bridge` |
+| homebase | grant admission + receipts (**required for live spawn**) | see homebase AGENTS |
 | mintmux | PTY multiplexer (bridge depends on it) | `go build ./cmd/...` |
-| portfolio | control plane: decisions, maps, contracts | markdown |
+| knowledge-engine | Neo4j pipelines (dumb pipe) | `./scripts/check.sh` |
+| axioms | principle corpus → KE | data repo |
+| portfolio | decisions / Wayfinder maps | markdown |
+| trajectory | transcript normalize + claims evidence | `bun run check` |
+| running-machine-contracts | joint schemas / conformance | `python3 fixtures/check_conformance.py` |
 | inbox | daily driver: email, messages, calendar | `uv run python inbox.py` |
 | m5tools | M5 hardware monitoring daemons | `make install` |
 | voice-engine-swift | dictation menubar app | `swift build` |
 
 Other repos (btw-v1, tensor-logic, ApplyPilot, collections-guide, rust-collections)
 are cloned as needed.
+
+## Agent skills (`.agents/` → Claude/Codex/Cursor on rebuild)
+
+Source of truth: `dotfiles/.agents/` (not invent-in-chat). Required set proved by
+`bin/prove-skills.sh`: preflight, wayfinder, grill-me, domain-modeling,
+codebase-design, setup-matt-pocock-skills, research, prototype, code-review,
+plus cocoindex / worktree-manager.
+
+Durable projection into `~/.claude/skills` etc. needs `./rebuild.sh` (Tier 3).
+
+## Isolation + HomeBase (spawn gates)
+
+| Gate | Live rule |
+|---|---|
+| Seatbelt | `seatbelt-compat` write deny-default; **not** production confidentiality |
+| Production | requires certified `vm` (or apple-container path) — VM backend **not** certified yet |
+| Local drive only | `BRIDGE_ALLOW_UNSAFE_LOCAL_MODE=1` + `BRIDGE_ISOLATION_MODE=seatbelt-compat` |
+| HomeBase | `BRIDGE_HOMEBASE_URL` + bridge private key + admission public key — **required** or spawn fails after pre_spawn |
+
+Do not document “spawn just works” without those gates. See `docs/SYSTEM_MAP.md`.
 
 ## LaunchAgents (`configuration.nix` — `launchctl list | grep org.nixos`)
 
@@ -133,7 +166,8 @@ Prove: `dotfiles/bin/prove-launchers.sh`
 - `com.jwalinshah.reconcile-outcomes` — hand LaunchAgent, not in configuration.nix (WAIVER; separate job-application owner).
 - `org.orbit.bridge-cdp-quota` — retired duplicate of the Nix-managed CDP quota agent; unloaded and archived under `~/Library/LaunchAgents/archive/` on 2026-07-29.
 
-*Last updated: 2026-07-23 — Pi cockpit, exact tool receipts, and lazy TLDR invalidation.*
+*Last updated: 2026-07-30 — SYSTEM_MAP, skills prove, HomeBase/isolation spawn gates, fleet repos.*
+
 ## Cross-Repo Dependency Manifest (deps.json) & Neo4j
 
 These are tracked by each project's `wayfinder/deps.json` (validated by
@@ -145,3 +179,4 @@ These are tracked by each project's `wayfinder/deps.json` (validated by
   (data must exist in Neo4j before bridge queries it)
 - Embedding servers (:8081/:8082) must be running for pipeline operations
 - Bridge audit workflow depends on knowledge engine data being current
+- Live spawn also requires HomeBase admission (see SYSTEM_MAP) — KE alone is not enough
