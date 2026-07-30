@@ -281,7 +281,7 @@ in
   home.file.".config/orbit/models.env".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/orbit/models.env";
 
-  # ~/bin launcher wrappers — ct, ca, and clpi.
+  # ~/bin launcher wrappers — ct, ca, pio, and clpi.
   # All other agents (codex, cursor-agent, agy, cmd) are called directly.
   home.file."bin/ct".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/ct-wrapper";
@@ -289,6 +289,8 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/ca-wrapper";
   home.file."bin/ca-watch".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/ca-watch";
+  home.file."bin/pio".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/pio-wrapper";
   home.file."bin/clpi".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/clpi";
 
@@ -311,6 +313,8 @@ in
     config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-ca";
   home.file."bin/bridge-ct".source =
     config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-ct";
+  home.file."bin/bridge-pio".source =
+    config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-pio";
   home.file."bin/bridge-cua".source =
     config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-cua";
   home.file."bin/bridge-agy".source =
