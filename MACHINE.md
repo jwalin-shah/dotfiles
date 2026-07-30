@@ -153,11 +153,24 @@ Prove: `dotfiles/bin/prove-launchers.sh`
 |---|---|---|
 | pi | `~/.pi/agent/settings.json`; auth remains runtime-owned | nix symlink for settings; `/login` owns auth |
 | ca (Claude direct) | `~/.claude/settings.json`, `settings.local.json` | nix symlink |
-| ct (TokenRouter) | `~/.claude-token/` (shares ca settings) | nix symlink |
+| ca (OAuth lane) | `~/.claude-a/settings.json` — no routing (subscription auth) | nix symlink |
+| ct (TokenRouter) | `~/.claude-token/settings.json` — own file; carries `ANTHROPIC_BASE_URL` + deepseek/kimi defaults + `apiKeyHelper` | nix symlink |
+| pio (Pioneer) | `~/.claude-pioneer/settings.json` — own file; carries `ANTHROPIC_BASE_URL` + claude-sonnet-5/opus-5 defaults + `apiKeyHelper` | nix symlink |
 | codex | `~/.codex/config.toml`, `hooks.json`, `rules/` | nix symlink |
 | cursor-agent | `~/.cursor/cli-config.json`, `hooks.json`, `mcp.json` | nix symlink (force) |
 | agy (Gemini) | `~/.gemini/antigravity-cli/settings.json`, `settings.json` | nix symlink (force) |
 | cmd (CommandCode) | self-managed | **WAIVER** — not in dotfiles hooks |
+
+**Lane stores are self-sufficient.** Each Claude store's own `settings.json`
+carries its lane routing, so a bare `claude` launched with only
+`CLAUDE_CONFIG_DIR` set (a detached supervisor pane inherits no other env)
+routes exactly like `bin/ct-wrapper` / `bin/pio-wrapper`. Keys are never in the
+repo: `apiKeyHelper` runs
+`/usr/bin/security find-generic-password -a <ACCOUNT> -s bridge-secrets -w`
+at request time — the same `bridge-secrets` Keychain service
+`~/.local/lib/keychain.bash` reads. An explicit `ANTHROPIC_API_KEY` in the
+environment still wins over `apiKeyHelper`, so the wrappers keep working
+unchanged.
 
 ## Not yet in nix (GAPs / WAIVERS)
 
@@ -166,7 +179,7 @@ Prove: `dotfiles/bin/prove-launchers.sh`
 - `com.jwalinshah.reconcile-outcomes` — hand LaunchAgent, not in configuration.nix (WAIVER; separate job-application owner).
 - `org.orbit.bridge-cdp-quota` — retired duplicate of the Nix-managed CDP quota agent; unloaded and archived under `~/Library/LaunchAgents/archive/` on 2026-07-29.
 
-*Last updated: 2026-07-30 — SYSTEM_MAP, skills prove, HomeBase/isolation spawn gates, fleet repos.*
+*Last updated: 2026-07-30 — SYSTEM_MAP, skills prove, HomeBase/isolation spawn gates, fleet repos, self-sufficient Claude lane stores (ct split from default; pioneer declared).*
 
 ## Cross-Repo Dependency Manifest (deps.json) & Neo4j
 

@@ -3,7 +3,11 @@
 set -euo pipefail
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
 
-ROOT="${HOME}/projects/dotfiles"
+# Script-relative, like prove-docs-freshness.sh: a copy running from a worktree
+# must prove that worktree's sources, not the primary checkout's. Live-link
+# resolution below still expects ~/projects/dotfiles — that is where home-manager
+# points, and it is deliberately not derived from ROOT.
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 FAIL=0
 ok() { echo "OK: $*"; }
 warn() { echo "WARN: $*" >&2; }
@@ -120,13 +124,18 @@ else
   fail "missing check-on-edit.sh"
 fi
 
-# Claude source (dotfiles) must match live expectations
+# Claude source (dotfiles) must match live expectations. Every lane store owns
+# its own settings.json now, so each source file carries the hooks itself.
 check_claude "claude-source" "$ROOT/home/.claude/settings.json" || FAIL=1
+check_claude "claude-a-source" "$ROOT/home/.claude-a/settings.json" || FAIL=1
+check_claude "claude-token-source" "$ROOT/home/.claude-token/settings.json" || FAIL=1
+check_claude "claude-pioneer-source" "$ROOT/home/.claude-pioneer/settings.json" || FAIL=1
 
 for pair in \
   "claude-live:${HOME}/.claude/settings.json" \
   "claude-a-live:${HOME}/.claude-a/settings.json" \
-  "claude-token-live:${HOME}/.claude-token/settings.json"
+  "claude-token-live:${HOME}/.claude-token/settings.json" \
+  "claude-pioneer-live:${HOME}/.claude-pioneer/settings.json"
 do
   label="${pair%%:*}"; path="${pair#*:}"
   [[ -f "$path" ]] || { warn "$label missing"; continue; }

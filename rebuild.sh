@@ -45,6 +45,7 @@ for skills_dir in \
   "$HOME/.claude/skills" \
   "$HOME/.claude-a/skills" \
   "$HOME/.claude-token/skills" \
+  "$HOME/.claude-pioneer/skills" \
   "$HOME/.codex/skills" \
   "$HOME/.cursor/skills-cursor"
 do
@@ -84,7 +85,7 @@ clear_skill_target() {
   fi
 }
 
-for base in .claude/skills .claude-a/skills .claude-token/skills .codex/skills .cursor/skills-cursor; do
+for base in .claude/skills .claude-a/skills .claude-token/skills .claude-pioneer/skills .codex/skills .cursor/skills-cursor; do
   # Include the retired axi name so activation removes stale projections.
   for name in axi preflight cocoindex cocoindex-code plugin.json; do
     clear_skill_target "$HOME/$base/$name"

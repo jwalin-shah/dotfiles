@@ -31,14 +31,21 @@ Add new entries to `bin/fmt-on-edit.sh` to support more languages.
 
 | Agent | Config file | Hook key | Status |
 |---|---|---|---|
-| `ca` / `ct` | `~/.claude/settings.json` | `PreToolUse` + `PostToolUse` | ✅ enforce + check-stale + fmt + check-on-edit |
-| `ca` (account A) | `~/.claude-a/settings.json` | same (shared settings) | ✅ |
-| `ca` (token) | `~/.claude-token/settings.json` | same (shared settings) | ✅ |
+| `claude` (default) | `~/.claude/settings.json` | `PreToolUse` + `PostToolUse` | ✅ enforce + check-stale + fmt + check-on-edit |
+| `ca` (OAuth lane) | `~/.claude-a/settings.json` | same (own copy) | ✅ |
+| `ct` (TokenRouter) | `~/.claude-token/settings.json` | same (own copy) | ✅ |
+| `pio` (Pioneer) | `~/.claude-pioneer/settings.json` | same (own copy) | ✅ |
 | `agy` | `~/.gemini/config/hooks.json` | `PreToolUse` (`edit_file`) | ✅ gate; settings.json = permissions only |
 | `cx` (Codex) | `~/.codex/hooks.json` | `pre-edit` / `post-edit` | ✅ file gate; **shell bypass WAIVER** |
 | `cua` (Cursor Agent) | `~/.cursor/hooks.json` | **`afterFileEdit`** + **`preToolUse`** | ✅ fixed 2026-07-22 |
 
 OpenCode and Kilo removed from machine (Jul 2026). Not in home.nix.
+
+Every Claude lane store owns its own `settings.json` (they used to share the
+default one), because each store also carries its lane's API routing and
+sharing would leak that routing into plain `claude`. Hooks are therefore
+duplicated across the four files — `bin/prove-harness-hooks.sh` checks all four
+sources, so a hook added to one and forgotten in another fails the prove.
 
 ### Cursor ≠ Claude (do not copy keys)
 
