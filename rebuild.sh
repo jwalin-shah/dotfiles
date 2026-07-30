@@ -32,6 +32,8 @@ done
 echo "==> proving generated Home Manager activation"
 "$DIR/bin/prove-home-activation.sh"
 "$DIR/bin/prove-home-activation-mutations.sh"
+echo "==> proving bounded CA watcher"
+"$DIR/bin/test-ca-watch.sh"
 
 ln -sfn "$DIR" ~/.dotfiles
 
