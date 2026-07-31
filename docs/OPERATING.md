@@ -179,7 +179,7 @@ Do **not** try to commit everything in one pass. Sort by lane:
 
 ---
 
-## 8. Config consistency across providers (ca / ct / cx / Cursor / agy)
+## 8. Config consistency across providers (ca / ct / pio / cx / Cursor / agy)
 
 ### Source of truth
 

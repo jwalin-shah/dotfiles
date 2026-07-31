@@ -51,3 +51,18 @@ under `~/.claude/`, `~/.codex/`, etc.
 
 Skills: edit `dotfiles/.agents/<name>/`, prove with `bin/prove-skills.sh`, rebuild
 to project durably.
+
+Claude lanes: each store (`home/.claude`, `.claude-a`, `.claude-token`,
+`.claude-pioneer`) owns its own `settings.json` and carries its own routing, so a
+bare `claude` with only `CLAUDE_CONFIG_DIR` set behaves like its `bin/*-wrapper`.
+**This repo is public — never write a key into one.** Keys come from the
+`bridge-secrets` Keychain via `apiKeyHelper`; see the lane table in `MACHINE.md`.
+Editing an already-declared `mkOutOfStoreSymlink` target is live with no rebuild;
+declaring a *new* file in `home.nix` needs `./rebuild.sh`.
+
+## Maintaining this file
+
+Keep this file for knowledge useful to almost every future agent session in this project.
+Do not repeat what the codebase already shows; point to the authoritative file or command instead.
+Prefer rewriting or pruning existing entries over appending new ones.
+When updating this file, preserve this bar for all agents and keep entries concise.

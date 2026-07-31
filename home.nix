@@ -178,7 +178,11 @@ in
     /usr/bin/git config --global core.hooksPath "${config.home.homeDirectory}/.config/git/hooks" || true
   '';
 
-  # Claude config dirs (3) -- same settings, symlinked
+  # Claude config dirs (4) -- one settings.json per lane, symlinked.
+  # .claude (default) and .claude-a (OAuth) carry no routing; .claude-token
+  # and .claude-pioneer carry their lane's base URL + model defaults + an
+  # apiKeyHelper that reads the key from Keychain at runtime, so a bare
+  # `claude` with only CLAUDE_CONFIG_DIR set routes the same as its wrapper.
   home.file.".claude/settings.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/settings.json";
   home.file.".claude/settings.json".force = true;
@@ -203,8 +207,11 @@ in
   home.file.".claude-a/CLAUDE.md".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/GLOBAL.md";
 
+  # ct owns its own settings.json. It used to share home/.claude/settings.json
+  # with the default lane; TokenRouter routing lives in the store now, so
+  # sharing would hijack plain `claude` too.
   home.file.".claude-token/settings.json".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/settings.json";
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude-token/settings.json";
   home.file.".claude-token/settings.json".force = true;
   home.file.".claude-token/settings.local.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/settings.local.json";
@@ -215,6 +222,19 @@ in
   home.file.".claude-token/CLAUDE.md".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/GLOBAL.md";
   home.file.".claude-token/CLAUDE.md".force = true;
+
+  home.file.".claude-pioneer/settings.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude-pioneer/settings.json";
+  home.file.".claude-pioneer/settings.json".force = true;
+  home.file.".claude-pioneer/settings.local.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/settings.local.json";
+  home.file.".claude-pioneer/settings.local.json".force = true;
+  home.file.".claude-pioneer/mcp.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude-pioneer/mcp.json";
+  home.file.".claude-pioneer/mcp.json".force = true;
+  home.file.".claude-pioneer/CLAUDE.md".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/GLOBAL.md";
+  home.file.".claude-pioneer/CLAUDE.md".force = true;
 
   # Other agent configs
 
@@ -376,7 +396,7 @@ in
           type != "symlink"
           && !(builtins.match ".*\\.backup" name != null);
         skills = builtins.attrNames (lib.filterAttrs isSkill entries);
-        skillDirs = [ ".claude" ".claude-a" ".claude-token" ".codex" ];
+        skillDirs = [ ".claude" ".claude-a" ".claude-token" ".claude-pioneer" ".codex" ];
         link = dir: name:
           let typ = entries.${name};
           in {
