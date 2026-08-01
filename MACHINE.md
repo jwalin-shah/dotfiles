@@ -95,7 +95,7 @@ Neovim's current Treesitter plugin compiles parsers with the Home Manager
 | repo | purpose | build |
 |---|---|---|
 | dotfiles | machine constitution, rebuild, LaunchAgents, proves | `./rebuild.sh` |
-| orbit | captain CLI (thin shell over bridge-serve) | `go build ./cmd/orbit` |
+| orbit | optional thin Bridge client (non-primary; CLI bridge is spine) | `go build ./cmd/orbit` |
 | bridge | spawn / verify / deliver / ledger / Seatbelt | `go build ./cmd/bridge` |
 | homebase | grant admission + receipts (**required for live spawn**); binds 127.0.0.1:9102 | see homebase AGENTS |
 | mintmux | PTY multiplexer (bridge depends on it) | `go build ./cmd/...` |
@@ -142,7 +142,7 @@ Do not document “spawn just works” without those gates. See `docs/SYSTEM_MAP
 | cocoindex-daemon | — | **REMOVED** 2026-07-22 — do not re-enable as second sink |
 | knowledge-engine | — | **REMOVED 2026-07-31** — on-change + daily 03:15 catch-up → Neo4j (captain's cut) |
 | bridge-cdp-quota | — | **REMOVED 2026-07-31** — CDP scrape → `~/.bridge/cdp-cache.json` every 6h (captain's cut) |
-| prove-launchers | — | PATH orbit/bridge, LaunchAgents, overnight PATH,/usr/sbin, **CDP offline prove**, **factory e2e schema prove** |
+| prove-launchers | — | PATH orbit/bridge, LaunchAgents, **CDP offline prove**, **factory e2e schema prove** (on-demand; not a LaunchAgent) |
 | **verify-machine** | — | **REMOVED 2026-07-31** — daily 09:00 `bridge verify-machine` + `prove-launchers.sh` (captain's cut; run manually via pre-commit hook) |
 | factory-e2e | — | `wayfinder/factory-e2e-readiness-2026-07-23.md` + `prove-factory-e2e-scorecard.sh` |
 | **bridge-serve** | :9100 / :9101 | **REMOVED 2026-07-31** — Orbit HTTP + authenticated gRPC surface (captain's cut). Token file owner: `~/.local/state/bridge/grpc-auth-token` (0600). Prove: `prove-launchers.sh` orbit identity check |

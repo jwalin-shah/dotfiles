@@ -49,7 +49,7 @@ YOU (captain)
 
 **Always-on (declared LaunchAgents / brew services)** — see MACHINE.md:
 
-- neo4j, llama-embed :8081, coderank-embed :8082, mintmux, homebase-drive :9847, …
+- neo4j, llama-embed :8081, coderank-embed :8082, mintmux, homebase-drive :9847, inbox-server :9849, m5logd, …
 
 **On-demand:**
 
@@ -61,6 +61,7 @@ YOU (captain)
 
 - mlx-chat :8080 — PARKED  
 - cocoindex-daemon — REMOVED  
+- knowledge-engine daily LaunchAgent, bridge-serve, bridge-cdp-quota, voice-engine, overnight-harden, verify-machine — REMOVED 2026-07-31  
 - Ladybug writers — frozen (Neo4j sole store)
 
 ## Isolation (do not confuse these)

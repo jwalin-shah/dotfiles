@@ -3,7 +3,7 @@
 **Captain entry (this machine):** nix-darwin + home-manager constitution for the
 fleet. Start here:
 
-1. [`docs/SYSTEM_MAP.md`](docs/SYSTEM_MAP.md) — how Pi / Bridge / HomeBase / KE / Firstmate link  
+1. [`docs/SYSTEM_MAP.md`](docs/SYSTEM_MAP.md) — how Pi / Bridge / HomeBase / KE / Firstmate / Seatbelt / Orbit link  
 2. [`docs/OPERATING.md`](docs/OPERATING.md) — how to use it: commits, worktrees, daily loop  
 3. [`MACHINE.md`](MACHINE.md) — what is installed, PARKED, REMOVED, WAIVER  
 4. [`AGENTS.md`](AGENTS.md) — agent instructions for this repo  
@@ -15,6 +15,7 @@ fleet. Start here:
 bin/prove-docs-freshness.sh           # docs match live machine
 bin/prove-launchers.sh                # PATH + LaunchAgents + nested proves
 ~/projects/agent-os/bin/prove-all.sh  # Pi/Bridge/HB/mintmux/Neo4j/trajectory
+bridge freeze                         # CLI bridge spine health
 ```
 
 ---
