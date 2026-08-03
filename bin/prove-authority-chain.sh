@@ -57,17 +57,18 @@ for role in captain bridge admission verifier receipt; do
   done
 done
 
-# 6. Bridge sees HomeBase (env / HTTP reachable).
-if curl -sf "${HB}/v1/status" -o /dev/null 2>/dev/null; then
-  ok "Bridge/HTTP reachable at ${HB}/v1/status"
-else
-  # Some homebase versions expose a root; try that before failing.
-  if curl -sf "${HB}/" -o /dev/null 2>/dev/null; then
-    ok "Bridge/HTTP reachable at ${HB}/"
-  else
-    fail "HomeBase HTTP not reachable at ${HB}"
-  fi
-fi
+# 6. Bridge sees HomeBase (HTTP reachable). HomeBase has no GET health route;
+# a POST-only route returning 405 (not 404) proves the server is alive and
+# routing. Any HTTP response other than 404/000 (connection refused) counts.
+HTTP_CODE="$(curl -s -o /dev/null -w '%{http_code}' "${HB}/api/v1/records" 2>/dev/null || echo 000)"
+case "$HTTP_CODE" in
+  405|200|201|400|401|403)
+    ok "HomeBase HTTP reachable at ${HB} (route returned ${HTTP_CODE})"
+    ;;
+  *)
+    fail "HomeBase HTTP not reachable at ${HB} (got ${HTTP_CODE})"
+    ;;
+esac
 
 # 9/10. Valid + tampered verifier receipt. We only assert the endpoints exist
 # and do NOT try to synthesize a real signed receipt here (that needs bridge's
