@@ -77,7 +77,7 @@ Neovim's current Treesitter plugin compiles parsers with the Home Manager
 | **Neo4j (sole store)** | `neo4j://localhost:7687` (Homebrew `brew services`) | Live: ~2183 Axiom, ~3153 Chunk, + File/CodeSymbol (parity in progress). Portfolio ADR: `portfolio/wayfinder/neo4j-sole-store.md` |
 | CocoIndex state | `~/projects/knowledge-engine/cocoindex.db` + `~/.local/share/cocoindex/` | Pipeline bookkeeping / per-project indices — **not** the knowledge graph |
 | LadybugDB (frozen) | `~/projects/bridge/.bridge/ladybug/bridge-knowledge` | ~6.75GB migration source only; writers disabled |
-| Headroom | `~/projects/voice-engine-swift/.headroom/` | voice history vectors |
+| ~~Headroom~~ | ~~`~/projects/voice-engine-swift/.headroom/`~~ | **REMOVED 2026-07-31** — voice history vectors (captain's cut; dir gone) |
 
 ## Minimum Repos (clone from `jwalin-shah` GitHub)
 
@@ -95,7 +95,7 @@ Neovim's current Treesitter plugin compiles parsers with the Home Manager
 | running-machine-contracts | joint schemas / conformance | `python3 fixtures/check_conformance.py` |
 | inbox | daily driver: email, messages, calendar | `uv run python inbox.py` |
 | m5tools | M5 hardware monitoring daemons | `make install` |
-| voice-engine-swift | dictation menubar app | `swift build` |
+| voice-engine-swift | dictation menubar app (**PAUSED** — CoreML -14 root cause, see git log 242e86d0) | `swift build` |
 
 Other repos (btw-v1, tensor-logic, ApplyPilot, collections-guide, rust-collections)
 are cloned as needed.
@@ -129,17 +129,17 @@ Do not document “spawn just works” without those gates. See `docs/SYSTEM_MAP
 | mlx-chat-daemon | :8080 | **PARKED** 2026-07-23 — do not re-enable without ticket; Neo4j sole-store uses :8081/:8082 only |
 | tldr incremental cache | — | no LaunchAgent; edit hook marks changed file dirty, next `tldr calls` query patches only that file |
 | cocoindex-daemon | — | **REMOVED** 2026-07-22 — do not re-enable as second sink |
-| knowledge-engine | — | on-change + daily 03:15 catch-up → Neo4j |
-| bridge-cdp-quota | — | CDP scrape → `~/.bridge/cdp-cache.json` every 6h |
+| knowledge-engine | — | **REMOVED 2026-07-31** — on-change + daily 03:15 catch-up → Neo4j (captain's cut) |
+| bridge-cdp-quota | — | **REMOVED 2026-07-31** — CDP scrape → `~/.bridge/cdp-cache.json` every 6h (captain's cut) |
 | prove-launchers | — | PATH orbit/bridge, LaunchAgents, overnight PATH,/usr/sbin, **CDP offline prove**, **factory e2e schema prove** |
-| **verify-machine** | — | daily 09:00 `bridge verify-machine` + `prove-launchers.sh` |
+| **verify-machine** | — | **REMOVED 2026-07-31** — daily 09:00 `bridge verify-machine` + `prove-launchers.sh` (captain's cut; run manually via pre-commit hook) |
 | factory-e2e | — | `wayfinder/factory-e2e-readiness-2026-07-23.md` + `prove-factory-e2e-scorecard.sh` |
-| **bridge-serve** | :9100 / :9101 | Orbit HTTP + authenticated gRPC surface (`org.nixos.com.jwalinshah.bridge-serve`, KeepAlive). Token file owner: `~/.local/state/bridge/grpc-auth-token` (0600). Prove: `prove-launchers.sh`, `orbit status` |
-| **overnight-harden** | — | every 15m prove+spawn (LaunchAgent); Cursor Layer A continuous ~5m while chat awake |
+| **bridge-serve** | :9100 / :9101 | **REMOVED 2026-07-31** — Orbit HTTP + authenticated gRPC surface (captain's cut). Token file owner: `~/.local/state/bridge/grpc-auth-token` (0600). Prove: `prove-launchers.sh` orbit identity check |
+| **overnight-harden** | — | **REMOVED 2026-07-31** — every 15m prove+spawn (LaunchAgent); Cursor Layer A continuous ~5m while chat awake (captain's cut) |
 | neo4j | :7687 | sole knowledge store — Homebrew `brew services` (not a nix LaunchAgent) |
 | mintmux | — | PTY multiplexer |
 | m5logd | — | M5 hardware logging |
-| voice-engine | — | dictation menubar app |
+| voice-engine | — | **REMOVED 2026-07-31** — dictation menubar app (captain's cut) |
 | inbox-server | :9849 | unified inbox API |
 
 Ladybug pipeline LaunchAgent is **frozen** — Neo4j is the sole knowledge store.

@@ -7,8 +7,8 @@
   },
   "lastChangelogVersion": "0.82.0",
   "theme": "dark",
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.6-luna",
+  "defaultProvider": "tokenrouter",
+  "defaultModel": "deepseek/deepseek-v4-flash-0731",
   "packages": [
     "npm:pi-subagents",
     {
