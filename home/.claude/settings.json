@@ -11,6 +11,26 @@
   },
   "model": "sonnet",
   "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/jwalinshah/.dotfiles/bin/fmt-on-edit.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/jwalinshah/.dotfiles/bin/check-on-edit.sh"
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Edit|Write|Bash",
@@ -31,22 +51,14 @@
         ]
       }
     ],
-    "PostToolUse": [
+    "SessionStart": [
       {
-        "matcher": "Edit|Write|MultiEdit",
+        "matcher": "*",
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/jwalinshah/.dotfiles/bin/fmt-on-edit.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "Edit|Write|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/Users/jwalinshah/.dotfiles/bin/check-on-edit.sh"
+            "command": "bash '/Users/jwalinshah/.claude/hooks/herdr-agent-state.sh' session",
+            "timeout": 10
           }
         ]
       }
@@ -62,16 +74,16 @@
     "mattpocock-skills@mattpocock-skills": true
   },
   "extraKnownMarketplaces": {
-    "openai-codex": {
-      "source": {
-        "source": "github",
-        "repo": "openai/codex-plugin-cc"
-      }
-    },
     "mattpocock-skills": {
       "source": {
         "source": "github",
         "repo": "matt-langston/mattpocock-skills"
+      }
+    },
+    "openai-codex": {
+      "source": {
+        "source": "github",
+        "repo": "openai/codex-plugin-cc"
       }
     }
   },
@@ -80,22 +92,22 @@
   "theme": "dark-ansi",
   "verbose": false,
   "agentPushNotifEnabled": true,
+  "_comment": "Minimal shared Claude settings. Transport is chosen by the launcher wrapper (claude-wrapper, ca-wrapper, ct-wrapper).",
   "models": [
     {
+      "display_name": "DeepSeek v4 Pro",
       "id": "opus",
-      "model": "deepseek-v4-pro",
-      "display_name": "DeepSeek v4 Pro"
+      "model": "deepseek-v4-pro"
     },
     {
+      "display_name": "DeepSeek v4 Flash",
       "id": "sonnet",
-      "model": "deepseek-v4-flash",
-      "display_name": "DeepSeek v4 Flash"
+      "model": "deepseek-v4-flash"
     },
     {
+      "display_name": "Kimi K3 Free",
       "id": "haiku",
-      "model": "kimi-k3-free",
-      "display_name": "Kimi K3 Free"
+      "model": "kimi-k3-free"
     }
-  ],
-  "_comment": "Minimal shared Claude settings. Transport is chosen by the launcher wrapper (claude-wrapper, ca-wrapper, ct-wrapper)."
+  ]
 }

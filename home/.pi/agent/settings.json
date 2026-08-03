@@ -1,5 +1,5 @@
 {
-  "defaultProjectTrust": "ask",
+  "defaultProjectTrust": "allow",
   "enableInstallTelemetry": true,
   "enableAnalytics": false,
   "warnings": {
@@ -7,11 +7,16 @@
   },
   "lastChangelogVersion": "0.82.0",
   "theme": "dark",
-  "defaultProvider": "tokenrouter",
-  "defaultModel": "deepseek/deepseek-v4-flash",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.6-luna",
   "packages": [
     "npm:pi-subagents",
-    "npm:@juicesharp/rpiv-ask-user-question",
+    {
+      "source": "npm:@juicesharp/rpiv-ask-user-question",
+      "extensions": [
+        "-index.ts"
+      ]
+    },
     "npm:@narumitw/pi-plan-mode",
     "npm:@gotgenes/pi-permission-system"
   ],
@@ -22,6 +27,6 @@
   "steeringMode": "all",
   "followUpMode": "all",
   "transport": "auto",
-  "showCacheMissNotices": true,
+  "showCacheMissNotices": false,
   "treeFilterMode": "all"
 }

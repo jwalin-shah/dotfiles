@@ -58,6 +58,12 @@ trust_level = "trusted"
 [projects."/Users/jwalinshah/Documents/Codex/2026-07-29/apple-container-worker-review"]
 trust_level = "trusted"
 
+[projects."/private/var/folders/sj/b3pb98ls4mx03dx50srzyq380000gn/T/tmp.f5XhehqqTu"]
+trust_level = "trusted"
+
+[projects."/private/var/folders/sj/b3pb98ls4mx03dx50srzyq380000gn/T/tmp.lPXmbqMYJI"]
+trust_level = "trusted"
+
 [tui.model_availability_nux]
 "gpt-5.5" = 4
 "gpt-5.6-sol" = 4

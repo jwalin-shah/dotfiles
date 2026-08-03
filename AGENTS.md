@@ -1,35 +1,33 @@
-# dotfiles — Machine constitution
+# Dotfiles — agent instructions
 
-One machine. One command: `./rebuild.sh`. This repo defines everything
-that survives a fresh macOS install.
+This repo is the **machine constitution** (nix-darwin + home-manager).
 
-**Read first:** [`docs/SYSTEM_MAP.md`](docs/SYSTEM_MAP.md) — how Orbit, Bridge,
-HomeBase, Knowledge Engine, Seatbelt, and LaunchAgents link.  
-**Day-to-day (commits, worktrees):** [`docs/OPERATING.md`](docs/OPERATING.md).  
-Inventory: [`MACHINE.md`](MACHINE.md). Principles: [`GLOBAL.md`](GLOBAL.md).
+## Read first
 
-**Freshness is forced:** `bin/prove-docs-freshness.sh` (also from `prove-launchers.sh`).
-If you change services, skills, or spawn gates, update MACHINE.md / SYSTEM_MAP in
-the same change or the prove fails.
+1. [`docs/SYSTEM_MAP.md`](docs/SYSTEM_MAP.md) — how Pi / Bridge / HomeBase / KE / Firstmate link  
+2. [`MACHINE.md`](MACHINE.md) — inventory, PARKED, REMOVED  
+3. [`GLOBAL.md`](GLOBAL.md) — five non-negotiable principles  
+4. [`docs/OPERATING.md`](OPERATING.md) — commits, worktrees, lanes  
 
-## Architecture
+Living topology (portfolio):  
+`~/projects/portfolio/wayfinder/system-of-systems-2026-08-01/map.md`
 
-```
-configuration.nix     nix-darwin — LaunchAgents, Homebrew, system daemons
-home.nix              home-manager — packages, symlinks, agent configs, skills
-GLOBAL.md             Machine principles → ~/CLAUDE.md
-MACHINE.md            Inventory SoT (what is installed / PARKED / WAIVER)
-docs/SYSTEM_MAP.md    How the fleet connects + spawn checklist
-home/.                Agent configs (Claude, Codex, Cursor, Gemini)
-.agents/              Skill source (projected on rebuild)
-config/orbit/         models.env — single switch for all AI models
-bin/                  Wrappers + prove-*.sh gates
-```
+Joint prove: `~/projects/agent-os/bin/prove-all.sh`
 
-## Rebuild
+## Rules for agents in this repo
+
+- Do not re-enable PARKED/REMOVED services (mlx-chat, cocoindex-daemon, Ladybug writers).  
+- Do not invent LaunchAgents without updating MACHINE.md + SYSTEM_MAP in the same change.  
+- `bin/prove-docs-freshness.sh` must pass after doc/inventory edits.  
+- Tier-3 (`./rebuild.sh`) only with explicit captain approval.  
+- Captain surface is **Pi**, not Orbit.
+
+## Prove
 
 ```bash
-./rebuild.sh              # Apply all nix changes (Tier 3 — captain approved)
+bin/prove-docs-freshness.sh
+bin/prove-skills.sh
+bin/prove-launchers.sh
 ```
 
 After rebuild, restart services if needed:

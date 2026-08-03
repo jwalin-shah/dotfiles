@@ -1,16 +1,27 @@
 {
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "bash '/Users/jwalinshah/.codex/herdr-agent-state.sh' session",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "post-edit": [
+      {
+        "command": "/Users/jwalinshah/projects/dotfiles/bin/fmt-on-edit.sh"
+      }
+    ],
     "pre-edit": [
       {
         "command": "/Users/jwalinshah/.dotfiles/bin/enforce-bridge-workflow.sh"
       },
       {
         "command": "/Users/jwalinshah/.dotfiles/bin/check-stale-gate.py"
-      }
-    ],
-    "post-edit": [
-      {
-        "command": "/Users/jwalinshah/projects/dotfiles/bin/fmt-on-edit.sh"
       }
     ]
   }

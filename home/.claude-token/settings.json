@@ -2,13 +2,16 @@
   "env": {
     "ENABLE_TOOL_SEARCH": "true",
     "ANTHROPIC_BASE_URL": "https://api.tokenrouter.com",
-    "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
     "ANTHROPIC_DEFAULT_OPUS_MODEL": "deepseek/deepseek-v4-pro",
     "ANTHROPIC_DEFAULT_OPUS_MODEL_SUPPORTED_CAPABILITIES": "effort,xhigh_effort,max_effort",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "deepseek/deepseek-v4-flash",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "deepseek/deepseek-v4-flash-0731",
     "ANTHROPIC_DEFAULT_SONNET_MODEL_SUPPORTED_CAPABILITIES": "effort,xhigh_effort,max_effort",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "moonshotai/kimi-k3-free",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL_SUPPORTED_CAPABILITIES": "effort,xhigh_effort"
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "kimi/kimi-k3-free-5.6-luna",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL_SUPPORTED_CAPABILITIES": "effort,xhigh_effort",
+    "OPENAI_GPT_LUNA_MODEL": "openai/gpt-5.6-luna",
+    "OPENAI_GPT_LUNA_MODEL_SUPPORTED_CAPABILITIES": "effort,xhigh_effort,max_effort",
+    "XAI_GROK_MODEL": "x-ai/grok-4.5",
+    "XAI_GROK_MODEL_SUPPORTED_CAPABILITIES": "effort,xhigh_effort,max_effort"
   },
   "permissions": {
     "allow": [
@@ -96,13 +99,23 @@
     },
     {
       "id": "sonnet",
-      "model": "deepseek-v4-flash",
-      "display_name": "DeepSeek v4 Flash"
+      "model": "deepseek-v4-flash-0731",
+      "display_name": "DeepSeek v4 Flash 0731"
     },
     {
       "id": "haiku",
-      "model": "kimi-k3-free",
-      "display_name": "Kimi K3 Free"
+      "model": "kimi-k3-free-5.6-luna",
+      "display_name": "Kimi K3 Free 5.6 Luna"
+    },
+    {
+      "id": "gpt-5.6-luna",
+      "model": "openai/gpt-5.6-luna",
+      "display_name": "OpenAI GPT 5.6 Luna"
+    },
+    {
+      "id": "grok-4.5",
+      "model": "x-ai/grok-4.5",
+      "display_name": "xAI Grok 4.5"
     }
   ],
   "_comment": "TokenRouter lane store (ct). Self-sufficient: routing lives here, not only in bin/ct-wrapper, so a bare `claude` with CLAUDE_CONFIG_DIR=~/.claude-token still reaches TokenRouter. Key stays in the bridge-secrets Keychain and is read at runtime by apiKeyHelper -- never committed.",

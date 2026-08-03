@@ -1,47 +1,53 @@
-# Domain context
+# dotfiles — Machine constitution
 
-> Produced / maintained via the `domain-modeling` skill. Required by portfolio universal-pocock-policy (2026-07-30).
+One machine. One command: `./rebuild.sh`. This repo defines everything
+that survives a fresh macOS install.
 
-## Purpose
+**Read first:** [`docs/SYSTEM_MAP.md`](docs/SYSTEM_MAP.md) — how Orbit, Bridge,
+HomeBase, Knowledge Engine, Seatbelt, and LaunchAgents link.  
+**Day-to-day (commits, worktrees):** [`docs/OPERATING.md`](docs/OPERATING.md).  
+Inventory: [`MACHINE.md`](MACHINE.md). Principles: [`GLOBAL.md`](GLOBAL.md).
 
-Dotfiles is the **machine constitution** for the captain's Mac — not an application. One repo, one command (`./rebuild.sh`), and a fresh machine ends up configured the same way. It defines system settings, packages, shell, editor, terminal, agent configs, LaunchAgents, and launcher scripts that survive reinstall.
+**Freshness is forced:** `bin/prove-docs-freshness.sh` (also from `prove-launchers.sh`).
+If you change services, skills, or spawn gates, update MACHINE.md / SYSTEM_MAP in
+the same change or the prove fails.
 
-## Ubiquitous language
+## Architecture
 
-| Term | Meaning |
-|---|---|
-| Switch | `darwin-rebuild switch` applying flake config to live system |
-| Bootstrap | First-time `bootstrap.sh`: Nix install → symlink → first switch |
-| mkOutOfStoreSymlink | home-manager pattern pointing `~/.config/*` at repo `home/` files |
-| LaunchAgent | macOS daemon plist (Neo4j, embeds, knowledge-engine sync, fmt-on-change) |
-| Machine principles | `GLOBAL.md` → `~/CLAUDE.md` agent constitution |
-| Audit | `audit-config-ownership.sh` verifies live configs match repo copies |
+```
+configuration.nix     nix-darwin — LaunchAgents, Homebrew, system daemons
+home.nix              home-manager — packages, symlinks, agent configs, skills
+GLOBAL.md             Machine principles → ~/CLAUDE.md
+MACHINE.md            Inventory SoT (what is installed / PARKED / WAIVER)
+docs/SYSTEM_MAP.md    How the fleet connects + spawn checklist
+home/.                Agent configs (Claude, Codex, Cursor, Gemini)
+.agents/              Skill source (projected on rebuild)
+config/orbit/         models.env — single switch for all AI models
+bin/                  Wrappers + prove-*.sh gates
+```
 
-## Entities
+## Rebuild
 
-| Entity | Invariants | Owner |
-|---|---|---|
-| flake.nix | Entry point; darwinConfigurations, home-manager, nix-homebrew | dotfiles |
-| configuration.nix | System: macOS defaults, Homebrew brews/casks, LaunchAgents | dotfiles |
-| home.nix | User packages, symlinks, shell aliases, agent config installs | dotfiles |
-| home/ | Real config files (Neovim, WezTerm, AGENTS.md, agent settings) | dotfiles |
-| bin/ | Launcher scripts symlinked to ~/bin (ct, openwiki, agent wrappers) | dotfiles |
-| config/orbit/models.env | Single switch for all AI model selection | dotfiles |
+```bash
+./rebuild.sh              # Apply all nix changes (Tier 3 — captain approved)
+```
 
-## Boundaries
+After rebuild, restart services if needed:
+```bash
+launchctl kickstart -k gui/$UID/org.nixos.<service-name>
+```
 
-- **In scope:** nix-darwin + home-manager declarative config, agent policy symlinks, service LaunchAgents, audit scripts
-- **Out of scope:** application business logic (lives in ~/projects/*); git identity (deliberately not set)
-- **Upstream dependencies:** nixpkgs, nix-darwin 26.05, home-manager, Determinate Nix
-- **Downstream consumers:** entire ~/projects stack (Neo4j, embed servers, knowledge-engine daily sync, fmt→neo4j-on-change)
+## Adding a new tool or daemon
 
-## Events / lifecycle
+1. Declare in `configuration.nix` (brew/LaunchAgent) or `home.nix` (npm/uv/skill)
+2. Document in `MACHINE.md` (+ `docs/SYSTEM_MAP.md` if it changes how pieces link)
+3. Run `bin/prove-docs-freshness.sh` then `./rebuild.sh`
 
-1. **Bootstrap:** clone → review host/user/arch → `./bootstrap.sh` → first switch
-2. **Daily:** edit config in repo → `./rebuild.sh` → kickstart changed LaunchAgents
-3. **Audit:** `bin/audit-config-ownership.sh` + `bin/audit-doc-freshness.sh` on demand
+## Agent config management
 
-## Open questions
+All agent configs in `home/` are nix-symlinked to their runtime locations.
+Changes MUST be made in this repo and applied via rebuild — never edited only
+under `~/.claude/`, `~/.codex/`, etc.
 
-- Homebrew `cleanup = "zap"` removes unlisted packages on every switch — captain must curate brews/casks list
-- High-agency aliases (`cc`, `co`) are intentional but require informed use
+Skills: edit `dotfiles/.agents/<name>/`, prove with `bin/prove-skills.sh`, rebuild
+to project durably.
