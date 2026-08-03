@@ -129,6 +129,11 @@ if rg -q 'HOMEBASE_CAPTAIN_PUBLIC_KEY_FILE' "$CONFIG"; then
 else
   fail "homebase must set HOMEBASE_CAPTAIN_PUBLIC_KEY_FILE"
 fi
+if rg -q 'BRIDGE_HOMEBASE_URL' "${ROOT}/home.nix"; then
+  ok "home.nix declares BRIDGE_HOMEBASE_URL (bridge→homebase wiring)"
+else
+  fail "home.nix must set BRIDGE_HOMEBASE_URL (bridge→homebase wiring)"
+fi
 if [[ -f "${ROOT}/bin/prove-authority-chain.sh" ]]; then
   ok "bin/prove-authority-chain.sh present"
 else

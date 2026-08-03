@@ -91,6 +91,7 @@ fi
 
 required=(
   # mlx-chat-daemon PARKED 2026-07-23 (Neo4j sole-store; embeds :8081/:8082 only)
+  org.nixos.com.jwalinshah.homebase
   org.nixos.com.jwalinshah.llama-embed-server
   org.nixos.com.jwalinshah.coderank-embed-server
   org.nixos.com.jwalinshah.mintmux
