@@ -14,3 +14,6 @@ credentials.json
 .env.*
 .env
 .bridge-task
+
+# skill .backup copies (fmt-on-edit hook) never tracked
+.agents/**/*.backup
