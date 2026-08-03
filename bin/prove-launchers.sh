@@ -65,11 +65,15 @@ for c in chrome-ai-tools chrome-main chrome-third; do
 done
 
 # --- orbit identity ---
+# orbit is a gRPC thin shell over bridge. bridge-serve was deliberately removed
+# 2026-07-31 (captain cut it), so a live bridge health line is NOT expected.
+# The proof is: the auth token resolves (no "token file is required") and the
+# failure mode is a clean connection-refused — i.e. the client is wired.
 orbit_out="$(orbit status 2>&1 || true)"
-if echo "$orbit_out" | grep -q 'bridge health'; then
-  ok "orbit status is gRPC thin shell"
+if echo "$orbit_out" | grep -q "gRPC auth token file is required"; then
+  fail "orbit status cannot resolve the gRPC auth token (stale binary?). got: ${orbit_out:0:120}"
 else
-  fail "orbit status does not show bridge health (stale binary?). got: ${orbit_out:0:120}"
+  ok "orbit status resolves gRPC auth token (bridge-serve absent is expected)"
 fi
 
 # --- LaunchAgents declared in configuration.nix must be loaded (or calendar) ---
@@ -90,12 +94,8 @@ required=(
   org.nixos.com.jwalinshah.llama-embed-server
   org.nixos.com.jwalinshah.coderank-embed-server
   org.nixos.com.jwalinshah.mintmux
-  org.nixos.com.jwalinshah.knowledge-engine
   org.nixos.com.jwalinshah.inbox-server
-  org.nixos.com.jwalinshah.bridge-cdp-quota
-  org.nixos.com.jwalinshah.bridge-serve
   org.nixos.com.jwalinshah.m5logd
-  org.nixos.com.jwalinshah.voice-engine
 )
 
 if "$ROOT/bin/reconcile-agent-toolchain.sh" check >/dev/null; then
@@ -139,51 +139,29 @@ for label in "${retired[@]}"; do
   fi
 done
 
-# verify-machine daily agent: required in nix source; loaded after rebuild
-if grep -q 'com.jwalinshah.verify-machine' "$CFG"; then
-  ok "verify-machine declared in configuration.nix"
-  if echo "$loaded" | grep -q 'org.nixos.com.jwalinshah.verify-machine'; then
-    ok "loaded org.nixos.com.jwalinshah.verify-machine"
+# Deliberately removed 2026-07-31 (captain cut). The prove asserts they are
+# NOT loaded and NOT re-declared in configuration.nix — re-adding any of them
+# without reversing the removal is drift and must fail.
+removed=(
+  org.nixos.com.jwalinshah.knowledge-engine
+  org.nixos.com.jwalinshah.bridge-cdp-quota
+  org.nixos.com.jwalinshah.bridge-serve
+  org.nixos.com.jwalinshah.voice-engine
+  org.nixos.com.jwalinshah.verify-machine
+  org.nixos.com.jwalinshah.overnight-harden
+)
+for label in "${removed[@]}"; do
+  if echo "$loaded" | grep -q "$label"; then
+    fail "removed LaunchAgent is loaded: $label (captain cut 2026-07-31)"
   else
-    warn "verify-machine not loaded yet — run rebuild.sh to activate daily 09:00 gate"
+    ok "removed LaunchAgent not loaded: $label"
   fi
-else
-  fail "verify-machine missing from configuration.nix"
-fi
-
-# overnight-harden interval agent (durable wrap — not Cursor-session-bound)
-if grep -q 'com.jwalinshah.overnight-harden' "$CFG"; then
-  ok "overnight-harden declared in configuration.nix"
-  if echo "$loaded" | grep -q 'org.nixos.com.jwalinshah.overnight-harden'; then
-    ok "loaded org.nixos.com.jwalinshah.overnight-harden"
+  if grep -q "$label" "$CFG"; then
+    fail "removed LaunchAgent re-declared in configuration.nix: $label"
   else
-    warn "overnight-harden not loaded yet — run rebuild.sh (or interim LaunchAgent)"
+    ok "removed LaunchAgent not re-declared in configuration.nix: $label"
   fi
-  OH_TICK="${HOME}/projects/dotfiles/bin/overnight-harden-tick.sh"
-  if [[ -x "$OH_TICK" ]]; then
-    if bash -n "$OH_TICK" 2>/dev/null; then
-      ok "overnight-harden-tick.sh bash -n clean"
-    else
-      fail "overnight-harden-tick.sh bash -n failed (syntax)"
-    fi
-    if [[ -x "${HOME}/projects/dotfiles/bin/prove-overnight-pr-belt.sh" ]]; then
-      if "${HOME}/projects/dotfiles/bin/prove-overnight-pr-belt.sh" >/dev/null; then
-        ok "prove-overnight-pr-belt.sh PASS"
-      else
-        fail "prove-overnight-pr-belt.sh FAILED"
-      fi
-    fi
-    if rg -q '/usr/sbin' "$OH_TICK"; then
-      ok "overnight-harden-tick.sh PATH includes /usr/sbin"
-    else
-      fail "overnight-harden-tick.sh PATH missing /usr/sbin (lsof/chown ghost under LaunchAgent)"
-    fi
-  else
-    fail "missing executable $OH_TICK"
-  fi
-else
-  fail "overnight-harden missing from configuration.nix"
-fi
+done
 
 # CDP quota prove (offline merge always; live optional via CDP_PROVE_LIVE=1)
 CDP_PROVE="${HOME}/projects/bridge/scripts/prove-cdp-quota.sh"
