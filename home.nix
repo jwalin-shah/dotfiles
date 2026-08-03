@@ -39,6 +39,14 @@ in
     NLTK_DATA = "${config.home.homeDirectory}/.local/share/nltk_data";
     GOPATH = "${config.home.homeDirectory}/.local/share/go";
     PATH = "${config.home.homeDirectory}/.cargo/bin:${config.home.homeDirectory}/.local/bin:${config.home.homeDirectory}/bin:/opt/homebrew/bin:$PATH";
+    # Bridge↔HomeBase admission (fail-closed gate). HomeBase main API server
+    # on :9102 serves /api/v1/contracts/grants/check + /api/v1/verifications/bridge.
+    # Keys must match the authority set enrolled in ~/.local/state/homebase/keys/
+    # (regenerated 2026-08-03). See docs/SYSTEM_MAP.md "spawn" section.
+    BRIDGE_HOMEBASE_URL = "http://127.0.0.1:9102";
+    BRIDGE_HOMEBASE_BRIDGE_PRIVATE_KEY_FILE = "${config.home.homeDirectory}/.local/state/homebase/keys/bridge.priv";
+    BRIDGE_HOMEBASE_ADMISSION_PUBLIC_KEY_FILE = "${config.home.homeDirectory}/.local/state/homebase/keys/admission.pub";
+    BRIDGE_ALLOW_UNSAFE_LOCAL_MODE = "1";
   };
 
   programs.zsh = {
