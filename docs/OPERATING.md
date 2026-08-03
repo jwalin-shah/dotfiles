@@ -8,6 +8,44 @@ This is the **day-to-day playbook**. Not inventory (MACHINE.md), not philosophy 
 
 ---
 
+## 0. Two lanes — assured vs manual
+
+All work on this machine falls into one of two lanes. Know which lane you are
+in before you start; the lane decides what counts as done.
+
+### Assured lane (Bridge/HomeBase-backed)
+
+```text
+Firstmate request
+  → Bridge typed task
+  → HomeBase grant
+  → Bridge worktree + sandbox
+  → Mintmux session
+  → independent Bridge verification
+  → HomeBase receipt acceptance
+  → Bridge-controlled delivery
+  → captain merge
+```
+
+This lane carries the full authority chain: Bridge constrains and proves the
+work, and HomeBase decides which proved transitions become authoritative.
+
+### Manual lane (no Bridge/HomeBase assurance)
+
+```text
+Human or agent edits a captain-owned worktree
+  → ordinary repository tests
+  → human commit/PR
+```
+
+**This lane does not carry Bridge/HomeBase assurance.** A manual commit is
+ordinary work, not an assured delivery: it has no attempt identity, no Bridge
+verification receipt, no HomeBase receipt acceptance, and no Bridge-owned
+publish. It is fine for normal captain work; it is not the same as the
+assured lane. Do not claim otherwise.
+
+---
+
 ## 1. Daily loop (what you actually do)
 
 ```text
@@ -30,7 +68,7 @@ This is the **day-to-day playbook**. Not inventory (MACHINE.md), not philosophy 
 | Who | Where | When |
 |---|---|---|
 | **You / Cursor in a worktree** | Feature branch in that worktree | Normal captain work; one atom per commit preferred |
-| **Bridge worker** | Disposable spawn worktree | Only inside admitted spawn; should stay inside `allowed_paths` |
+| **Bridge worker** | Disposable spawn worktree | Only inside admitted spawn; works inside `allowed_paths`; does **not** self-publish (Bridge-owned delivery) |
 | **`bridge deliver`** | Applies verified tree → publish path | Preferred for `delivery: pr` once trust P0 closes |
 | **`bridge release`** | After landed PR/reference check | Records `LandedWorkProof`; releases lease |
 
@@ -113,9 +151,9 @@ Use these for **risky Bridge/HomeBase work** instead of dirtying `agent/quota-op
 orbit captures ticket+brief
   → (gates) HomeBase grant + isolation
   → spawn worktree (Lane B)
-  → worker may commit inside allowed_paths
+  → worker works inside allowed_paths (no self-publish)
   → bridge verify (fresh tree)
-  → bridge deliver / release   # publish + proof
+  → bridge deliver   # Bridge-owned delivery: bridge performs the commit/PR
   → ledger records outcome
 ```
 

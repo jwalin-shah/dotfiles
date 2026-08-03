@@ -8,6 +8,17 @@ declared here or in `configuration.nix`/`home.nix`, it doesn't survive a rebuild
 `~/projects/portfolio/wayfinder/system-of-systems-2026-08-01/map.md`.
 Joint prove: `~/projects/agent-os/bin/prove-all.sh`.
 
+## Service table
+
+| Component | Status | Role |
+|---|---|---|
+| Firstmate | Installed / on demand | Orchestration (plans, delegates, supervises, communicates) |
+| Bridge | Always on service + CLI | Execution and assurance (spawn/verify/deliver/ledger, Seatbelt) |
+| HomeBase | Always on localhost service | Admission and authority (contract/grant + signed receipts, :9102) |
+| Mintmux | Always on current backend | PTY/session runtime (Bridge worker sessions) |
+| Herdr | Evaluated / PARKED | Candidate alternative backend (not production-admitted) |
+| Orbit | On demand | Bridge administration / status (thin CLI) |
+
 **Freshness gate:** `bin/prove-docs-freshness.sh` (also via `prove-launchers.sh`).
 Update this file in the same change as any LaunchAgent / PATH / PARKED edit.
 

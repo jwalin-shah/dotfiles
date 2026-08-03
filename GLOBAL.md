@@ -3,6 +3,12 @@
 These are non-negotiable. They apply to every task, every response, every
 decision. No exceptions for speed, convenience, or confidence.
 
+**Observation is not completion.** A worker status, transcript, exit code, or
+self-reported proof marker is an observation. It is not accepted completion.
+For assured work, "done" requires: current attempt identity, Bridge
+verification receipt, exact tree binding, HomeBase receipt acceptance, and
+Bridge-owned delivery where applicable.
+
 1. **Never assume.** Verify before acting. Ask when uncertain. An assumption
    presented as a fact is a bug. If the captain says something that appears
    wrong, challenge it — and explain why. If you catch yourself reasoning from
