@@ -9,6 +9,7 @@ export PATH="${HOME}/.local/bin:${HOME}/bin:/opt/homebrew/bin:/usr/local/bin:/us
 FAIL=0
 ok() { echo "OK: $*"; }
 fail() { echo "FAIL: $*" >&2; FAIL=1; }
+warn() { echo "WARN: $*" >&2; }
 
 MACHINE="${ROOT}/MACHINE.md"
 MAP="${ROOT}/docs/SYSTEM_MAP.md"
@@ -47,7 +48,7 @@ for needle in 'worktree' 'commit' 'Lane A' 'Lane B' 'Lane C' 'bridge deliver' 'H
 done
 
 # --- SYSTEM_MAP required sections ---
-for needle in 'Orbit' 'Bridge' 'HomeBase' 'Seatbelt' 'Knowledge Engine' 'prove-docs-freshness' 'BRIDGE_ALLOW_UNSAFE_LOCAL_MODE' 'PARKED'; do
+for needle in 'Pi' 'Bridge' 'HomeBase' 'Seatbelt' 'Knowledge Engine' 'prove-docs-freshness' 'BRIDGE_ALLOW_UNSAFE_LOCAL_MODE' 'PARKED' 'Firstmate' 'Orbit'; do
   if rg -q --fixed-strings "$needle" "$MAP"; then
     ok "SYSTEM_MAP mentions $needle"
   else
@@ -106,18 +107,41 @@ else
   fail "neo4j not started (MACHINE.md claims sole store at :7687)"
 fi
 
-# --- bridge-serve loaded (orbit surface) ---
+# --- bridge-serve is optional (CLI Bridge is the spine; Pi is captain surface) ---
 if launchctl list 2>/dev/null | rg -q 'org\.nixos\.com\.jwalinshah\.bridge-serve'; then
-  ok "bridge-serve LaunchAgent listed"
+  ok "bridge-serve LaunchAgent listed (optional gRPC surface)"
 else
-  fail "bridge-serve not in launchctl (SYSTEM_MAP claims orbit→bridge-serve)"
+  ok "bridge-serve absent (optional; CLI bridge spine OK)"
 fi
 
-# --- HomeBase gap must be documented (spawn blocker) ---
-if rg -q 'HomeBase' "$MAP" && rg -q 'BRIDGE_HOMEBASE_URL' "$MAP"; then
-  ok "SYSTEM_MAP documents HomeBase spawn requirement"
+# --- HomeBase must be DECLARED, not merely mentioned. ---
+# Declaration-based, per the authority-chain plan: configuration.nix must
+# actually declare the homebase LaunchAgent + its env (not just SYSTEM_MAP
+# containing the word HomeBase), and prove-authority-chain.sh must exist.
+CONFIG="${ROOT}/configuration.nix"
+if rg -q 'org\.nixos\.com\.jwalinshah\.homebase' "$CONFIG"; then
+  ok "configuration.nix declares homebase LaunchAgent"
 else
-  fail "SYSTEM_MAP must document HomeBase / BRIDGE_HOMEBASE_URL spawn gate"
+  fail "configuration.nix must declare org.nixos.com.jwalinshah.homebase"
+fi
+if rg -q 'HOMEBASE_CAPTAIN_PUBLIC_KEY_FILE' "$CONFIG"; then
+  ok "homebase declares HOMEBASE_CAPTAIN_PUBLIC_KEY_FILE"
+else
+  fail "homebase must set HOMEBASE_CAPTAIN_PUBLIC_KEY_FILE"
+fi
+if [[ -f "${ROOT}/bin/prove-authority-chain.sh" ]]; then
+  ok "bin/prove-authority-chain.sh present"
+else
+  fail "missing bin/prove-authority-chain.sh"
+fi
+MACHINE_HAS="no"
+if rg -q 'HomeBase' "$MACHINE" && rg -q '127\.0\.0\.1:9102|:9102' "$MACHINE"; then
+  MACHINE_HAS="yes"
+fi
+if [[ "$MACHINE_HAS" == "yes" ]]; then
+  ok "MACHINE.md names homebase on :9102"
+else
+  warn "MACHINE.md does not yet name homebase on :9102 (add it)"
 fi
 
 # --- portfolio one-surface pointer ---

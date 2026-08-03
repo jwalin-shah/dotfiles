@@ -3,9 +3,10 @@
 Single source of truth for everything installed on this machine. If it's not
 declared here or in `configuration.nix`/`home.nix`, it doesn't survive a rebuild.
 
-**How pieces connect (Orbit → Bridge → HomeBase → KE → Seatbelt):** see
+**How pieces connect (Pi → Firstmate/Bridge → HomeBase → KE → Seatbelt):** see
 [`docs/SYSTEM_MAP.md`](docs/SYSTEM_MAP.md). Portfolio living map:
-`~/projects/portfolio/wayfinder/one-surface-system-2026-07-30/map.md`.
+`~/projects/portfolio/wayfinder/system-of-systems-2026-08-01/map.md`.
+Joint prove: `~/projects/agent-os/bin/prove-all.sh`.
 
 **Freshness gate:** `bin/prove-docs-freshness.sh` (also via `prove-launchers.sh`).
 Update this file in the same change as any LaunchAgent / PATH / PARKED edit.
@@ -85,7 +86,7 @@ Neovim's current Treesitter plugin compiles parsers with the Home Manager
 | dotfiles | machine constitution, rebuild, LaunchAgents, proves | `./rebuild.sh` |
 | orbit | captain CLI (thin shell over bridge-serve) | `go build ./cmd/orbit` |
 | bridge | spawn / verify / deliver / ledger / Seatbelt | `go build ./cmd/bridge` |
-| homebase | grant admission + receipts (**required for live spawn**) | see homebase AGENTS |
+| homebase | grant admission + receipts (**required for live spawn**); binds 127.0.0.1:9102 | see homebase AGENTS |
 | mintmux | PTY multiplexer (bridge depends on it) | `go build ./cmd/...` |
 | knowledge-engine | Neo4j pipelines (dumb pipe) | `./scripts/check.sh` |
 | axioms | principle corpus → KE | data repo |
@@ -179,7 +180,7 @@ unchanged.
 - `com.jwalinshah.reconcile-outcomes` — hand LaunchAgent, not in configuration.nix (WAIVER; separate job-application owner).
 - `org.orbit.bridge-cdp-quota` — retired duplicate of the Nix-managed CDP quota agent; unloaded and archived under `~/Library/LaunchAgents/archive/` on 2026-07-29.
 
-*Last updated: 2026-07-30 — SYSTEM_MAP, skills prove, HomeBase/isolation spawn gates, fleet repos, self-sufficient Claude lane stores (ct split from default; pioneer declared).*
+*Last updated: 2026-08-03 — verify-machine 11/11 green; LaunchAgents table reconciled (6 removed 2026-07-31 marked); headroom/voice-engine paused states recorded.*
 
 ## Cross-Repo Dependency Manifest (deps.json) & Neo4j
 

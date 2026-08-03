@@ -269,6 +269,9 @@
       "zoxide"
       "yazi"
       "sketchybar"
+      # macOS maintenance/health CLI (mo status/analyze --json → machine-health
+      # proof + wake evidence). NOT wired into auto-running destructive clean.
+      "mole"
     ];
 
     casks = [
@@ -297,6 +300,7 @@
     uvBin = "${home}/.local/share/uv/tools";
     brewBin = "/opt/homebrew/bin";
     dotfilesBin = "${home}/.dotfiles/bin";
+    state = "${home}/.local/state";
     defaultPATH = "${localBin}:${dotfilesBin}:${brewBin}:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
   in {
 
@@ -387,44 +391,9 @@
     # for bridge soft-fail SearchSource until Neo4j vector search replaces it.
     # Do not re-enable this LaunchAgent as a second sink.
 
-    # knowledge-engine: daily catch-up (cocoindex embeds + sync-graph).
-    # Primary path is on-change: fmt-on-edit → neo4j-on-change → on-change-sync.sh.
-    # MUST use project .venv (has requests + cocoindex[neo4j]); global uv tool lacks deps.
-    "com.jwalinshah.knowledge-engine" = {
-      serviceConfig = {
-        ProgramArguments = [
-          "${dotfilesBin}/daemon-wrapper"
-          "${home}/projects/knowledge-engine/scripts/sync-and-embed.sh"
-        ];
-        RunAtLoad = true;
-        # Daily catch-up only — not hourly theater. On-change owns freshness.
-        StartCalendarInterval = [
-          {
-            Hour = 3;
-            Minute = 15;
-          }
-        ];
-        WorkingDirectory = "${home}/projects/knowledge-engine";
-        EnvironmentVariables = {
-          HOME = home;
-          PATH = "${home}/projects/knowledge-engine/.venv/bin:${defaultPATH}";
-          DAEMON_NAME = "knowledge-engine";
-          DAEMON_PORT = "0";
-          DAEMON_DISPLAY_NAME = "knowledge-engine:neo4j";
-          DAEMON_TYPE = "foreground";
-          DAEMON_HEALTH_URL = "pid-only";
-          NEO4J_URI = "neo4j://localhost:7687";
-          NEO4J_USER = "neo4j";
-          # Secret names are safe to keep declarative; daemon-wrapper reads
-          # values from the macOS Keychain at launch and fails closed if the
-          # approved entry has not been provisioned.
-          DAEMON_KEYCHAIN_SERVICE = "bridge-secrets";
-          DAEMON_KEYCHAIN_SECRETS = "NEO4J_PASSWORD";
-        };
-        StandardOutPath = "${home}/.local/share/orbit/knowledge-engine.log";
-        StandardErrorPath = "${home}/.local/share/orbit/knowledge-engine.log";
-      };
-    };
+    # knowledge-engine: REMOVED 2026-07-31 — captain cut the daily catch-up.
+    # On-change path (fmt-on-edit → neo4j-on-change) still handles incremental
+    # updates. Re-add if full daily sync is needed.
 
     # inbox-server: unified inbox API (Gmail/iMessage/Calendar/Sheets/Docs)
     # Was a hand-installed plist, not nix-managed, not through daemon-wrapper
@@ -454,64 +423,12 @@
       };
     };
 
-    # bridge-serve: gRPC :9101 + HTTP :9100 — orbit thin shell depends on this.
-    # Without KeepAlive, agent-shell nohup dies when the session ends and the
-    # wrap (orbit/hooks/check-stale) fails closed on a false "bridge down".
-    "com.jwalinshah.bridge-serve" = {
-      serviceConfig = {
-        ProgramArguments = [
-          "${dotfilesBin}/daemon-wrapper"
-          "${localBin}/bridge"
-          "serve"
-        ];
-        KeepAlive.SuccessfulExit = false;
-        RunAtLoad = true;
-        ThrottleInterval = 10;
-        WorkingDirectory = "${home}/projects/bridge";
-        EnvironmentVariables = {
-          HOME = home;
-          PATH = defaultPATH;
-          DAEMON_NAME = "bridge-serve";
-          DAEMON_PORT = "9101";
-          DAEMON_DISPLAY_NAME = "bridge-serve:9101";
-          DAEMON_TYPE = "foreground";
-          DAEMON_HEALTH_URL = "http://127.0.0.1:9100/v1/status";
-          DAEMON_WORKING_DIR = "${home}/projects/bridge";
-          BRIDGE_GRPC_AUTH_TOKEN_FILE = "${home}/.local/state/bridge/grpc-auth-token";
-        };
-        StandardOutPath = "${home}/.local/share/orbit/bridge-serve.log";
-        StandardErrorPath = "${home}/.local/share/orbit/bridge-serve.log";
-      };
-    };
+    # bridge-serve: REMOVED 2026-07-31 — captain cut it; orbit thin shell no longer
+    # depends on a permanent bridge daemon. Re-add if bridge needs to serve
+    # continuously.
 
-    # bridge-cdp-quota: refresh ~/.bridge/cdp-cache.json every 6h.
-    # Requires CDP Brave profile (bridge/scripts/ensure-cdp-browser.sh) logged
-    # into billing sites. Source of truth was hand-installed
-    # org.orbit.bridge-cdp-quota (bridge/scripts/org.orbit.bridge-cdp-quota.plist);
-    # after rebuild unload that label if still loaded:
-    #   launchctl bootout gui/$UID/org.orbit.bridge-cdp-quota
-    "com.jwalinshah.bridge-cdp-quota" = {
-      serviceConfig = {
-        ProgramArguments = [
-          "/bin/bash"
-          "-c"
-          ''
-            export PATH="${home}/bin:${home}/.local/bin:${brewBin}:$PATH"
-            "${home}/projects/bridge/scripts/ensure-cdp-browser.sh" && \
-              "${home}/projects/bridge/scripts/cdp-scrape-quota.py" >>"${home}/.bridge/cdp-scrape.log" 2>&1
-          ''
-        ];
-        StartInterval = 21600;
-        RunAtLoad = true;
-        WorkingDirectory = "${home}/projects/bridge";
-        EnvironmentVariables = {
-          HOME = home;
-          PATH = defaultPATH;
-        };
-        StandardOutPath = "${home}/.bridge/cdp-launchd.out.log";
-        StandardErrorPath = "${home}/.bridge/cdp-launchd.err.log";
-      };
-    };
+    # bridge-cdp-quota: REMOVED 2026-07-31 — captain cut it. quota-axi handles
+    # quota via API calls; no need to scrape billing sites via CDP Brave every 6h.
 
     # -- Session Infrastructure --
     # neo4j: sole knowledge store. Package declared in brews above; runtime
@@ -545,6 +462,76 @@
       };
     };
 
+    # homebase: authority daemon — contract/grant admission + durable signed
+    # receipt ledger. Binds 127.0.0.1:9102 only. This is the machine's
+    # authority spine: bridge CLI talks to it; it is NOT an agent runtime.
+    # Keys are provisioned once by bin/provision-authority-keys.sh (0600 under
+    # ~/.local/state/homebase/keys) and never declared here (PUBLIC repo).
+    "org.nixos.com.jwalinshah.homebase" = {
+      serviceConfig = {
+        ProgramArguments = [
+          "${dotfilesBin}/daemon-wrapper"
+          "${localBin}/homebase"
+        ];
+        KeepAlive.SuccessfulExit = false;
+        RunAtLoad = true;
+        ThrottleInterval = 10;
+        ExitTimeOut = 10;
+        WorkingDirectory = "${state}/homebase";
+        EnvironmentVariables = {
+          HOME = home;
+          PATH = defaultPATH;
+          DAEMON_NAME = "homebase";
+          DAEMON_PORT = "9102";
+          DAEMON_DISPLAY_NAME = "homebase:9102";
+          DAEMON_TYPE = "foreground";
+          DAEMON_HEALTH_URL = "http://127.0.0.1:9102/v1/status";
+          DAEMON_WORKING_DIR = "${state}/homebase";
+          # Local-only mode: NEO4J_URI is intentionally NOT set, so the Axiom
+          # Firewall is disabled and no Neo4j password is required. Set
+          # NEO4J_URI + NEO4J_PASSWORD to enable the firewall in a deployment.
+          HOMEBASE_RECORD_JOURNAL = "${state}/homebase/homebase_records.journal";
+          HOMEBASE_CAPTAIN_PUBLIC_KEY_FILE = "${state}/homebase/keys/captain.pub";
+          HOMEBASE_BRIDGE_PUBLIC_KEY_FILE = "${state}/homebase/keys/bridge.pub";
+          HOMEBASE_ADMISSION_PRIVATE_KEY_FILE = "${state}/homebase/keys/admission.priv";
+          HOMEBASE_VERIFIER_PUBLIC_KEY_FILE = "${state}/homebase/keys/verifier.pub";
+          HOMEBASE_VERIFIER_KEY_ID = "verifier";
+          HOMEBASE_RECEIPT_PRIVATE_KEY_FILE = "${state}/homebase/keys/receipt.priv";
+          PORT = "9102";
+        };
+        StandardOutPath = "${state}/homebase/homebase.log";
+        StandardErrorPath = "${state}/homebase/homebase.log";
+      };
+    };
+
+    # homebase-drive: admission driver (sidecar, optional). Same authority key
+    # set; supplies drive-admit behavior next to the main engine.
+    "org.nixos.com.jwalinshah.homebase-drive" = {
+      serviceConfig = {
+        ProgramArguments = [
+          "${dotfilesBin}/daemon-wrapper"
+          "${localBin}/drive-admit"
+        ];
+        KeepAlive.SuccessfulExit = false;
+        RunAtLoad = false;
+        ThrottleInterval = 10;
+        WorkingDirectory = "${state}/homebase";
+        EnvironmentVariables = {
+          HOME = home;
+          PATH = defaultPATH;
+          DAEMON_NAME = "homebase-drive";
+          DAEMON_PORT = "0";
+          DAEMON_DISPLAY_NAME = "homebase-drive";
+          DAEMON_TYPE = "foreground";
+          DAEMON_HEALTH_URL = "pid-only";
+          HOMEBASE_CAPTAIN_PUBLIC_KEY_FILE = "${state}/homebase/keys/captain.pub";
+          HOMEBASE_ADMISSION_PRIVATE_KEY_FILE = "${state}/homebase/keys/admission.priv";
+        };
+        StandardOutPath = "${state}/homebase/homebase-drive.log";
+        StandardErrorPath = "${state}/homebase/homebase-drive.log";
+      };
+    };
+
 
     # m5logd: M5 hardware logging daemon
     "com.jwalinshah.m5logd" = {
@@ -562,84 +549,14 @@
       };
     };
 
-    # voice-engine: macOS dictation menubar app
-    # (Re-enabled: KV-cache decoder rearchitecture built to avoid CoreML states)
-    "com.jwalinshah.voice-engine" = {
-      serviceConfig = {
-        ProgramArguments = [ "${localBin}/voice-engine" ];
-        KeepAlive = true;
-        RunAtLoad = true;
-        ThrottleInterval = 10;
-        EnvironmentVariables = {
-          HOME = home;
-          PATH = defaultPATH;
-        };
-        StandardOutPath = "/tmp/voice-engine.log";
-        StandardErrorPath = "/tmp/voice-engine.log";
-      };
-    };
+    # voice-engine: REMOVED 2026-07-31 — captain cut it. macOS dictation menubar
+    # app not needed.
 
-    # overnight-harden: prove pack + one queued spawn every 15m.
-    # Durable wrap worker — does not need a Cursor chat awake.
-    # Queue: portfolio/wayfinder/overnight-queue/{ticket}.json + .brief.md
-    # Stop: touch overnight-queue/STOP or weekly Claude ≥90% (script writes STOP).
-    "com.jwalinshah.overnight-harden" = {
-      serviceConfig = {
-        ProgramArguments = [
-          "${dotfilesBin}/overnight-harden-tick.sh"
-        ];
-        RunAtLoad = true;
-        StartInterval = 900;
-        WorkingDirectory = home;
-        EnvironmentVariables = {
-          HOME = home;
-          PATH = defaultPATH;
-          BRIDGE_AGY_MODEL = "claude-sonnet-4-6";
-        };
-        StandardOutPath = "${home}/.local/share/orbit/overnight-harden-launchd.log";
-        StandardErrorPath = "${home}/.local/share/orbit/overnight-harden-launchd.log";
-      };
-    };
+    # overnight-harden: REMOVED 2026-07-31 — captain cut it. Nightly prove+spawn
+    # queue not needed.
 
-    # verify-machine: daily machine health (hooks + daemons + config).
-    # Closes the gap where verify-machine only ran on rebuild/pre-commit.
-    # Log: ~/.local/share/orbit/verify-machine.log
-    "com.jwalinshah.verify-machine" = {
-      serviceConfig = {
-        ProgramArguments = [
-          "/bin/bash"
-          "-c"
-          ''
-            export PATH="${home}/.local/bin:${home}/bin:${dotfilesBin}:${brewBin}:/usr/sbin:/sbin:$PATH"
-            mkdir -p "${home}/.local/share/orbit"
-            {
-              echo "=== $(date -u +%Y-%m-%dT%H:%M:%SZ) verify-machine ==="
-              if command -v bridge >/dev/null 2>&1; then
-                bridge verify-machine
-              else
-                echo "ERROR: bridge not on PATH" >&2
-                exit 1
-              fi
-              "${home}/projects/dotfiles/bin/prove-launchers.sh" || exit 1
-            } >>"${home}/.local/share/orbit/verify-machine.log" 2>&1
-          ''
-        ];
-        RunAtLoad = false;
-        StartCalendarInterval = [
-          {
-            Hour = 9;
-            Minute = 0;
-          }
-        ];
-        WorkingDirectory = home;
-        EnvironmentVariables = {
-          HOME = home;
-          PATH = defaultPATH;
-        };
-        StandardOutPath = "${home}/.local/share/orbit/verify-machine-launchd.log";
-        StandardErrorPath = "${home}/.local/share/orbit/verify-machine-launchd.log";
-      };
-    };
+    # verify-machine: REMOVED 2026-07-31 — captain cut it. Daily machine health
+    # check not needed.
 
     # ladybug-pipeline: FROZEN 2026-07-21 — Neo4j is the sole knowledge store
     # (Portfolio ADR neo4j-sole-store). LadybugDB file retained read-only as a

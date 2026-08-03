@@ -3,182 +3,102 @@
 **Captain entry (this machine):** nix-darwin + home-manager constitution for the
 fleet. Start here:
 
-1. [`docs/SYSTEM_MAP.md`](docs/SYSTEM_MAP.md) — how Orbit / Bridge / HomeBase / KE / Seatbelt link  
+1. [`docs/SYSTEM_MAP.md`](docs/SYSTEM_MAP.md) — how Pi / Bridge / HomeBase / KE / Firstmate link  
 2. [`docs/OPERATING.md`](docs/OPERATING.md) — how to use it: commits, worktrees, daily loop  
 3. [`MACHINE.md`](MACHINE.md) — what is installed, PARKED, REMOVED, WAIVER  
 4. [`AGENTS.md`](AGENTS.md) — agent instructions for this repo  
 5. `bin/prove-docs-freshness.sh` — **forced** doc freshness (also via `prove-launchers.sh`)
+6. `~/projects/agent-os/bin/prove-all.sh` — joint frankenstein substrate prove
 
 ```sh
 ./rebuild.sh                          # apply nix (Tier 3)
 bin/prove-docs-freshness.sh           # docs match live machine
 bin/prove-launchers.sh                # PATH + LaunchAgents + nested proves
-orbit status                          # Bridge thin-shell health
+~/projects/agent-os/bin/prove-all.sh  # Pi/Bridge/HB/mintmux/Neo4j/trajectory
 ```
 
 ---
 
-Watch the upstream walkthrough: https://youtu.be/5N-okeDdIuI
+## What this is
 
-Personal Mac setup, managed with nix-darwin and home-manager.
-One repo, one command, and a fresh Mac ends up configured the same way every time.
+One machine. One command: `./rebuild.sh`. This repo defines everything that
+survives a fresh macOS install — system defaults, packages, LaunchAgents,
+shell, agent configs, skills, and prove gates.
 
-## What you get
+The repo is public at `https://github.com/jwalin-shah/dotfiles.git`.
+It is **this machine's** constitution, not a template. Clone it to
+understand the fleet, not to run it on your own Mac.
 
-Running the switch builds:
+## Architecture
 
-- System settings (dark mode, key repeat, dock, Finder, trackpad)
-- Homebrew apps (casks and CLI tools)
-- Nix user packages (ripgrep, fd, fzf, jq, lazygit, Neovim, Hack Nerd Font)
-- Shell (zsh, aliases, starship prompt)
-- Editor (Neovim config)
-- Terminal (WezTerm config)
-- Agent configs (Claude, Codex, opencode all share one AGENTS.md)
-- AXI helpers (GitHub, browser, and rich review wrappers exposed through shell aliases)
-- Launcher scripts in `bin/` (`ct`, `openwiki`, all agent wrappers)
-
-## Prerequisites
-
-- Apple Silicon Mac, by default.
-- Intel Mac: change one line.
-  In `configuration.nix`, set `nixpkgs.hostPlatform = "x86_64-darwin";` (the comment right there tells you the same thing).
-
-## Fresh-machine setup
-
-On a brand new Mac, from a bare clone of this repo:
-
-```sh
-git clone https://github.com/kunchenguid/dotfiles.git
-cd dotfiles
 ```
-
-Before you run it: review "Make it yours" below.
-Change the host label or CPU architecture if needed, and read the Homebrew cleanup warning.
-`bootstrap.sh` applies the config to your machine, so do this first.
-
-```sh
-./bootstrap.sh
+flake.nix              Entry point — nixpkgs, nix-darwin, home-manager, nix-homebrew
+configuration.nix      System layer — macOS defaults, Homebrew, LaunchAgents
+home.nix               User layer — packages, shell, symlinks, agent configs
+home/                  Live config files (Neovim, Claude, Codex, Cursor, Gemini)
+.agents/               Skill definitions (projected into agent configs on rebuild)
+config/orbit/          models.env — single switch for all AI model providers
+bin/                   Wrappers (ca, ct, cx) + prove-*.sh gates
+docs/                  SYSTEM_MAP, OPERATING, and linkage docs
 ```
-
-`bootstrap.sh` does six things, in order:
-
-1. Installs Determinate Nix, if it isn't already installed.
-2. Symlinks this repo to `~/.dotfiles`.
-   This has to happen before the first build, because `home.nix` points at config files through `~/.dotfiles`.
-3. Checks the `user` configured in `flake.nix` against your actual macOS username, and offers to fix it for you if they differ.
-4. Runs the first `darwin-rebuild switch`.
-   It fetches the `darwin-rebuild` tool from the nix-darwin 26.05 release branch, then applies this repo's locked flake config.
-5. Installs `treehouse` from the official install script if it is missing and prints the AXI wrapper aliases.
-6. Runs the config ownership audit (`bin/audit-config-ownership.sh`).
-
-After that, `darwin-rebuild` exists, `treehouse` is available if the install step succeeded, the launcher set is reachable, and you're on the normal workflow below.
-
-### Validate without applying
-
-Once Nix is installed (`bootstrap.sh` step 1 handles that), you can check that the config builds without touching your system - handy when you have edited something:
-
-```sh
-nix flake check --no-build
-nix build .#darwinConfigurations.mac.system --dry-run
-```
-
-If you renamed the host label in "Make it yours", substitute your label for `mac` in these commands.
 
 ## Daily use
 
-Edit the config files in place, then apply:
+```sh
+./rebuild.sh              # Apply all nix changes (Tier 3 — captain approved)
+```
+
+Edit files under `home/` directly — they're symlinked live via
+`mkOutOfStoreSymlink`, no rebuild needed. Only rebuild when you change a
+package list, system default, LaunchAgent, or skill definition.
+
+### Fresh machine
 
 ```sh
-./rebuild.sh
+./bootstrap.sh            # One-time: install Nix → symlink repo → first switch
 ```
 
-That's it.
-No separate build-and-copy step.
+`bootstrap.sh` installs Determinate Nix, symlinks the repo to `~/.dotfiles`,
+matches the flake username to `whoami`, and runs the first
+`darwin-rebuild switch`. After that, `./rebuild.sh` handles every later change.
 
-## Make it yours
+## Agent configs
 
-This repo is mine.
-If you clone it, review these before you run `bootstrap.sh`:
+All agent configs live under `home/` and are nix-symlinked to their runtime
+locations. **Never edit live files under `~/.claude/`, `~/.codex/`, etc.** —
+change them in this repo and rebuild.
 
-- **Username**: run `./bootstrap.sh` (it detects your macOS username and offers to set it) OR change the single `user = "kunchen"` line in `flake.nix`.
-  Everything else (`configuration.nix`, `home.nix`, home directory paths) is threaded from that one variable.
-- **Host label** `"mac"`, in three places: `flake.nix` (the `darwinConfigurations."mac"` name), `rebuild.sh:5` (the `#mac` at the end of the flake reference), and `bootstrap.sh`'s first-switch command (also `#mac`).
-  All three have to match.
-- **CPU architecture**, `hostPlatform` in `configuration.nix` (see Prerequisites above).
+| Lane | Config dir | Purpose |
+|---|---|---|
+| `ca` | `home/.claude/` | Claude direct (OAuth) |
+| `ct` | `home/.claude-token/` | TokenRouter — API key via Keychain `apiKeyHelper` |
+| `cx` | `home/.codex/` | Codex CLI config + hooks |
+| `cursor` | `home/.cursor/` | Cursor agent config |
+| `agy` | `home/.gemini/` | Gemini CLI config |
 
-**Git identity:** this config deliberately does not set your git name or email.
-Git will stop your first commit and tell you to set them (`git config --global user.name "Your Name"` and `git config --global user.email you@example.com`).
-If you'd rather manage that declaratively, add this back to `home.nix` with your own identity:
+Each Claude lane store is self-sufficient — its own `settings.json` carries
+routing, model defaults, and `apiKeyHelper`. **This repo is public — no keys
+are stored in it.** Keys come from the `bridge-secrets` Keychain at runtime.
 
-```nix
-programs.git = {
-  enable = true;
-  settings.user = {
-    name = "Your Name";
-    email = "you@example.com";
-  };
-};
-```
-
-**Homebrew cleanup warning:** `configuration.nix` sets `homebrew.onActivation.cleanup = "zap"`.
-That means every time you switch, Homebrew removes any package or cask on your machine that isn't listed in the `brews` and `casks` arrays in `configuration.nix`.
-If you already have Homebrew stuff installed that isn't in that list, the first switch will uninstall it.
-Read through `brews` and `casks` before you run `bootstrap.sh` or `rebuild.sh` for the first time, and add anything you want to keep.
-
-**About `herdr`:** it's in the `brews` list.
-It's a real public Homebrew formula (`brew info herdr` finds it in homebrew-core, no tap needed), so it will install fine.
-If you don't use it, just remove it from `brews` in your copy.
-
-**Heads-up:**
-
-- `home/AGENTS.md` is my personal agent policy, and `home.nix` installs it for Claude, Codex, and opencode.
-  If you clone this repo, you'd silently inherit my agent instructions - edit or delete `home/AGENTS.md` if you don't want that.
-- The `cc` and `co` shell aliases in `home.nix` are high-agency shortcuts: `claude --dangerously-skip-permissions` and `codex --full-auto`.
-  They're convenient for me, but know what they do before you use them.
-- The `gha`, `cda`, and `lva` aliases in `home.nix` are the AXI wrappers: `gh-axi`, `chrome-devtools-axi`, and `lavish-axi` through `npx -y`.
-
-## Repo tour
-
-- `flake.nix` - the entry point.
-  Wires up nixpkgs, nix-darwin, home-manager, and nix-homebrew, and declares the `mac` machine.
-- `configuration.nix` - system-level config: macOS defaults, Homebrew.
-- `home.nix` - user-level config: shell, packages, prompt, and the symlinks described below.
-- `rebuild.sh` - re-applies the config after the first switch.
-  Run this every time you make a change.
-- `home/` - the actual config files that get symlinked into place (Neovim, WezTerm, herdr, Claude settings, the shared `AGENTS.md`).
-- `bin/` - launcher scripts that are symlinked into `~/bin/` by `home.nix`.
-
-## How the symlinks work
-
-The files under `home/` are the real files - editing them here is editing your live config, no rebuild needed to see the change in your editor.
-`home.nix` uses `mkOutOfStoreSymlink` to point paths like `~/.config/nvim` straight at `home/.config/nvim` in this repo, so the two never drift out of sync.
-You only run `./rebuild.sh` when you change something that isn't just a symlinked file, like a package list or a system default.
-
-## Notes
-
-The first time you launch `nvim`, it bootstraps [lazy.nvim](https://github.com/folke/lazy.nvim) by cloning plugins from GitHub.
-That needs network access once; after that it's offline.
-
-For a deterministic ownership and stale-reference check, run `bin/audit-config-ownership.sh`.
-It verifies the live agent configs match the repo copies and fails if active files still mention old machine paths or retired tooling.
-
-For active docs freshness, run `bin/audit-doc-freshness.sh`.
-It checks markdown docs for stale machine references and broken local links while leaving `docs/archive/` alone.
-Use `bin/audit-config-ownership.sh` for live config files and launcher ownership.
-
-## Fresh-machine acceptance check
-
-After `./bootstrap.sh`, confirm the machine layer is ready:
+## Prove gates
 
 ```sh
-command -v openwiki
-command -v ct
-command -v treehouse
-command -v npx
-zsh -ic 'alias gha && alias cda && alias lva'
+bin/prove-docs-freshness.sh    # MACHINE.md + SYSTEM_MAP match live reality
+bin/prove-skills.sh            # Required skills present under .agents/
+bin/prove-launchers.sh         # PATH + LaunchAgents + nested proves (includes docs)
+bin/prove-harness-hooks.sh     # Hooks consistent across Claude/Codex/Cursor/Gemini
 ```
 
-If any of those fail, fix the dotfiles layer before trying to use firstmate.
+All prove commands must exit 0. If you change services, skills, or spawn gates,
+update `MACHINE.md` and/or `docs/SYSTEM_MAP.md` in the same commit.
+
+## Related
+
+- [`docs/SYSTEM_MAP.md`](docs/SYSTEM_MAP.md) — how the fleet connects
+- [`docs/OPERATING.md`](docs/OPERATING.md) — day-to-day: commits, worktrees, daily loop
+- [`MACHINE.md`](MACHINE.md) — full inventory (packages, LaunchAgents, models, PARKED/WAIVER)
+- [`GLOBAL.md`](GLOBAL.md) — machine principles projected to all agent configs
+- `~/projects/portfolio/wayfinder/one-surface-system-2026-07-30/map.md` — living system detail
 
 ## License
 

@@ -28,6 +28,7 @@ in
     tree
     zsh-vi-mode
     zsh-history-substring-search
+    semgrep
     dafny
     elan
   ];
@@ -293,6 +294,14 @@ in
   home.file.".pi/agent/settings.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.pi/agent/settings.json";
   home.file.".pi/agent/settings.json".force = true;
+  # Pi provider routing — TokenRouter only (Pioneer removed 2026-08-02).
+  # PUBLIC repo: the key stays in Keychain, reached at runtime by the
+  # !security command inside this file — never commit a secret here.
+  # Declared like settings.json so a rebuild restores it (models.json is
+  # currently NOT nix-managed on the machine, which let Pioneer resurface).
+  home.file.".pi/agent/models.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.pi/agent/models.json";
+  home.file.".pi/agent/models.json".force = true;
 
   home.file.".config/claude/mcp.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/claude/mcp.json";
@@ -301,7 +310,7 @@ in
   home.file.".config/orbit/models.env".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/orbit/models.env";
 
-  # ~/bin launcher wrappers — ct, ca, pio, and clpi.
+  # ~/bin launcher wrappers — ct, ca, and clpi.
   # All other agents (codex, cursor-agent, agy, cmd) are called directly.
   home.file."bin/ct".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/ct-wrapper";
@@ -309,8 +318,6 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/ca-wrapper";
   home.file."bin/ca-watch".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/ca-watch";
-  home.file."bin/pio".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/pio-wrapper";
   home.file."bin/clpi".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/clpi";
 
@@ -333,8 +340,6 @@ in
     config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-ca";
   home.file."bin/bridge-ct".source =
     config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-ct";
-  home.file."bin/bridge-pio".source =
-    config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-pio";
   home.file."bin/bridge-cua".source =
     config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/bridge-cua";
   home.file."bin/bridge-agy".source =
@@ -352,7 +357,9 @@ in
   home.file."bin/quota-axi".source =
     config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/dotfiles/bin/quota-axi";
 
-  # Mintmux session backends - tmux only (orca/zellij/herdr not installed)
+  # Mintmux session backends — tmux adapter (declared; backend selection is
+  # runtime config/backend). Herdr is now installed on the machine (pinned
+  # v0.7.4 via bin/fm-install-herdr.sh) and may be selected via config/backend.
   # source lives in ~/projects/bridge/scripts/ alongside the adapter scripts
   home.file."bin/backends/tmux.sh".source =
     config.lib.file.mkOutOfStoreSymlink "/Users/jwalinshah/projects/bridge/scripts/tmux-backend.sh";
