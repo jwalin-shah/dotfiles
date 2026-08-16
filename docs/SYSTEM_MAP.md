@@ -55,6 +55,7 @@ YOU (captain)
 
 - Bridge CLI, Pi, Firstmate, most of `~/projects/*`  
 - Agent wrappers (`ca`/`ct`/…) — started per session  
+- Codex → Inbox read-only MCP — local stdio child process; the private Inbox API remains on loopback
 - bridge-serve — optional gRPC surface (not required for CLI spine)
 
 **PARKED / REMOVED (do not re-enable without ticket + rebuild):**

@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+# life-ops-status — read-only baseline proof for the personal agent stack.
+#
+# This command checks service identity, local reachability, and configuration
+# boundaries. It never starts, stops, reconfigures, or writes to a service.
+set -uo pipefail
+
+export PATH="${HOME}/.local/bin:${HOME}/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
+
+INBOX_URL="${INBOX_URL:-http://127.0.0.1:9849}"
+BTW_URL="${BTW_URL:-http://127.0.0.1:8090/mcp}"
+OPENCLAW_BIN="${OPENCLAW_BIN:-$(command -v openclaw || true)}"
+status_capture="$(mktemp "${TMPDIR:-/tmp}/life-ops-openclaw-status.XXXXXX")"
+trap 'rm -f "$status_capture"' EXIT
+
+failures=0
+ok() { printf 'OK   %s\n' "$*"; }
+warn() { printf 'WARN %s\n' "$*"; }
+fail() { printf 'FAIL %s\n' "$*"; failures=$((failures + 1)); }
+
+printf 'Life Ops status — %s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+printf 'Scope: read-only checks; no service mutation\n\n'
+
+# Inbox health is intentionally read through /health. /healthz is an
+# authenticated backend route and is not the public gateway proof surface.
+inbox_body="$(/usr/bin/curl -fsS --max-time 8 "$INBOX_URL/health" 2>/dev/null || true)"
+if [[ -n "$inbox_body" ]] && /usr/bin/printf '%s' "$inbox_body" | /usr/bin/grep -q '"status":"ok"'; then
+  accounts="$(/usr/bin/printf '%s' "$inbox_body" | /usr/bin/sed -n 's/.*"gmail_accounts":\[\([^]]*\)\].*/\1/p')"
+  ok "Inbox health; Gmail accounts=${accounts:-unknown}"
+else
+  fail "Inbox health at $INBOX_URL/health"
+fi
+
+# A GET is expected to be rejected by the MCP endpoint. A 400/405 response
+# proves the route is present; the authenticated tool proof is separate.
+btw_code="$(/usr/bin/curl -sS --max-time 8 -o /dev/null -w '%{http_code}' "$BTW_URL" 2>/dev/null || true)"
+case "$btw_code" in
+  400|405) ok "BTW MCP route reachable at $BTW_URL (GET rejected as expected: HTTP $btw_code)" ;;
+  *) fail "BTW MCP route at $BTW_URL (HTTP ${btw_code:-no-response})" ;;
+esac
+
+if [[ -n "$OPENCLAW_BIN" ]] && "$OPENCLAW_BIN" status --deep >"$status_capture" 2>/dev/null; then
+  if /usr/bin/grep -q 'Gateway.*reachable' "$status_capture"; then
+    ok 'OpenClaw Gateway reachable'
+  else
+    fail 'OpenClaw Gateway status did not report reachable'
+  fi
+  if /usr/bin/grep -q 'LaunchAgent installed.*running' "$status_capture"; then
+    ok 'OpenClaw LaunchAgent loaded and running'
+  else
+    fail 'OpenClaw LaunchAgent not reported active'
+  fi
+  if /usr/bin/grep -q 'WhatsApp.*OK' "$status_capture"; then
+    ok 'OpenClaw WhatsApp linked and healthy'
+  else
+    fail 'OpenClaw WhatsApp not reported healthy'
+  fi
+  if /usr/bin/grep -q 'deepseek/deepseek-v4-flash-0731' "$status_capture"; then
+    ok 'OpenClaw default route is DeepSeek V4 Flash 0731'
+  else
+    fail 'OpenClaw default DeepSeek route not reported'
+  fi
+else
+  fail 'OpenClaw status command failed or is unavailable'
+fi
+
+loaded_agents="$(/bin/launchctl list 2>/dev/null || true)"
+if /usr/bin/printf '%s\n' "$loaded_agents" | /usr/bin/grep -q 'com.btw.mcp-server'; then
+  ok 'BTW LaunchAgent loaded'
+else
+  fail 'BTW LaunchAgent not loaded'
+fi
+if /usr/bin/printf '%s\n' "$loaded_agents" | /usr/bin/grep -q 'org.nixos.com.jwalinshah.inbox-server'; then
+  ok 'Inbox LaunchAgent loaded'
+else
+  fail 'Inbox LaunchAgent not loaded'
+fi
+
+# Show the known tunnel boundary without inspecting or printing credentials.
+if [[ -f "${HOME}/.config/tunnel-client/life-ops-inbox.yaml" ]]; then
+  warn 'OpenAI tunnel profile exists; runtime remains intentionally stopped until a valid runtime key is provisioned'
+else
+  warn 'OpenAI tunnel profile is absent'
+fi
+
+if [[ "$failures" -eq 0 ]]; then
+  printf '\nPASS: local baseline checks passed\n'
+else
+  printf '\nFAIL: %d baseline check(s) failed\n' "$failures"
+fi
+
+exit "$failures"

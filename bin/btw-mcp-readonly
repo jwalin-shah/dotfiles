@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Start the read-only BTW facts MCP server for local agent clients.
+#
+# Credentials are loaded from the existing macOS Keychain helper and injected
+# only into this child process. They are never placed in OpenClaw config or
+# passed as command-line arguments.
+set -euo pipefail
+
+btw_root="${BTW_ROOT:-/Users/jwalinshah/projects/btw-v1}"
+launcher="$btw_root/.venv/bin/livelm-mcp"
+keychain_helper="$btw_root/scripts/kg_keychain.py"
+
+if [[ ! -x "$launcher" ]]; then
+  echo "BTW MCP requires the project virtualenv launcher: $launcher" >&2
+  exit 1
+fi
+if [[ ! -r "$keychain_helper" ]]; then
+  echo "BTW MCP requires the Keychain helper: $keychain_helper" >&2
+  exit 1
+fi
+
+export KG_BASE_URL="${KG_BASE_URL:-https://prime-dev.breaktheweb.co}"
+export KG_USERNAME="${KG_USERNAME:-$(python3 "$keychain_helper" --user)}"
+export KG_API_KEY="${KG_API_KEY:-$(python3 "$keychain_helper")}"
+
+cd "$btw_root"
+exec "$launcher"
