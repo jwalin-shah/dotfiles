@@ -10,6 +10,8 @@ export PATH="${HOME}/.local/bin:${HOME}/bin:/opt/homebrew/bin:/usr/local/bin:/us
 INBOX_URL="${INBOX_URL:-http://127.0.0.1:9849}"
 BTW_URL="${BTW_URL:-http://127.0.0.1:8090/mcp}"
 OPENCLAW_BIN="${OPENCLAW_BIN:-$(command -v openclaw || true)}"
+TUNNEL_LABEL="${TUNNEL_LABEL:-ai.openai.life-ops-inbox-tunnel}"
+TUNNEL_HEALTH_FILE="${TUNNEL_HEALTH_FILE:-${HOME}/Library/Application Support/tunnel-client/health/life-ops-inbox.url}"
 status_capture="$(mktemp "${TMPDIR:-/tmp}/life-ops-openclaw-status.XXXXXX")"
 trap 'rm -f "$status_capture"' EXIT
 
@@ -76,11 +78,22 @@ else
   fail 'Inbox LaunchAgent not loaded'
 fi
 
-# Show the known tunnel boundary without inspecting or printing credentials.
-if [[ -f "${HOME}/.config/tunnel-client/life-ops-inbox.yaml" ]]; then
-  warn 'OpenAI tunnel profile exists; runtime remains intentionally stopped until a valid runtime key is provisioned'
+# Check the actual user-level tunnel LaunchAgent and its local readiness probe.
+# The tunnel credential is injected by Infisical inside that agent; this check
+# never reads or prints it.
+if /bin/launchctl print "gui/$(/usr/bin/id -u)/${TUNNEL_LABEL}" >/dev/null 2>&1; then
+  tunnel_base_url="$(/bin/cat "$TUNNEL_HEALTH_FILE" 2>/dev/null || true)"
+  tunnel_ready=""
+  if [[ -n "$tunnel_base_url" ]]; then
+    tunnel_ready="$(/usr/bin/curl -fsS --max-time 8 "$tunnel_base_url/readyz" 2>/dev/null || true)"
+  fi
+  if [[ "$tunnel_ready" == "ready" ]]; then
+    ok 'OpenAI Life Ops tunnel LaunchAgent loaded and ready'
+  else
+    fail 'OpenAI Life Ops tunnel LaunchAgent loaded but not ready'
+  fi
 else
-  warn 'OpenAI tunnel profile is absent'
+  fail 'OpenAI Life Ops tunnel LaunchAgent not loaded'
 fi
 
 if [[ "$failures" -eq 0 ]]; then
