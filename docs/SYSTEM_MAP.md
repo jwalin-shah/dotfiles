@@ -49,7 +49,8 @@ YOU (captain)
 
 **Always-on (declared LaunchAgents / brew services)** — see MACHINE.md:
 
-- neo4j, llama-embed :8081, coderank-embed :8082, mintmux, homebase-drive :9847, inbox-server :9849, m5logd, …
+- neo4j, llama-embed :8081, coderank-embed :8082, mintmux, homebase-drive :9847,
+  inbox-server :9849, m5logd, ai.openai.life-ops-inbox-tunnel, …
 
 **On-demand:**
 

@@ -189,9 +189,11 @@ unchanged.
 - `~/bin/chrome-ai-tools`, `chrome-main`, `chrome-third` — unmanaged wrappers (WAIVER).
 - `cmd` — Homebrew npm tool; no mutation gate (WAIVER).
 - `com.jwalinshah.reconcile-outcomes` — hand LaunchAgent, not in configuration.nix (WAIVER; separate job-application owner).
+- `ai.openai.life-ops-inbox-tunnel` — hand LaunchAgent, not in configuration.nix;
+  Infisical `life-ops-runtime` injects `CONTROL_PLANE_API_KEY` at launch.
 - `org.orbit.bridge-cdp-quota` — retired duplicate of the Nix-managed CDP quota agent; unloaded and archived under `~/Library/LaunchAgents/archive/` on 2026-07-29.
 
-*Last updated: 2026-08-14 — added the on-demand, read-only Codex-to-Inbox local MCP path; prior launcher reconciliation and paused-service states remain as recorded.*
+*Last updated: 2026-08-16 — added the Infisical-backed, read-only OpenAI Life Ops tunnel LaunchAgent and readiness proof.*
 
 ## Cross-Repo Dependency Manifest (deps.json) & Neo4j
 
