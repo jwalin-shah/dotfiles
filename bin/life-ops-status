@@ -9,6 +9,7 @@ export PATH="${HOME}/.local/bin:${HOME}/bin:/opt/homebrew/bin:/usr/local/bin:/us
 
 INBOX_URL="${INBOX_URL:-http://127.0.0.1:9849}"
 BTW_URL="${BTW_URL:-http://127.0.0.1:8090/mcp}"
+BTW_PUBLIC_URL="${BTW_PUBLIC_URL:-https://crumpled-resume-arbitrate.ngrok-free.dev/mcp}"
 OPENCLAW_BIN="${OPENCLAW_BIN:-$(command -v openclaw || true)}"
 TUNNEL_LABEL="${TUNNEL_LABEL:-ai.openai.life-ops-inbox-tunnel}"
 TUNNEL_HEALTH_FILE="${TUNNEL_HEALTH_FILE:-${HOME}/Library/Application Support/tunnel-client/health/life-ops-inbox.url}"
@@ -41,6 +42,20 @@ case "$btw_code" in
   *) fail "BTW MCP route at $BTW_URL (HTTP ${btw_code:-no-response})" ;;
 esac
 
+# The local route is not enough to prove ChatGPT can reach BTW. This is a
+# read-only MCP initialize handshake through the stable public forward.
+btw_initialize='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"life-ops-status","version":"1.0"}}}'
+btw_public_code="$(/usr/bin/curl -sS --max-time 15 -o /dev/null -w '%{http_code}' \
+  -X POST "$BTW_PUBLIC_URL" \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -d "$btw_initialize" 2>/dev/null || true)"
+if [[ "$btw_public_code" == '200' ]]; then
+  ok "BTW public MCP initialize reachable at $BTW_PUBLIC_URL"
+else
+  fail "BTW public MCP initialize at $BTW_PUBLIC_URL (HTTP ${btw_public_code:-no-response})"
+fi
+
 if [[ -n "$OPENCLAW_BIN" ]] && "$OPENCLAW_BIN" status --deep >"$status_capture" 2>/dev/null; then
   if /usr/bin/grep -q 'Gateway.*reachable' "$status_capture"; then
     ok 'OpenClaw Gateway reachable'
@@ -71,6 +86,11 @@ if /usr/bin/printf '%s\n' "$loaded_agents" | /usr/bin/grep -q 'com.btw.mcp-serve
   ok 'BTW LaunchAgent loaded'
 else
   fail 'BTW LaunchAgent not loaded'
+fi
+if /usr/bin/printf '%s\n' "$loaded_agents" | /usr/bin/grep -q 'com.btw.mcp-ngrok'; then
+  ok 'BTW ngrok forward LaunchAgent loaded'
+else
+  fail 'BTW ngrok forward LaunchAgent not loaded'
 fi
 if /usr/bin/printf '%s\n' "$loaded_agents" | /usr/bin/grep -q 'org.nixos.com.jwalinshah.inbox-server'; then
   ok 'Inbox LaunchAgent loaded'

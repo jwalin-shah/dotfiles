@@ -13,6 +13,6 @@ exec env \
   ANTHROPIC_DEFAULT_OPUS_MODEL_SUPPORTED_CAPABILITIES="effort,xhigh_effort,max_effort" \
   ANTHROPIC_DEFAULT_SONNET_MODEL="deepseek/deepseek-v4-flash" \
   ANTHROPIC_DEFAULT_SONNET_MODEL_SUPPORTED_CAPABILITIES="effort,xhigh_effort,max_effort" \
-  ANTHROPIC_DEFAULT_HAIKU_MODEL="moonshotai/kimi-k3-free" \
+  ANTHROPIC_DEFAULT_HAIKU_MODEL="deepseek/deepseek-v4-flash" \
   ANTHROPIC_DEFAULT_HAIKU_MODEL_SUPPORTED_CAPABILITIES="effort,xhigh_effort" \
   /opt/homebrew/bin/claude --dangerously-skip-permissions "$@"

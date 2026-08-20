@@ -340,6 +340,8 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/daemon-wrapper";
   home.file."bin/pi-cockpit".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/pi-cockpit";
+  home.file."bin/inbox".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin/inbox";
 
 
   # Bridge worker adapters - source lives in ~/projects/bridge/scripts/
