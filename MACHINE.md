@@ -159,6 +159,11 @@ The LadybugDB file under `bridge/.bridge/ladybug/` is retained read-only for mig
 Canonical inventory: `portfolio/wayfinder/launcher-inventory-2026-07-23.md`
 Prove: `dotfiles/bin/prove-launchers.sh`
 
+New 2026-08-17: `bin/inbox` — read-only agent-ergonomic wrapper for the local
+Inbox REST server (`127.0.0.1:9849`). Auth read from `~/.config/inbox/server.env`
+(`INBOX_SERVER_TOKEN`, owner-only). Reads only; writes stay in the MCP surfaces
+(`inbox-mcp-*`). Wired as `~/bin/inbox` via `home.nix`.
+
 ## Agent Configs
 
 | Agent | Config files | Managed? |

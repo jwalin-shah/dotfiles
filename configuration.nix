@@ -396,14 +396,19 @@
     # updates. Re-add if full daily sync is needed.
 
     # inbox-server: unified inbox API (Gmail/iMessage/Calendar/Sheets/Docs)
-    # Was a hand-installed plist, not nix-managed, not through daemon-wrapper
-    # — showed up as generic "python3.12" everywhere, invisible to bridge/
-    # orbit health monitoring. See jwalin-shah/inbox#65.
+    # Launches the python interpreter DIRECTLY — no bash daemon-wrapper, no
+    # run_server_daemon.sh. macOS TCC (Full Disk Access) keys on the
+    # responsible-process chain; a bash hop between launchd and python makes
+    # the FDA grant on python3.12 never attach, so iMessage/Notes/Reminders
+    # reads silently return empty. The frozen interpreter at
+    # ~/Applications/inbox-python312/bin/python3.12 is the FDA identity and
+    # must never be re-signed/rebuilt. Env setup moved into
+    # scripts/launch_server.py.
     "com.jwalinshah.inbox-server" = {
       serviceConfig = {
         ProgramArguments = [
-          "${dotfilesBin}/daemon-wrapper"
-          "${home}/projects/inbox/scripts/run_server_daemon.sh"
+          "${home}/Applications/inbox-python312/bin/python3.12"
+          "${home}/projects/inbox/scripts/launch_server.py"
         ];
         KeepAlive.SuccessfulExit = false;
         RunAtLoad = true;
@@ -412,11 +417,6 @@
         EnvironmentVariables = {
           HOME = home;
           PATH = defaultPATH;
-          DAEMON_NAME = "inbox-server";
-          DAEMON_PORT = "9849";
-          DAEMON_DISPLAY_NAME = "inbox-server:9849";
-          DAEMON_TYPE = "foreground";
-          DAEMON_HEALTH_URL = "http://127.0.0.1:9849/health";
         };
         StandardOutPath = "${home}/.local/share/orbit/inbox-server.log";
         StandardErrorPath = "${home}/.local/share/orbit/inbox-server.log";
