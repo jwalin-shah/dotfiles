@@ -105,7 +105,9 @@ launchctl bootout "gui/$(id -u)/org.orbit.bridge-cdp-quota" 2>/dev/null || true
 
 if command -v bridge >/dev/null 2>&1; then
   echo "==> refreshing machine capability manifest"
-  bridge freeze --write 2>/dev/null || true
+  # Fail closed: a drifted or failed re-attestation must abort the rebuild, not
+  # silently skip it — otherwise the manifest falls out of sync with the build.
+  bridge freeze --write || exit 1
   bridge verify-machine
   echo "==> proving harness hooks"
   "$DIR/bin/prove-harness-hooks.sh" || exit 1
