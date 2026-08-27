@@ -68,10 +68,34 @@ Cursor `afterFileEdit` sends `{ "file_path": "..." }` on stdin. Wrapper:
 
 One script: `bin/enforce-bridge-workflow.sh`.
 
-**Policy:** any mutation under `~/projects/<repo>` needs `ORBIT_TASK.md` or
-`.bridge-task` in that repo. Applies to **every** project dir, not a 3-name
-allowlist. Shell write-forms (`>`, heredoc, `tee`, `rm`, …) are mutations —
-no Write-tool bypass via shell.
+**Policy:** any mutation in a git repository whose primary checkout is under
+`~/projects` must happen in an isolated git worktree carrying
+`ORBIT_TASK.md` or `.bridge-task`. The primary/shared checkout is denied even
+when it has a stale marker. Shell write-forms (`>`, heredoc, `tee`, `rm`, …)
+are mutations — no Write-tool bypass via shell.
+
+The only ordinary exception is bootstrap of the task marker and the narrowly
+listed gate/configuration files. A purposeful prototype may use a shared
+checkout only when the hook input includes this explicit contract:
+
+```json
+{
+  "bridge_workflow": {
+    "mode": "prototype",
+    "purpose": "one concrete hypothesis",
+    "allowed_paths": [".scratch/my-probe"],
+    "expires_at": "2099-01-01T00:00:00Z",
+    "disposable": true,
+    "no_delivery": true
+  }
+}
+```
+
+Prototype targets must stay under `.scratch/` or `.prototype/`, remain inside
+`allowed_paths`, have a future timezone-aware expiry, and are never eligible
+for delivery. Missing or malformed metadata is a deny, not an inferred
+exception. Adapters that cannot pass `bridge_workflow` metadata must create
+an isolated worktree and marker instead.
 
 **Always-allowed (exact / prefix):** repo-root `ORBIT_TASK.md` and
 `.bridge-task` (chicken-egg bootstrap so Write/Edit — and narrow shell that
@@ -87,7 +111,9 @@ files). See `ALWAYS_ALLOWED_PREFIXES` in `bin/enforce-bridge-workflow.sh`.
 | Codex | `pre-edit` | file edits only today — **shell bypass still open on Codex** until a shell pre-hook exists |
 | Gemini/agy | `PreToolUse` | shared `~/.gemini/config/hooks.json` (`edit_file`) → `enforce-bridge-workflow.sh`; `settings.json` has no hooks key by design |
 
-Prove: `bin/prove-bridge-workflow-gate.sh`
+Prove: `bin/prove-bridge-workflow-gate.sh`. It creates a temporary git fixture
+under `~/projects`, proves primary-checkout denial, isolated-marker admission,
+prototype bounds, and the existing hook wiring, then removes only that fixture.
 
 Lesson (2026-07-22): Cursor `failClosed: true` when the worker cannot execute
 the hook command (`Shell execution is not available in the worker extension
