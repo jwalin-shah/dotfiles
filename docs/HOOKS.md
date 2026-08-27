@@ -114,6 +114,8 @@ files). See `ALWAYS_ALLOWED_PREFIXES` in `bin/enforce-bridge-workflow.sh`.
 Prove: `bin/prove-bridge-workflow-gate.sh`. It creates a temporary git fixture
 under `~/projects`, proves primary-checkout denial, isolated-marker admission,
 prototype bounds, and the existing hook wiring, then removes only that fixture.
+The latest checked-in evidence is
+[`docs/isolated-guardrail-proof-2026-08-26.md`](isolated-guardrail-proof-2026-08-26.md).
 
 Lesson (2026-07-22): Cursor `failClosed: true` when the worker cannot execute
 the hook command (`Shell execution is not available in the worker extension
