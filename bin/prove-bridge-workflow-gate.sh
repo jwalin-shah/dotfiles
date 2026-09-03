@@ -19,6 +19,8 @@ git -C "$TARGET" commit -qm fixture
 git -C "$TARGET" worktree add -q --detach "$ISOLATED" HEAD
 restore() {
   git -C "$TARGET" worktree remove --force "$ISOLATED" 2>/dev/null || true
+  git -C "$TARGET" worktree remove --force "${FIXTURE}/wt-dirty" 2>/dev/null || true
+  git -C "$TARGET" worktree remove --force "${FIXTURE}/wt-clean" 2>/dev/null || true
   rm -rf -- "$FIXTURE"
 }
 trap restore EXIT
@@ -101,6 +103,40 @@ run_case "prototype-shell-primary-scratch-allow" \
   "{${PROTO_META},\"command\":\"echo x > $TARGET/.scratch/probe.py\",\"cwd\":\"$TARGET\"}" 0
 run_case "prototype-without-purpose-deny" \
   "{\"bridge_workflow\":{\"mode\":\"prototype\",\"allowed_paths\":[\".scratch\"],\"expires_at\":\"2099-01-01T00:00:00Z\",\"disposable\":true},\"tool_input\":{\"path\":\"$PROTO\"}}" 2
+
+# Destructive-git guard: worktree remove / branch delete must fail closed on
+# anything with no recoverable git backup (2026-09-03 incident: a batch
+# `git worktree remove --force` loop destroyed real untracked content with
+# no per-item check — see wayfinder machine-provider-routing-triage map).
+BARE="${FIXTURE}/bare.git"
+git init -q --bare "$BARE"
+git -C "$TARGET" remote add origin "$BARE"
+git -C "$TARGET" push -q origin main
+
+WT_DIRTY="${FIXTURE}/wt-dirty"
+git -C "$TARGET" worktree add -q "$WT_DIRTY" -b wt-dirty
+mkdir -p "$WT_DIRTY/untracked-dir"
+printf 'irreplaceable\n' > "$WT_DIRTY/untracked-dir/report.md"
+run_case "worktree-remove-dirty-untracked-deny" \
+  "{\"tool_input\":{\"command\":\"git worktree remove $WT_DIRTY --force\",\"cwd\":\"$TARGET\"}}" 2
+
+WT_CLEAN="${FIXTURE}/wt-clean"
+git -C "$TARGET" worktree add -q "$WT_CLEAN" -b wt-clean
+git -C "$TARGET" push -q origin wt-clean
+run_case "worktree-remove-clean-pushed-allow" \
+  "{\"tool_input\":{\"command\":\"git worktree remove $WT_CLEAN --force\",\"cwd\":\"$TARGET\"}}" 0
+
+git -C "$TARGET" checkout -qb branch-unpushed
+printf 'new\n' > "$TARGET/unpushed-file.md"
+git -C "$TARGET" add unpushed-file.md
+git -C "$TARGET" commit -qm "real unpushed commit"
+git -C "$TARGET" checkout -q main
+run_case "branch-delete-unpushed-commit-deny" \
+  "{\"tool_input\":{\"command\":\"git -C $TARGET branch -D branch-unpushed\",\"cwd\":\"$TARGET\"}}" 2
+
+git -C "$TARGET" branch branch-pushed main
+run_case "branch-delete-pushed-content-allow" \
+  "{\"tool_input\":{\"command\":\"git -C $TARGET branch -D branch-pushed\",\"cwd\":\"$TARGET\"}}" 0
 
 # Exit-code contract: deny must be 2 (Claude/Cursor treat exit 1 as allow).
 # Document that exit 1 must never be used for policy deny.

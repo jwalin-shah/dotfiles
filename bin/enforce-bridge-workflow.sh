@@ -61,6 +61,19 @@ MUTATION_RE = re.compile(
     """
 )
 
+# Destructive git operations that can permanently lose content with no git
+# backup at all (untracked worktree files, commits reachable from no
+# remote). Checked unconditionally — independent of MUTATION_RE/is_mutation,
+# since these can silently discard work invisibly to that heuristic, and
+# independent of checkout ownership/task-marker policy, since the risk is
+# the same regardless of who owns the checkout.
+WORKTREE_REMOVE_RE = re.compile(
+    r"(?:^|[\s;|&])git\s+(?:-C\s+(\S+)\s+)?worktree\s+remove\s+(?:--force|-f)?\s*([^\s;|&]+)?\s*(?:--force|-f)?"
+)
+BRANCH_DELETE_RE = re.compile(
+    r"(?:^|[\s;|&])git\s+(?:-C\s+(\S+)\s+)?branch\s+(?:-D|(?:-d|--delete)\s+(?:--force|-f))\s+([^\s;|&]+)"
+)
+
 
 def emit(obj: dict, code: int) -> None:
     print(json.dumps(obj))
@@ -312,6 +325,91 @@ def is_mutation(cmd: str) -> bool:
     return bool(MUTATION_RE.search(cmd))
 
 
+def dirty_status(path: Path) -> str | None:
+    """Return a description of uncommitted/untracked content, or None if clean."""
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(path), "status", "--porcelain"],
+            check=True, capture_output=True, text=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return "unable to check git status (not a git checkout?)"
+    lines = [line for line in result.stdout.splitlines() if line.strip()]
+    if not lines:
+        return None
+    sample = ", ".join(line.strip() for line in lines[:5])
+    more = f" and {len(lines) - 5} more" if len(lines) > 5 else ""
+    return f"{len(lines)} uncommitted/untracked path(s): {sample}{more}"
+
+
+def unpushed_reason(path: Path, ref: str = "HEAD") -> str | None:
+    """Return a reason string if ref is not reachable from any remote-tracking
+    branch, or None if it is (i.e., a backstop already exists somewhere)."""
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(path), "branch", "-r", "--contains", ref],
+            check=True, capture_output=True, text=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return f"unable to check remote-tracking reachability for {ref}"
+    if result.stdout.strip():
+        return None
+    return f"{ref} is not reachable from any remote-tracking branch (not pushed anywhere)"
+
+
+def resolve_repo_relative(raw: str | None, cwd: str | None) -> Path:
+    base = Path(cwd).expanduser() if cwd else Path.cwd()
+    if not raw:
+        return base
+    candidate = Path(raw).expanduser()
+    return candidate if candidate.is_absolute() else base / candidate
+
+
+def check_destructive_git(cmd: str, cwd: str | None) -> None:
+    """Fail closed on git worktree remove / branch -D that would discard
+    content with no recoverable backup. This runs unconditionally — it does
+    not depend on is_mutation() or checkout ownership, since the risk (an
+    untracked file or an unpushed commit with zero git-level backup) is the
+    same regardless of who owns the checkout or whether the broader mutation
+    heuristic happens to fire."""
+    for m in WORKTREE_REMOVE_RE.finditer(cmd):
+        repo_flag, raw_target = m.group(1), m.group(2)
+        if not raw_target:
+            continue
+        base = resolve_repo_relative(repo_flag, cwd)
+        target = resolve_repo_relative(raw_target, str(base))
+        if not target.exists():
+            continue  # already gone or unresolvable path; nothing to protect
+        dirty = dirty_status(target)
+        if dirty:
+            deny(
+                f"git worktree remove denied: {target} has {dirty}. "
+                "This is not recoverable once the worktree is removed unless "
+                "it has already been committed and pushed. Commit and push "
+                "first, then retry."
+            )
+        reason = unpushed_reason(target)
+        if reason:
+            deny(f"git worktree remove denied: {target} — {reason}. Push it somewhere first, then retry.")
+
+    for m in BRANCH_DELETE_RE.finditer(cmd):
+        repo_flag, branch = m.group(1), m.group(2)
+        repo_path = resolve_repo_relative(repo_flag, cwd)
+        try:
+            sha_result = subprocess.run(
+                ["git", "-C", str(repo_path), "rev-parse", "--verify", branch],
+                capture_output=True, text=True,
+            )
+        except OSError:
+            continue
+        if sha_result.returncode != 0:
+            continue  # branch does not exist here; not this hook's problem
+        sha = sha_result.stdout.strip()
+        reason = unpushed_reason(repo_path, sha)
+        if reason:
+            deny(f"git branch delete denied: {branch} ({sha[:8]}) — {reason}. Push it somewhere first, then retry.")
+
+
 def projects_touched_by_shell(cmd: str, cwd: str | None) -> set[Path]:
     found: set[Path] = set()
     if cwd:
@@ -391,6 +489,7 @@ def main() -> None:
         deny_scope(d, checkout, primary, abs_file)
 
     if cmd:
+        check_destructive_git(cmd, cwd)
         if not is_mutation(cmd):
             allow()
         touched = checkouts_touched_by_shell(cmd, cwd)
