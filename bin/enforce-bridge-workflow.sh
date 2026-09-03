@@ -18,12 +18,14 @@ export INPUT
 INPUT=$(cat || true)
 
 exec python3 - <<'PY'
-import json, os, re, sys
+import json, os, re, subprocess, sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 HOME = Path(os.environ.get("HOME", "")).expanduser()
 PROJECTS = (HOME / "projects").resolve()
 TASK_MARKERS = ("ORBIT_TASK.md", ".bridge-task")
+PROTOTYPE_ROOTS = (".scratch", ".prototype")
 ALWAYS_ALLOWED_PREFIXES = (
     # Repo-root task markers — chicken-egg bootstrap (Write/Edit only these).
     "ORBIT_TASK.md",
@@ -91,9 +93,12 @@ def load() -> dict:
     if not raw.strip():
         return {}
     try:
-        return json.loads(raw)
+        value = json.loads(raw)
     except Exception:
-        return {}
+        deny("hook input is not valid JSON; refusing to infer permission")
+    if not isinstance(value, dict):
+        deny("hook input must be a JSON object; refusing to infer permission")
+    return value
 
 
 def project_for_path(path: Path) -> Path | None:
@@ -110,21 +115,70 @@ def project_for_path(path: Path) -> Path | None:
     return PROJECTS / rel.parts[0]
 
 
-def has_task(project: Path) -> bool:
-    return any((project / m).is_file() for m in TASK_MARKERS)
-
-
-def always_allowed(project: Path, abs_file: Path) -> bool:
+def git_value(path: Path, flag: str) -> Path | None:
+    """Return one resolved git path without invoking a shell."""
     try:
-        rel = str(abs_file.resolve().relative_to(project.resolve()))
+        result = subprocess.run(
+            ["git", "-C", str(path), "rev-parse", flag],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return None
+    value = result.stdout.strip()
+    if not value:
+        return None
+    candidate = Path(value)
+    if not candidate.is_absolute():
+        candidate = path / candidate
+    try:
+        return candidate.resolve()
+    except OSError:
+        return None
+
+
+def checkout_scope(path: Path) -> tuple[Path, Path, bool] | None:
+    """Return (checkout root, primary root, isolated) for a git path."""
+    try:
+        probe = path.expanduser()
+        if probe.is_file():
+            probe = probe.parent
+        while not probe.exists() and probe != probe.parent:
+            probe = probe.parent
+        checkout = git_value(probe, "--show-toplevel")
+        common = git_value(probe, "--git-common-dir")
+    except OSError:
+        return None
+    if checkout is None or common is None or common.name != ".git":
+        return None
+    primary = common.parent
+    if not primary.is_dir():
+        return None
+    # Only govern repositories whose primary checkout is inside the declared
+    # project fleet. Other git repositories remain outside this policy.
+    try:
+        primary.relative_to(PROJECTS)
+    except ValueError:
+        return None
+    return checkout, primary, checkout != primary
+
+
+def has_task(checkout: Path) -> bool:
+    return any((checkout / m).is_file() for m in TASK_MARKERS)
+
+
+def always_allowed(checkout: Path, abs_file: Path) -> bool:
+    try:
+        rel = str(abs_file.resolve().relative_to(checkout.resolve()))
     except ValueError:
         return False
     return any(rel == p or rel.startswith(p) for p in ALWAYS_ALLOWED_PREFIXES)
 
 
-def shell_only_always_allowed(cmd: str, project: Path) -> bool:
+def shell_only_always_allowed(cmd: str, checkout: Path) -> bool:
     """True when every project file path in cmd is always_allowed (narrow shell)."""
-    proj = str(project.resolve())
+    proj = str(checkout.resolve())
     rels: list[str] = []
     for m in re.finditer(re.escape(proj) + r"/([^\s;'\"\\|<>]+)", cmd):
         rels.append(m.group(1).rstrip("/"))
@@ -138,6 +192,81 @@ def shell_only_always_allowed(cmd: str, project: Path) -> bool:
         any(rel == p or rel.startswith(p) for p in ALWAYS_ALLOWED_PREFIXES)
         for rel in rels
     )
+
+
+def workflow_metadata(d: dict) -> dict:
+    """Read the explicit bridge_workflow contract without trusting free text."""
+    for container in (d, d.get("tool_input"), d.get("toolInput")):
+        if not isinstance(container, dict):
+            continue
+        for key in ("bridge_workflow", "work_scope"):
+            value = container.get(key)
+            if isinstance(value, dict):
+                return value
+    return {}
+
+
+def parse_expiry(value: object) -> datetime | None:
+    if not isinstance(value, str) or not value.strip():
+        return None
+    try:
+        expiry = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if expiry.tzinfo is None:
+        return None
+    return expiry.astimezone(timezone.utc)
+
+
+def prototype_contract(d: dict, checkout: Path, target: Path) -> tuple[bool, str]:
+    """Validate a disposable, bounded prototype exception."""
+    scope = workflow_metadata(d)
+    if scope.get("mode") != "prototype":
+        return False, ""
+    if not isinstance(scope.get("purpose"), str) or not scope["purpose"].strip():
+        return False, "prototype requires a non-empty purpose"
+    if scope.get("disposable") is not True:
+        return False, "prototype requires disposable=true"
+    if scope.get("deliverable") is True or scope.get("no_delivery") is False:
+        return False, "prototype cannot be marked deliverable"
+    expiry = parse_expiry(scope.get("expires_at"))
+    if expiry is None or expiry <= datetime.now(timezone.utc):
+        return False, "prototype requires a future timezone-aware expires_at"
+    allowed = scope.get("allowed_paths")
+    if not isinstance(allowed, list) or not allowed or not all(isinstance(p, str) for p in allowed):
+        return False, "prototype requires a non-empty allowed_paths list"
+    try:
+        target_rel = target.resolve().relative_to(checkout.resolve())
+    except ValueError:
+        return False, "prototype target is outside the checkout"
+    target_parts = target_rel.parts
+    if not target_parts or target_parts[0] not in PROTOTYPE_ROOTS:
+        return False, "prototype writes must stay under .scratch or .prototype"
+    for raw in allowed:
+        candidate = Path(raw)
+        if candidate.is_absolute() or ".." in candidate.parts:
+            return False, "prototype allowed_paths must be relative and traversal-free"
+        allowed_path = (checkout / candidate).resolve()
+        try:
+            target.resolve().relative_to(allowed_path)
+            return True, ""
+        except ValueError:
+            continue
+    return False, "prototype target is outside allowed_paths"
+
+
+def shell_targets(cmd: str, cwd: str | None) -> list[Path]:
+    """Extract only obvious mutation targets; ambiguity is denied."""
+    base = Path(cwd).expanduser() if cwd else Path.cwd()
+    raw_targets: list[str] = []
+    patterns = (
+        r"(?:^|[\s;&|])(?:>>?\s*|tee\s+|touch\s+|rm\s+(?:-[^\s]+\s+)*)([^\s;&|<>]+)",
+        r"(?:^|[\s;&|])(?:mv|cp|install)\s+(?:-[^\s]+\s+)*[^\s;&|]+\s+([^\s;&|]+)",
+    )
+    for pattern in patterns:
+        raw_targets.extend(m.group(1) for m in re.finditer(pattern, cmd))
+    return [Path(value).expanduser() if Path(value).expanduser().is_absolute()
+            else base / value for value in raw_targets]
 
 
 def extract_file(d: dict) -> str | None:
@@ -196,6 +325,56 @@ def projects_touched_by_shell(cmd: str, cwd: str | None) -> set[Path]:
     return {p for p in found if p.is_dir()}
 
 
+def checkouts_touched_by_shell(cmd: str, cwd: str | None) -> set[Path]:
+    paths: list[Path] = []
+    if cwd:
+        paths.append(Path(cwd).expanduser())
+    paths.extend(shell_targets(cmd, cwd))
+    scopes: set[Path] = set()
+    for path in paths:
+        scope = checkout_scope(path)
+        if scope is not None:
+            scopes.add(scope[0])
+    # Retain the old absolute-path recognizer for commands whose target is not
+    # syntactically tied to a redirection (e.g. git -C ~/projects/repo ...).
+    for project in projects_touched_by_shell(cmd, cwd):
+        scope = checkout_scope(project)
+        if scope is not None:
+            scopes.add(scope[0])
+    return scopes
+
+
+def shell_target_for_checkout(checkout: Path, targets: list[Path]) -> Path:
+    """Select a target belonging to this checkout; otherwise stay ambiguous."""
+    for target in targets:
+        scope = checkout_scope(target)
+        if scope is not None and scope[0] == checkout:
+            return target
+    return checkout / "__ambiguous_shell_target__"
+
+
+def deny_scope(d: dict, checkout: Path, primary: Path, target: Path) -> None:
+    """Deny shared/markerless mutations, or malformed prototype exceptions."""
+    prototype_ok, reason = prototype_contract(d, checkout, target)
+    scope = workflow_metadata(d)
+    if scope.get("mode") == "prototype":
+        if prototype_ok:
+            allow()
+        deny(reason)
+    if checkout == primary:
+        deny(
+            f"Mutations in shared primary checkout {primary} are denied; use a "
+            "clean isolated git worktree. Declare bridge_workflow.mode=prototype "
+            "only for a bounded disposable .scratch/.prototype experiment."
+        )
+    if not has_task(checkout):
+        deny(
+            f"Isolated checkout {checkout} requires ORBIT_TASK.md or .bridge-task "
+            "before mutation (create the marker first)."
+        )
+    allow()
+
+
 def main() -> None:
     d = load()
     file_path = extract_file(d)
@@ -203,44 +382,34 @@ def main() -> None:
 
     if file_path:
         abs_file = Path(file_path).expanduser()
-        project = project_for_path(abs_file)
-        if project is None:
+        scope = checkout_scope(abs_file)
+        if scope is None:
             allow()
-        if always_allowed(project, abs_file):
+        checkout, primary, _ = scope
+        if always_allowed(checkout, abs_file):
             allow()
-        if has_task(project):
-            allow()
-        try:
-            rel = str(abs_file.resolve().relative_to(project.resolve()))
-        except Exception:
-            rel = abs_file.name
-        deny(
-            f"Direct edits in {project} require ORBIT_TASK.md or .bridge-task "
-            f"(or bridge spawn). Blocked: {rel}"
-        )
+        deny_scope(d, checkout, primary, abs_file)
 
     if cmd:
         if not is_mutation(cmd):
             allow()
-        touched = projects_touched_by_shell(cmd, cwd)
+        touched = checkouts_touched_by_shell(cmd, cwd)
         if not touched and cwd:
-            p = project_for_path(Path(cwd))
-            if p is not None:
-                touched.add(p)
+            scope = checkout_scope(Path(cwd))
+            if scope is not None:
+                touched.add(scope[0])
         if not touched:
             allow()
-        blocked = [
-            p
-            for p in sorted(touched)
-            if not has_task(p) and not shell_only_always_allowed(cmd, p)
-        ]
-        if not blocked:
-            allow()
-        names = ", ".join(p.name for p in blocked)
-        deny(
-            f"Shell mutation under ~/projects/{{{names}}} requires ORBIT_TASK.md "
-            f"or .bridge-task (no Write bypass via shell). Command: {cmd[:160]}"
-        )
+        for checkout in sorted(touched):
+            scope = checkout_scope(checkout)
+            if scope is None:
+                continue
+            _, primary, _ = scope
+            if shell_only_always_allowed(cmd, checkout):
+                continue
+            target = shell_target_for_checkout(checkout, shell_targets(cmd, cwd))
+            deny_scope(d, checkout, primary, target)
+        allow()
 
     allow()
 

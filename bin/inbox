@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+# inbox — agent-ergonomic read wrapper for the local Inbox REST server.
+#
+# AXI-flavored: REST underneath, compact output, deterministic errors, default
+# safety. Read-only by default; write/confirm-gated ops live in the MCP
+# surfaces (inbox_mcp_full / inbox_mcp_stdio) and are NOT exposed here.
+#
+# Auth: reads INBOX_SERVER_TOKEN from $INBOX_SERVER_ENV_FILE
+#       (default: $HOME/.config/inbox/server.env), the same file the other
+#       inbox-mcp-* launchers use. Only an owner-readable file is accepted.
+set -euo pipefail
+
+inbox_root="${INBOX_ROOT:-/Users/jwalinshah/projects/inbox}"
+credential_file="${INBOX_SERVER_ENV_FILE:-$HOME/.config/inbox/server.env}"
+server_url="${INBOX_SERVER_URL:-http://127.0.0.1:9849}"
+
+if [[ ! -r "$credential_file" || ! -O "$credential_file" ]]; then
+  echo "inbox: requires an owner-readable local credential file ($credential_file)." >&2
+  exit 1
+fi
+file_mode="$(/usr/bin/stat -f '%Lp' "$credential_file")"
+if (( (8#$file_mode & 077) != 0 )); then
+  echo "inbox: refuses a credential file readable by group or others." >&2
+  exit 1
+fi
+inbox_token="$(/usr/bin/awk -F= '$1 == "INBOX_SERVER_TOKEN" {sub(/^[^=]*=/, ""); print; exit}' "$credential_file")"
+if [[ -z "$inbox_token" ]]; then
+  echo "inbox: could not load INBOX_SERVER_TOKEN from $credential_file." >&2
+  exit 1
+fi
+command -v curl >/dev/null 2>&1 || { echo "inbox: curl is required." >&2; exit 1; }
+command -v python3 >/dev/null 2>&1 || { echo "inbox: python3 is required." >&2; exit 1; }
+
+AUTH=(-H "Authorization: Bearer $inbox_token")
+
+# Compact, token-lean printer: minified JSON, capped length.
+q() {
+  python3 -c '
+import sys, json
+data = sys.stdin.read()
+try:
+    obj = json.loads(data)
+except Exception as e:
+    print(data[:2000]); sys.exit(0)
+out = json.dumps(obj, ensure_ascii=False, separators=(",", ":"))
+print(out[:6000])
+'
+}
+
+urlencode() {
+  python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1], safe=""))' "$1"
+}
+
+get() { curl -s -m 30 "${AUTH[@]}" "$@"; }
+
+usage() {
+  cat >&2 <<'EOF'
+inbox — Inbox REST reader (read-only)
+
+Usage: inbox <command> [args]
+
+  status              server + account health
+  inbox               curated needs-action view (threads + tasks + events)
+  now                 condensed "what's on my plate" view
+  search <q> [N]      Gmail search (default 5 results)
+  thread <thread_id>  summary of one thread
+  threads-reply [N]   threads needing a reply
+  tasks [list_id]     Google Tasks (default "@default", up to 30)
+  tasks-lists         Google task lists
+  calendar            calendar search
+  contacts            contact search
+  help                this message
+
+Writes are intentionally NOT exposed here; use the MCP surfaces for that.
+EOF
+}
+
+cmd="${1:-status}"
+shift || true
+
+case "$cmd" in
+  status|health)
+    get "$server_url/health" | q ;;
+  inbox|needs-action)
+    get "$server_url/inbox/needs-action" | q ;;
+  now)
+    get "$server_url/inbox/now" | q ;;
+  search)
+    qq="${1:-}"
+    [[ -n "$qq" ]] || { echo "inbox: search requires a query." >&2; exit 1; }
+    n="${2:-5}"
+    get "$server_url/gmail/search?q=$(urlencode "$qq")&max=$n" | q ;;
+  thread)
+    id="${1:-}"
+    [[ -n "$id" ]] || { echo "inbox: thread requires a thread_id." >&2; exit 1; }
+    get "$server_url/gmail/threads/$id/summary" | q ;;
+  threads-reply)
+    n="${1:-5}"
+    get "$server_url/gmail/threads/needing-reply?limit=$n" | q ;;
+  tasks)
+    list="${1:-@default}"
+    get "$server_url/tasks?list_id=$(urlencode "$list")&max=30" | q ;;
+  tasks-lists)
+    get "$server_url/tasks/lists" | q ;;
+  calendar)
+    get "$server_url/calendar/search" | q ;;
+  contacts)
+    qq="${1:-*}"
+    get "$server_url/contacts/search?q=$(urlencode "$qq")" | q ;;
+  help|-h|--help)
+    usage ;;
+  *)
+    usage; exit 1 ;;
+esac

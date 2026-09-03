@@ -159,6 +159,11 @@ The LadybugDB file under `bridge/.bridge/ladybug/` is retained read-only for mig
 Canonical inventory: `portfolio/wayfinder/launcher-inventory-2026-07-23.md`
 Prove: `dotfiles/bin/prove-launchers.sh`
 
+New 2026-08-17: `bin/inbox` — read-only agent-ergonomic wrapper for the local
+Inbox REST server (`127.0.0.1:9849`). Auth read from `~/.config/inbox/server.env`
+(`INBOX_SERVER_TOKEN`, owner-only). Reads only; writes stay in the MCP surfaces
+(`inbox-mcp-*`). Wired as `~/bin/inbox` via `home.nix`.
+
 ## Agent Configs
 
 | Agent | Config files | Managed? |
@@ -168,7 +173,7 @@ Prove: `dotfiles/bin/prove-launchers.sh`
 | ca (OAuth lane) | `~/.claude-a/settings.json` — no routing (subscription auth) | nix symlink |
 | ct (TokenRouter) | `~/.claude-token/settings.json` — own file; carries `ANTHROPIC_BASE_URL` + deepseek/kimi defaults + `apiKeyHelper` | nix symlink |
 | pio (Pioneer) | `~/.claude-pioneer/settings.json` — own file; carries `ANTHROPIC_BASE_URL` + claude-sonnet-5/opus-5 defaults + `apiKeyHelper` | nix symlink |
-| codex | `~/.codex/config.toml`, `hooks.json`, `rules/` | nix symlink |
+| codex | `~/.codex/config.toml`, `hooks.json`, `rules/`; on-demand read-only Inbox MCP | nix symlink; MCP reads the owner-only local Inbox credential at process start |
 | cursor-agent | `~/.cursor/cli-config.json`, `hooks.json`, `mcp.json` | nix symlink (force) |
 | agy (Gemini) | `~/.gemini/antigravity-cli/settings.json`, `settings.json` | nix symlink (force) |
 | cmd (CommandCode) | self-managed | **WAIVER** — not in dotfiles hooks |
@@ -189,9 +194,11 @@ unchanged.
 - `~/bin/chrome-ai-tools`, `chrome-main`, `chrome-third` — unmanaged wrappers (WAIVER).
 - `cmd` — Homebrew npm tool; no mutation gate (WAIVER).
 - `com.jwalinshah.reconcile-outcomes` — hand LaunchAgent, not in configuration.nix (WAIVER; separate job-application owner).
+- `ai.openai.life-ops-inbox-tunnel` — hand LaunchAgent, not in configuration.nix;
+  Infisical `life-ops-runtime` injects `CONTROL_PLANE_API_KEY` at launch.
 - `org.orbit.bridge-cdp-quota` — retired duplicate of the Nix-managed CDP quota agent; unloaded and archived under `~/Library/LaunchAgents/archive/` on 2026-07-29.
 
-*Last updated: 2026-08-03 — verify-machine 11/11 green; LaunchAgents table reconciled (6 removed 2026-07-31 marked); headroom/voice-engine paused states recorded.*
+*Last updated: 2026-08-16 — added the Infisical-backed, read-only OpenAI Life Ops tunnel LaunchAgent and readiness proof.*
 
 ## Cross-Repo Dependency Manifest (deps.json) & Neo4j
 

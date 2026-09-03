@@ -49,12 +49,14 @@ YOU (captain)
 
 **Always-on (declared LaunchAgents / brew services)** — see MACHINE.md:
 
-- neo4j, llama-embed :8081, coderank-embed :8082, mintmux, homebase-drive :9847, inbox-server :9849, m5logd, …
+- neo4j, llama-embed :8081, coderank-embed :8082, mintmux, homebase-drive :9847,
+  inbox-server :9849, m5logd, ai.openai.life-ops-inbox-tunnel, …
 
 **On-demand:**
 
 - Bridge CLI, Pi, Firstmate, most of `~/projects/*`  
 - Agent wrappers (`ca`/`ct`/…) — started per session  
+- Codex → Inbox read-only MCP — local stdio child process; the private Inbox API remains on loopback
 - bridge-serve — optional gRPC surface (not required for CLI spine)
 
 **PARKED / REMOVED (do not re-enable without ticket + rebuild):**

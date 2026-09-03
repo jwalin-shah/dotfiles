@@ -152,6 +152,10 @@ args = ["mcp"]
 cwd = "."
 enabled = false
 
+[mcp_servers.inbox_readonly]
+command = "/Users/jwalinshah/projects/dotfiles/bin/inbox-mcp-readonly"
+enabled = true
+
 [shell_environment_policy]
 inherit = "core"
 

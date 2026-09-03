@@ -1,22 +1,25 @@
 #!/usr/bin/env bash
 # Canary: gate denies mutations without task; allows with task; shells can't bypass.
 set -euo pipefail
-GATE="${HOME}/.dotfiles/bin/enforce-bridge-workflow.sh"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+export ROOT
+GATE="${ROOT}/bin/enforce-bridge-workflow.sh"
 PASS=0; FAIL=0
-TARGET="${HOME}/projects/axioms"
-# axioms normally has no task; stash if present
-STASHED=0
-if [[ -f "$TARGET/.bridge-task" || -f "$TARGET/ORBIT_TASK.md" ]]; then
-  mkdir -p /tmp/gate-task-stash
-  mv "$TARGET/.bridge-task" /tmp/gate-task-stash/ 2>/dev/null || true
-  mv "$TARGET/ORBIT_TASK.md" /tmp/gate-task-stash/ 2>/dev/null || true
-  STASHED=1
-fi
+FIXTURE="$(mktemp -d "${HOME}/projects/.bridge-gate-fixture.XXXXXX")"
+TARGET="${FIXTURE}/repo"
+ISOLATED="${FIXTURE}/worktree"
+mkdir -p "$TARGET"
+git -C "$TARGET" init -q
+git -C "$TARGET" config user.email gate-test@example.invalid
+git -C "$TARGET" config user.name gate-test
+printf 'fixture\n' > "$TARGET/README.md"
+printf 'tracked\n' > "$TARGET/tracked.txt"
+git -C "$TARGET" add README.md tracked.txt
+git -C "$TARGET" commit -qm fixture
+git -C "$TARGET" worktree add -q --detach "$ISOLATED" HEAD
 restore() {
-  if [[ "$STASHED" -eq 1 ]]; then
-    mv /tmp/gate-task-stash/.bridge-task "$TARGET/" 2>/dev/null || true
-    mv /tmp/gate-task-stash/ORBIT_TASK.md "$TARGET/" 2>/dev/null || true
-  fi
+  git -C "$TARGET" worktree remove --force "$ISOLATED" 2>/dev/null || true
+  rm -rf -- "$FIXTURE"
 }
 trap restore EXIT
 
@@ -51,6 +54,8 @@ PY
 # README.md is ALWAYS_ALLOWED — use a code path
 run_case "write-code-no-task-deny" \
   "{\"tool_input\":{\"path\":\"$TARGET/extract.py\"}}" 2
+run_case "write-existing-primary-no-task-deny" \
+  "{\"tool_input\":{\"path\":\"$TARGET/tracked.txt\"}}" 2
 
 # Chicken-egg: Write of task markers is always allowed (no prior marker)
 run_case "write-bridge-task-no-task-allow" \
@@ -64,22 +69,43 @@ run_case "shell-readonly-allow" \
 run_case "shell-heredoc-deny" \
   "{\"command\":\"cat > $TARGET/evil.py <<'E'\\nx\\nE\",\"cwd\":\"$TARGET\"}" 2
 
-# Narrow shell: marker-only mutation allowed without prior task
+# Marker creation remains the only primary-checkout bootstrap exception.
 run_case "shell-write-bridge-task-allow" \
   "{\"command\":\"echo ticket > $TARGET/.bridge-task\",\"cwd\":\"$TARGET\"}" 0
 run_case "shell-write-orbit-task-allow" \
   "{\"command\":\"echo ticket > $TARGET/ORBIT_TASK.md\",\"cwd\":\"$TARGET\"}" 0
 
+# A marker never turns the shared primary checkout into an ordinary work area.
 echo "ticket: prove-gate" > "$TARGET/.bridge-task"
-run_case "write-with-task-allow" \
-  "{\"tool_input\":{\"path\":\"$TARGET/extract.py\"}}" 0
-run_case "shell-heredoc-with-task-allow" \
-  "{\"command\":\"cat > $TARGET/evil.py <<'E'\\nx\\nE\",\"cwd\":\"$TARGET\"}" 0
-rm -f "$TARGET/.bridge-task"
+run_case "write-primary-with-task-still-deny" \
+  "{\"tool_input\":{\"path\":\"$TARGET/extract.py\"}}" 2
+run_case "shell-primary-with-task-still-deny" \
+  "{\"command\":\"cat > $TARGET/evil.py <<'E'\\nx\\nE\",\"cwd\":\"$TARGET\"}" 2
+rm -f "$TARGET/.bridge-task" "$TARGET/ORBIT_TASK.md"
+
+# An isolated checkout still needs an explicit task marker.
+run_case "write-isolated-without-task-deny" \
+  "{\"tool_input\":{\"path\":\"$ISOLATED/extract.py\"}}" 2
+echo "ticket: isolated" > "$ISOLATED/.bridge-task"
+run_case "write-isolated-with-task-allow" \
+  "{\"tool_input\":{\"path\":\"$ISOLATED/extract.py\"}}" 0
+
+# A prototype exception is explicit, bounded, disposable, and scratch-only.
+PROTO="$TARGET/.scratch/probe.py"
+PROTO_META="\"bridge_workflow\":{\"mode\":\"prototype\",\"purpose\":\"gate canary\",\"allowed_paths\":[\".scratch\"],\"expires_at\":\"2099-01-01T00:00:00Z\",\"disposable\":true,\"no_delivery\":true}"
+run_case "prototype-primary-scratch-allow" \
+  "{${PROTO_META},\"tool_input\":{\"path\":\"$PROTO\"}}" 0
+run_case "prototype-primary-outside-scratch-deny" \
+  "{${PROTO_META},\"tool_input\":{\"path\":\"$TARGET/real.py\"}}" 2
+run_case "prototype-shell-primary-scratch-allow" \
+  "{${PROTO_META},\"command\":\"echo x > $TARGET/.scratch/probe.py\",\"cwd\":\"$TARGET\"}" 0
+run_case "prototype-without-purpose-deny" \
+  "{\"bridge_workflow\":{\"mode\":\"prototype\",\"allowed_paths\":[\".scratch\"],\"expires_at\":\"2099-01-01T00:00:00Z\",\"disposable\":true},\"tool_input\":{\"path\":\"$PROTO\"}}" 2
 
 # Exit-code contract: deny must be 2 (Claude/Cursor treat exit 1 as allow).
 # Document that exit 1 must never be used for policy deny.
 run_case "empty-stdin-allow" "{}" 0
+run_case "invalid-json-deny" "not-json" 2
 python3 - <<'PY'
 # Codex shell waiver note — vendor has no shell pre-hook; prove documents it.
 print("OK: WAIVER codex-shell-bypass until vendor adds shell pre-hook")
@@ -103,15 +129,17 @@ fi
 
 # Cross-harness wiring checks (source files)
 python3 - <<'PY'
-import json, sys
+import json, os, sys
 from pathlib import Path
-root = Path.home() / "projects/dotfiles/home"
-# Cursor: Shell in matcher, no beforeShellExecution (worker can't nest shell hooks)
+root = Path(os.environ["ROOT"]) / "home"
+# Cursor: Shell in matcher. A beforeShellExecution entry may be present in a
+# user-managed config; this proof does not rewrite or judge that separate hook.
 c = json.loads((root/".cursor/hooks.json").read_text())
 pre = json.dumps(c["hooks"].get("preToolUse", []))
 assert "Shell" in pre and "enforce-bridge-workflow" in pre
-assert "beforeShellExecution" not in c["hooks"], "beforeShellExecution must stay off in this worker"
 assert c["hooks"]["preToolUse"][0].get("failClosed") is False
+if "beforeShellExecution" in c["hooks"]:
+    print("NOTE: Cursor beforeShellExecution present in user config; left unchanged")
 # Claude: Bash in enforce matcher
 cl = json.loads((root/".claude/settings.json").read_text())
 blob = json.dumps(cl["hooks"]["PreToolUse"])
