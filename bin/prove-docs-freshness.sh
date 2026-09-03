@@ -149,12 +149,15 @@ else
   warn "MACHINE.md does not yet name homebase on :9102 (add it)"
 fi
 
-# --- portfolio one-surface pointer ---
-PORT_MAP="${HOME}/projects/portfolio/wayfinder/one-surface-system-2026-07-30/map.md"
-if [[ -f "$PORT_MAP" ]]; then
-  ok "portfolio one-surface map present"
+# --- portfolio living-map pointer (prefer sos 2026-08-01; accept older one-surface) ---
+PORT_MAP_NEW="${HOME}/projects/portfolio/wayfinder/system-of-systems-2026-08-01/map.md"
+PORT_MAP_OLD="${HOME}/projects/portfolio/wayfinder/one-surface-system-2026-07-30/map.md"
+if [[ -f "$PORT_MAP_NEW" ]]; then
+  ok "portfolio system-of-systems-2026-08-01 map present"
+elif [[ -f "$PORT_MAP_OLD" ]]; then
+  ok "portfolio one-surface map present (legacy pointer)"
 else
-  fail "missing portfolio one-surface map (SYSTEM_MAP cross-link)"
+  fail "missing portfolio living map (SYSTEM_MAP cross-link)"
 fi
 
 if [[ "$FAIL" -ne 0 ]]; then

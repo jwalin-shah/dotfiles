@@ -18,7 +18,8 @@ for bin in orbit bridge; do
   fi
 done
 
-# bridge-serve must not be older than ~/.local/bin/bridge (stale gRPC binary).
+# bridge-serve freshness is only meaningful when the optional gRPC surface is up.
+# live launchctl/pgrep truth is host-global; binary path stays under ~/.local/bin.
 BRIDGE_BIN="${HOME}/.local/bin/bridge"
 if [[ -x "$BRIDGE_BIN" ]]; then
   bin_m=$(stat -f %m "$BRIDGE_BIN" 2>/dev/null || echo 0)
@@ -31,6 +32,8 @@ if [[ -x "$BRIDGE_BIN" ]]; then
     else
       ok "bridge-serve not older than ~/.local/bin/bridge"
     fi
+  else
+    ok "bridge-serve not running (optional; CLI bridge spine OK)"
   fi
 fi
 
@@ -76,10 +79,11 @@ else
   ok "orbit status resolves gRPC auth token (bridge-serve absent is expected)"
 fi
 
-# --- LaunchAgents declared in configuration.nix must be loaded (or calendar) ---
-CFG="${HOME}/projects/dotfiles/configuration.nix"
+# --- LaunchAgents declared in this worktree's configuration.nix must be loaded ---
+# Prefer ROOT so proves work from disposable worktrees; launchctl truth stays live-home.
+CFG="${ROOT}/configuration.nix"
 if [[ ! -f "$CFG" ]]; then
-  fail "missing configuration.nix"
+  fail "missing configuration.nix at $CFG"
 else
   ok "configuration.nix present"
   if rg -q 'defaultPATH.*usr/sbin' "$CFG"; then
@@ -92,6 +96,8 @@ fi
 required=(
   # mlx-chat-daemon PARKED 2026-07-23 (Neo4j sole-store; embeds :8081/:8082 only)
   org.nixos.com.jwalinshah.homebase
+  # Cut 2026-07-31 (must not be required): knowledge-engine, bridge-cdp-quota,
+  # bridge-serve, voice-engine, overnight-harden, verify-machine
   org.nixos.com.jwalinshah.llama-embed-server
   org.nixos.com.jwalinshah.coderank-embed-server
   org.nixos.com.jwalinshah.mintmux
@@ -186,7 +192,7 @@ else
 fi
 
 # Factory e2e scorecard schema (Y rows must prove)
-SCHEMA_PROVE="${HOME}/projects/dotfiles/bin/prove-factory-e2e-scorecard.sh"
+SCHEMA_PROVE="${ROOT}/bin/prove-factory-e2e-scorecard.sh"
 if [[ -x "$SCHEMA_PROVE" ]]; then
   if "$SCHEMA_PROVE"; then
     ok "prove-factory-e2e-scorecard.sh PASS"

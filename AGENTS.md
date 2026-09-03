@@ -4,7 +4,7 @@ This repo is the **machine constitution** (nix-darwin + home-manager).
 
 ## Read first
 
-1. [`docs/SYSTEM_MAP.md`](docs/SYSTEM_MAP.md) — how Pi / Bridge / HomeBase / KE / Firstmate link  
+1. [`docs/SYSTEM_MAP.md`](docs/SYSTEM_MAP.md) — how Pi / Bridge / HomeBase / KE / Firstmate / Seatbelt / Orbit link  
 2. [`MACHINE.md`](MACHINE.md) — inventory, PARKED, REMOVED  
 3. [`GLOBAL.md`](GLOBAL.md) — five non-negotiable principles  
 4. [`docs/OPERATING.md`](OPERATING.md) — commits, worktrees, lanes  
