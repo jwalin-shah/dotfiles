@@ -21,6 +21,7 @@ restore() {
   git -C "$TARGET" worktree remove --force "$ISOLATED" 2>/dev/null || true
   git -C "$TARGET" worktree remove --force "${FIXTURE}/wt-dirty" 2>/dev/null || true
   git -C "$TARGET" worktree remove --force "${FIXTURE}/wt-clean" 2>/dev/null || true
+  git -C "$TARGET" worktree remove --force "${FIXTURE}/wt-guard" 2>/dev/null || true
   rm -rf -- "$FIXTURE"
 }
 trap restore EXIT
@@ -137,6 +138,88 @@ run_case "branch-delete-unpushed-commit-deny" \
 git -C "$TARGET" branch branch-pushed main
 run_case "branch-delete-pushed-content-allow" \
   "{\"tool_input\":{\"command\":\"git -C $TARGET branch -D branch-pushed\",\"cwd\":\"$TARGET\"}}" 0
+
+# rm/git-clean/git-reset/git-push are ALSO governed by the pre-existing
+# primary-checkout/task-marker ownership policy (rm, reset, and push all
+# match MUTATION_RE; deny-path tests below hit the new destructive check
+# first regardless, but allow-path tests must run somewhere the ownership
+# policy would independently allow too — an isolated worktree with a task
+# marker, same as every other *-allow case in this file). git clean is not
+# in MUTATION_RE so it never reaches the ownership layer either way.
+WT_GUARD="${FIXTURE}/wt-guard"
+git -C "$TARGET" worktree add -q "$WT_GUARD" -b wt-guard
+echo "ticket: guard-fixture" > "$WT_GUARD/.bridge-task"
+git -C "$WT_GUARD" add .bridge-task
+git -C "$WT_GUARD" commit -qm "wt-guard task marker"
+git -C "$WT_GUARD" push -q origin wt-guard
+
+# rm -r: only checked when the target is inside a git checkout AND has real
+# uncommitted/untracked content (git status --porcelain on that path).
+mkdir -p "$WT_GUARD/rm-target"
+printf 'irreplaceable\n' > "$WT_GUARD/rm-target/report.md"
+run_case "rm-recursive-dirty-untracked-deny" \
+  "{\"tool_input\":{\"command\":\"rm -rf $WT_GUARD/rm-target\",\"cwd\":\"$WT_GUARD\"}}" 2
+git -C "$WT_GUARD" add rm-target/report.md
+git -C "$WT_GUARD" commit -qm "commit rm-target"
+run_case "rm-recursive-clean-committed-allow" \
+  "{\"tool_input\":{\"command\":\"rm -rf $WT_GUARD/rm-target\",\"cwd\":\"$WT_GUARD\"}}" 0
+run_case "rm-recursive-outside-any-checkout-allow" \
+  "{\"tool_input\":{\"command\":\"rm -rf ${FIXTURE}/not-a-repo\",\"cwd\":\"$WT_GUARD\"}}" 0
+
+# git clean -fd: previewed via a real `git clean -n` dry run.
+mkdir -p "$WT_GUARD/clean-target"
+printf 'irreplaceable\n' > "$WT_GUARD/clean-target/x.md"
+run_case "git-clean-untracked-content-deny" \
+  "{\"tool_input\":{\"command\":\"git clean -fd\",\"cwd\":\"$WT_GUARD\"}}" 2
+git -C "$WT_GUARD" add clean-target/x.md
+git -C "$WT_GUARD" commit -qm "commit clean-target"
+run_case "git-clean-nothing-untracked-allow" \
+  "{\"tool_input\":{\"command\":\"git clean -fd\",\"cwd\":\"$WT_GUARD\"}}" 0
+
+# git reset --hard: only checked when the tree actually has uncommitted changes.
+echo "modified" >> "$WT_GUARD/.bridge-task"
+run_case "git-reset-hard-dirty-deny" \
+  "{\"tool_input\":{\"command\":\"git reset --hard\",\"cwd\":\"$WT_GUARD\"}}" 2
+git -C "$WT_GUARD" checkout -q -- .bridge-task
+run_case "git-reset-hard-clean-allow" \
+  "{\"tool_input\":{\"command\":\"git reset --hard\",\"cwd\":\"$WT_GUARD\"}}" 0
+
+# git push --force: only checked when it would discard a remote commit not
+# reachable from the new local tip. --force-with-lease is never checked
+# (it already fails safely on its own if the remote moved).
+printf 'remote-only\n' > "$WT_GUARD/remote-only.md"
+git -C "$WT_GUARD" add remote-only.md
+git -C "$WT_GUARD" commit -qm "commit that will only exist on the remote"
+git -C "$WT_GUARD" push -q origin wt-guard
+git -C "$WT_GUARD" reset -q --hard HEAD~1
+run_case "git-push-force-would-discard-remote-commit-deny" \
+  "{\"tool_input\":{\"command\":\"git push origin wt-guard --force\",\"cwd\":\"$WT_GUARD\"}}" 2
+run_case "git-push-force-with-lease-not-checked-allow" \
+  "{\"tool_input\":{\"command\":\"git push origin wt-guard --force-with-lease\",\"cwd\":\"$WT_GUARD\"}}" 0
+git -C "$WT_GUARD" fetch -q origin
+git -C "$WT_GUARD" reset -q --hard origin/wt-guard
+run_case "git-push-force-fast-forward-safe-allow" \
+  "{\"tool_input\":{\"command\":\"git push origin wt-guard --force\",\"cwd\":\"$WT_GUARD\"}}" 0
+
+# destructive-override: a real, evidenced escape hatch, not a bare flag —
+# malformed metadata still denies (with the specific missing field named);
+# a genuinely complete override allows AND is durably logged.
+mkdir -p "$WT_GUARD/override-target"
+printf 'ephemeral\n' > "$WT_GUARD/override-target/x.md"
+run_case "destructive-override-missing-verified-how-deny" \
+  "{\"tool_input\":{\"command\":\"rm -rf $WT_GUARD/override-target\",\"cwd\":\"$WT_GUARD\"},\"bridge_workflow\":{\"mode\":\"destructive-override\",\"reason\":\"only a reason, no evidence\"}}" 2
+OVERRIDE_LOG="${HOME}/.dotfiles-state/destructive-overrides.log"
+before_lines=0
+[[ -f "$OVERRIDE_LOG" ]] && before_lines=$(wc -l < "$OVERRIDE_LOG")
+run_case "destructive-override-complete-allow" \
+  "{\"tool_input\":{\"command\":\"rm -rf $WT_GUARD/override-target\",\"cwd\":\"$WT_GUARD\"},\"bridge_workflow\":{\"mode\":\"destructive-override\",\"reason\":\"prove-bridge-workflow-gate.sh fixture case\",\"verified_how\":\"synthetic test content, not real\"}}" 0
+after_lines=0
+[[ -f "$OVERRIDE_LOG" ]] && after_lines=$(wc -l < "$OVERRIDE_LOG")
+if [[ "$after_lines" -gt "$before_lines" ]]; then
+  echo "OK: destructive-override-is-logged"; PASS=$((PASS+1))
+else
+  echo "FAIL: destructive-override-is-logged (before=$before_lines after=$after_lines)" >&2; FAIL=$((FAIL+1))
+fi
 
 # Exit-code contract: deny must be 2 (Claude/Cursor treat exit 1 as allow).
 # Document that exit 1 must never be used for policy deny.
