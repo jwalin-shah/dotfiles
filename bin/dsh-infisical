@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Launch DeepSeek Harness with provider credentials injected from Infisical.
+# Secret values never appear in argv, logs, or this repository.
+set -euo pipefail
+
+export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
+
+INFISICAL_BIN="${INFISICAL_BIN:-$(command -v infisical || true)}"
+PNPM_BIN="${PNPM_BIN:-$(command -v pnpm || true)}"
+INFISICAL_ENV="${DSH_INFISICAL_ENV:-dev}"
+INFISICAL_PATH="${DSH_INFISICAL_PATH:-/providers}"
+DSH_ROOT="${DSH_ROOT:-$HOME/projects/deepseek-harness}"
+
+if [[ -z "$INFISICAL_BIN" || ! -x "$INFISICAL_BIN" ]]; then
+  echo "dsh-infisical: infisical CLI is required" >&2
+  exit 1
+fi
+if [[ -z "$PNPM_BIN" || ! -x "$PNPM_BIN" ]]; then
+  echo "dsh-infisical: pnpm is required" >&2
+  exit 1
+fi
+if [[ ! -f "$DSH_ROOT/package.json" ]]; then
+  echo "dsh-infisical: DSH_ROOT must contain package.json: $DSH_ROOT" >&2
+  exit 1
+fi
+
+# With no app arguments, start the normal Web profile. All supplied arguments
+# are forwarded verbatim to dsh (for example: `web` or `--profile headless`).
+if (( $# == 0 )); then
+  set -- web
+fi
+
+cd "$DSH_ROOT"
+exec "$INFISICAL_BIN" run \
+  --env "$INFISICAL_ENV" \
+  --path "$INFISICAL_PATH" \
+  -- "$PNPM_BIN" dsh "$@"
