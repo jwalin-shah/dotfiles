@@ -96,6 +96,7 @@ required=(
   org.nixos.com.jwalinshah.coderank-embed-server
   org.nixos.com.jwalinshah.mintmux
   org.nixos.com.jwalinshah.inbox-server
+  org.nixos.com.jwalinshah.openclaw-gateway
   org.nixos.com.jwalinshah.m5logd
 )
 
@@ -131,6 +132,7 @@ retired=(
   org.orbit.bridge-cdp-quota
   org.nixos.com.jwalinshah.cocoindex-daemon
   org.nixos.com.jwalinshah.tldr-daemon
+  ai.openclaw.gateway
 )
 for label in "${retired[@]}"; do
   if echo "$loaded" | grep -qE "[[:space:]]${label}$"; then

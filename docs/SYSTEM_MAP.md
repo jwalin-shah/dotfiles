@@ -1,7 +1,7 @@
 # System map — how this machine links together
 
 **Owner:** dotfiles (machine constitution)  
-**Living detail (topology + intent):** `~/projects/portfolio/wayfinder/system-of-systems-2026-08-01/map.md`  
+**Living detail (topology + intent):** `~/firstmate/projects/portfolio/wayfinder/agent-os-architecture-2026-09-03/` (router: `agent-router.md`). Do **not** treat `~/projects/portfolio` on `docs/land-detached-updates-2026-08-19` as architecture.  
 **Control plane / proves:** `~/projects/agent-os/` (`bin/prove-all.sh`)  
 **Prove (this repo):** `bin/prove-docs-freshness.sh` (also run from `prove-launchers.sh`)  
 **Day-to-day use / commits / worktrees:** [`OPERATING.md`](OPERATING.md)
@@ -10,7 +10,7 @@ This file is the **short** map. If MACHINE.md and this disagree, MACHINE.md wins
 
 ## One sentence
 
-Captain talks to **Pi** → Firstmate runs the fleet and/or **Bridge** admits/grants/spawns → **Mintmux** runs Bridge workers → Knowledge Engine/Neo4j feeds context → **HomeBase** must admit the grant → prove commands decide done. Dotfiles only decides **what may exist and run** on the Mac.
+Captain talks to **OpenClaw** (surface, :18789) and/or **Pi** → Firstmate runs the fleet and/or **Bridge** admits/grants/spawns → **Mintmux** runs Bridge workers → Knowledge Engine/Neo4j feeds context → **HomeBase** must admit the grant → prove commands decide done. Dotfiles only decides **what may exist and run** on the Mac. Local iMessage/Notes/Reminders stay on **inbox-server** (FDA python), not OpenClaw.
 
 ```text
 YOU (captain)

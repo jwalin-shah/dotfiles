@@ -108,8 +108,9 @@ Neovim's current Treesitter plugin compiles parsers with the Home Manager
 | m5tools | M5 hardware monitoring daemons | `make install` |
 | voice-engine-swift | dictation menubar app (**PAUSED** — CoreML -14 root cause, see git log 242e86d0) | `swift build` |
 
-Other repos (btw-v1, tensor-logic, ApplyPilot, collections-guide, rust-collections)
-are cloned as needed.
+Other repos (tensor-logic, ApplyPilot, collections-guide, rust-collections)
+are cloned as needed. The retired BTW repository is not part of the active
+machine baseline.
 
 ## Agent skills (`.agents/` → Claude/Codex/Cursor on rebuild)
 
@@ -152,6 +153,7 @@ Do not document “spawn just works” without those gates. See `docs/SYSTEM_MAP
 | m5logd | — | M5 hardware logging |
 | voice-engine | — | **REMOVED 2026-07-31** — dictation menubar app (captain's cut) |
 | inbox-server | :9849 | unified inbox API |
+| **openclaw-gateway** | :18789 | Human surface (npm `openclaw`; nix LaunchAgent). FDA stays on inbox python, not node. Cutover: `bin/openclaw-adopt-nix.sh`. See `docs/OPENCLAW.md`. |
 
 Ladybug pipeline LaunchAgent is **frozen** — Neo4j is the sole knowledge store.
 The LadybugDB file under `bridge/.bridge/ladybug/` is retained read-only for migration.
@@ -193,12 +195,13 @@ unchanged.
 
 - `~/bin/chrome-ai-tools`, `chrome-main`, `chrome-third` — unmanaged wrappers (WAIVER).
 - `cmd` — Homebrew npm tool; no mutation gate (WAIVER).
+- `openclaw` — npm -g on Homebrew node; LaunchAgent now declared. Package pin is not a brew formula (WAIVER until we pin npm).
 - `com.jwalinshah.reconcile-outcomes` — hand LaunchAgent, not in configuration.nix (WAIVER; separate job-application owner).
 - `ai.openai.life-ops-inbox-tunnel` — hand LaunchAgent, not in configuration.nix;
   Infisical `life-ops-runtime` injects `CONTROL_PLANE_API_KEY` at launch.
 - `org.orbit.bridge-cdp-quota` — retired duplicate of the Nix-managed CDP quota agent; unloaded and archived under `~/Library/LaunchAgents/archive/` on 2026-07-29.
 
-*Last updated: 2026-08-16 — added the Infisical-backed, read-only OpenAI Life Ops tunnel LaunchAgent and readiness proof.*
+*Last updated: 2026-09-03 — declared OpenClaw gateway in nix; FDA remains inbox python3.12.*
 
 ## Cross-Repo Dependency Manifest (deps.json) & Neo4j
 

@@ -423,6 +423,51 @@
       };
     };
 
+    # OpenClaw gateway (:18789) — human surface / agent runtime.
+    # Package: npm -g `openclaw` (not a Homebrew formula). Token stays in
+    # ~/.openclaw/service-env/ai.openclaw.gateway.env (0600), sourced by the
+    # OpenClaw-generated env wrapper — do NOT put OPENCLAW_GATEWAY_TOKEN in
+    # this file or the nix store.
+    #
+    # TCC: this agent uses /bin/sh → wrapper → node. That hop is ACCEPTABLE
+    # here because OpenClaw must NOT hold Full Disk Access. iMessage/Notes/
+    # Reminders are inbox-server's frozen python3.12 identity only. Do not
+    # "fix" this by exec'ing node directly in order to attach FDA to OpenClaw.
+    # Computer-use / Accessibility is a later grant on a pinned node path,
+    # behind Bridge, not FDA.
+    #
+    # CUTOVER: brew/openclaw still installs LaunchAgent ai.openclaw.gateway.
+    # Two KeepAlive jobs on :18789 will fight (same lesson as neo4j dual
+    # managers). Run bin/openclaw-adopt-nix.sh BEFORE darwin-rebuild, or
+    # bootout ai.openclaw.gateway first.
+    "com.jwalinshah.openclaw-gateway" = {
+      serviceConfig = {
+        ProgramArguments = [
+          "/bin/sh"
+          "${home}/.openclaw/service-env/ai.openclaw.gateway-env-wrapper.sh"
+          "${home}/.openclaw/service-env/ai.openclaw.gateway.env"
+          "/opt/homebrew/opt/node/bin/node"
+          "/opt/homebrew/lib/node_modules/openclaw/dist/index.js"
+          "gateway"
+          "--port"
+          "18789"
+        ];
+        KeepAlive = true;
+        RunAtLoad = true;
+        ProcessType = "Interactive";
+        ThrottleInterval = 10;
+        ExitTimeOut = 20;
+        Umask = 63;
+        WorkingDirectory = "${home}/.openclaw";
+        EnvironmentVariables = {
+          HOME = home;
+          PATH = "/opt/homebrew/opt/node/bin:${defaultPATH}";
+        };
+        StandardOutPath = "${home}/Library/Logs/openclaw/gateway.log";
+        StandardErrorPath = "/dev/null";
+      };
+    };
+
     # bridge-serve: REMOVED 2026-07-31 — captain cut it; orbit thin shell no longer
     # depends on a permanent bridge daemon. Re-add if bridge needs to serve
     # continuously.
