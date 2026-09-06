@@ -196,9 +196,16 @@ unchanged.
 - `com.jwalinshah.reconcile-outcomes` — hand LaunchAgent, not in configuration.nix (WAIVER; separate job-application owner).
 - `ai.openai.life-ops-inbox-tunnel` — hand LaunchAgent, not in configuration.nix;
   Infisical `life-ops-runtime` injects `CONTROL_PLANE_API_KEY` at launch.
+- `ai.openai.life-ops-inbox-readonly-tunnel` — hand LaunchAgent (GAP/WAIVER); read-only LifeOps MCP tunnel.
+- `ai.openai.inbox-ingest-tunnel` — hand LaunchAgent (GAP/WAIVER); Secure MCP Tunnel → Inbox control plane `:8002/mcp`.
+- `com.inbox.mcp-control-plane` — hand LaunchAgent (GAP/WAIVER); ingest-only MCP on `127.0.0.1:8002`, `SPAWN=0`.
+  Canonical code root: `~/.local/state/inbox/control-plane-root` → current PR-2B worktree tip.
+  Bridge intake ledger: `~/.local/state/inbox/bridge-ingest-repo` via `INBOX_BRIDGE_REPO`.
+  Launcher: `~/.config/inbox/run-control-plane.sh`.
+- `com.inbox.autoslash-trigger`, `com.inbox.imessage-trigger`, `com.inbox.think-through` — hand LaunchAgents (GAP/WAIVER); Inbox automation siblings.
 - `org.orbit.bridge-cdp-quota` — retired duplicate of the Nix-managed CDP quota agent; unloaded and archived under `~/Library/LaunchAgents/archive/` on 2026-07-29.
 
-*Last updated: 2026-08-16 — added the Infisical-backed, read-only OpenAI Life Ops tunnel LaunchAgent and readiness proof.*
+*Last updated: 2026-09-06 — declared Inbox MCP control-plane + inbox-ingest tunnel GAPs; canonical `control-plane-root` symlink (DF-1/2/3).*
 
 ## Cross-Repo Dependency Manifest (deps.json) & Neo4j
 
