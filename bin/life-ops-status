@@ -11,8 +11,8 @@ INBOX_URL="${INBOX_URL:-http://127.0.0.1:9849}"
 BTW_URL="${BTW_URL:-http://127.0.0.1:8090/mcp}"
 BTW_PUBLIC_URL="${BTW_PUBLIC_URL:-https://crumpled-resume-arbitrate.ngrok-free.dev/mcp}"
 OPENCLAW_BIN="${OPENCLAW_BIN:-$(command -v openclaw || true)}"
-TUNNEL_LABEL="${TUNNEL_LABEL:-ai.openai.life-ops-inbox-tunnel}"
-TUNNEL_HEALTH_FILE="${TUNNEL_HEALTH_FILE:-${HOME}/Library/Application Support/tunnel-client/health/life-ops-inbox.url}"
+TUNNEL_LABEL="${TUNNEL_LABEL:-ai.openai.lifeops-oci-tunnel}"
+TUNNEL_HEALTH_FILE="${TUNNEL_HEALTH_FILE:-${HOME}/Library/Application Support/tunnel-client/health/lifeops-oci.url}"
 status_capture="$(mktemp "${TMPDIR:-/tmp}/life-ops-openclaw-status.XXXXXX")"
 trap 'rm -f "$status_capture"' EXIT
 
